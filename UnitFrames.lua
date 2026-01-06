@@ -747,8 +747,8 @@ function SetupUnitFrame(frameName, unit, number)
     frame.debuffs = {}
     frame.pool = CreateFramePool("Frame", frame, "CUI_AuraFrameTemplate")
     frame.calc = CreateUnitHealPredictionCalculator()
-    frame.calc:SetHealAbsorbClampMode(0)
-    frame.calc:SetIncomingHealClampMode(1)
+    frame.calc:SetHealAbsorbClampMode(Enum.UnitHealAbsorbClampMode.CurrentHealth)
+    frame.calc:SetIncomingHealClampMode(Enum.UnitIncomingHealClampMode.MissingHealth)
 
     if unit == "target" then
         frame:RegisterEvent("PLAYER_TARGET_CHANGED")

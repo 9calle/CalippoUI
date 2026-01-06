@@ -43,88 +43,6 @@ for i, c in pairs(DEBUFF_DISPLAY_COLOR_INFO) do
     dispelColorCurve:AddPoint(i, c)
 end
 
-do
--- local function UpdateAuras(frame, type)
---     local dbEntry = CUI.DB.profile.GroupFrames[frame.name][type]
---     local anchorPoint = dbEntry.AnchorPoint
---     local anchorRelativePoint = dbEntry.AnchorRelativePoint
---     local dirH = dbEntry.DirH
---     local dirV = dbEntry.DirV
---     local size = dbEntry.Size
---     local padding = dbEntry.Padding
---     local posX = dbEntry.PosX
---     local posY = dbEntry.PosY
---     local rowLength = dbEntry.RowLength
---     local maxShown = dbEntry.MaxShown
-
---     local stacksEnabled = dbEntry.Stacks.Enabled
---     local stacksAP = dbEntry.Stacks.AnchorPoint
---     local stacksARP = dbEntry.Stacks.AnchorRelativePoint
---     local stacksPX = dbEntry.Stacks.PosX
---     local stacksPY = dbEntry.Stacks.PosY
---     local stacksFont = dbEntry.Stacks.Font
---     local stacksOutline = dbEntry.Stacks.Outline
---     local stacksSize = dbEntry.Stacks.Size
-
---     local index = 0
--- 	local function HandleAura(aura)
---         if index >= maxShown then return end
-
---         local auraFrame = frame.pool:Acquire()
---         auraFrame:Show()
-
---         auraFrame.unit = frame.unit
---         auraFrame.type = type
---         auraFrame.auraInstanceID = aura.auraInstanceID
-
---         auraFrame:SetSize(size, size)
-
---         local color = C_UnitAuras.GetAuraDispelTypeColor(frame.unit, aura.auraInstanceID, dispelColorCurve)
---         if type == "Debuffs" and color then
---             if aura.dispelName then
---                 auraFrame.Overlay.Backdrop:Hide()
---                 auraFrame.Overlay.DispelBackdrop:Show()
---                 auraFrame.Overlay.DispelBackdrop:SetBackdropBorderColor(color.r, color.g, color.b, color.a)
---             else
---                 auraFrame.Overlay.Backdrop:Show()
---                 auraFrame.Overlay.DispelBackdrop:Hide()
---             end
---         else
---             auraFrame.Overlay.Backdrop:Show()
---             auraFrame.Overlay.DispelBackdrop:Hide()
---         end
-
---         auraFrame.Icon:SetTexture(aura.icon)
---         auraFrame.Icon:SetTexCoord(.08, .92, .08, .92)
-
---         local stacksFrame = auraFrame.Overlay.Count
---         if stacksEnabled then
---             stacksFrame:Show()
---             stacksFrame:ClearAllPoints()
---             stacksFrame:SetPoint(stacksAP, auraFrame.Overlay, stacksARP, stacksPX, stacksPY)
---             stacksFrame:SetFont(stacksFont, stacksSize, stacksOutline)
---             stacksFrame:SetText(C_StringUtil.TruncateWhenZero(aura.applications))
---         else
---             stacksFrame:Hide()
---         end
-
---         auraFrame.Cooldown:SetCooldownFromExpirationTime(aura.expirationTime, aura.duration)
-
---         Util.PositionFromIndex(index, auraFrame, frame.Overlay, anchorPoint, anchorRelativePoint, dirH, dirV, size, size, padding, posX, posY, rowLength)
-
---         index = index + 1
--- 	end
-
---     if type == "Buffs" then
--- 	    AuraUtil.ForEachAura(frame.unit, AuraUtil.CreateFilterString(AuraUtil.AuraFilters.Helpful, AuraUtil.AuraFilters.Player, AuraUtil.AuraFilters.Raid), nil, HandleAura, true)
---     elseif type == "Debuffs" then
---         AuraUtil.ForEachAura(frame.unit, AuraUtil.CreateFilterString(AuraUtil.AuraFilters.Harmful), nil, HandleAura, true)
---     elseif type == "Defensives" then
---         AuraUtil.ForEachAura(frame.unit, AuraUtil.CreateFilterString(AuraUtil.AuraFilters.Helpful, AuraUtil.AuraFilters.ExternalDefensive), nil, HandleAura, true)
---     end
--- end
-end
-
 local function UpdateAuras(frame, blizzFrame, type)
     local dbEntry = CUI.DB.profile.GroupFrames[frame.name][type]
     local anchorPoint = dbEntry.AnchorPoint
@@ -527,6 +445,7 @@ end
 
 local function UpdateAll(frame)
     UpdateMaxHealth(frame)
+
     UpdateInRange(frame)
     UpdateInPhase(frame)
     UpdateIsDead(frame)
@@ -785,8 +704,8 @@ local function SetupGroupFrame(unit, groupType, frameName, parent)
     frame.groupType = groupType
     frame.name = frameName
     frame.calc = CreateUnitHealPredictionCalculator()
-    frame.calc:SetHealAbsorbClampMode(0)
-    frame.calc:SetIncomingHealClampMode(1)
+    frame.calc:SetHealAbsorbClampMode(Enum.UnitHealAbsorbClampMode.CurrentHealth)
+    frame.calc:SetIncomingHealClampMode(Enum.UnitIncomingHealClampMode.MissingHealth)
 
     frame.disconnected = nil
     frame.summon = nil
