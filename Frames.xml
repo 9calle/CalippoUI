@@ -1,0 +1,90 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+<!-- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! -->
+
+    <Frame name="CUI_AuraFrameTemplate" virtual="true" enableMouse="true">
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture parentKey="Icon" setAllPoints="true"/>
+			</Layer>
+		</Layers>
+		<Frames>
+			<Cooldown parentKey="Cooldown" inherits="CooldownFrameTemplate" hideCountdownNumbers="true" reverse="true" drawEdge="true">
+				<Anchors>
+					<Anchor point="CENTER" x="0" y="0"/>
+				</Anchors>
+			</Cooldown>
+            <Frame parentKey="Overlay">
+                <Anchors>
+                    <Anchor point="TOPLEFT"/>
+                    <Anchor point="BOTTOMRIGHT"/>
+                </Anchors>  
+                <Layers>
+                    <Layer level="OVERLAY">
+                        <FontString parentKey="Count" justifyH="RIGHT" font="Interface\AddOns\CalippoUI\Fonts\FiraSans-Medium.ttf">
+                            <Color r="1" g="1" b="1" a="1"/>
+                            <FontHeight>
+                                <AbsValue val="10"/>
+                            </FontHeight>
+                            <Anchors>
+                                <Anchor point="BOTTOMRIGHT" x="-1" y="0"/>
+                            </Anchors>
+                        </FontString>
+                    </Layer>
+                </Layers>
+                <Frames>
+                    <Frame parentKey="Backdrop" inherits="BackdropTemplate">
+                        <Anchors>
+                            <Anchor point="TOPLEFT" x="-1" y="1"/>
+                            <Anchor point="BOTTOMRIGHT" x="1" y="-1"/>
+                        </Anchors>
+                        <KeyValues>
+                            <KeyValue key="backdropInfo" value="CUI_BACKDROP_DSW" type="global"/>
+                        </KeyValues>
+                    </Frame>
+                </Frames>
+            </Frame>
+		</Frames>
+        <Scripts>
+            <OnUpdate>
+                if GameTooltip:IsOwned(self) then
+                    if self.type == "Buffs" then
+                        GameTooltip:SetUnitBuffByAuraInstanceID(self.unit, self.auraInstanceID)
+                    else
+                        GameTooltip:SetUnitDebuffByAuraInstanceID(self.unit, self.auraInstanceID)
+                    end 
+                end
+            </OnUpdate>
+            <OnEnter>
+                if self.showTooltip then
+                    GameTooltip:SetOwner(self, "ANCHOR_BOTTOMRIGHT", 15, -25)
+                    if self.type == "Buffs" then
+                        GameTooltip:SetUnitBuffByAuraInstanceID(self.unit, self.auraInstanceID)
+                    else
+                        GameTooltip:SetUnitDebuffByAuraInstanceID(self.unit, self.auraInstanceID)
+                    end 
+                end
+            </OnEnter>
+            <OnLeave>
+                GameTooltip:Hide()
+            </OnLeave>
+        </Scripts>
+	</Frame>
+
+<!-- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! -->
+
+    <Button name="CUI_UnitFrameTemplate" inherits="BackdropTemplate, SecureUnitButtonTemplate" mixin="PingableType_UnitFrameMixin" hidden="true" virtual="true">
+        <Scripts>
+            <OnEnter>
+                if not InCombatLockdown() then
+                    GameTooltip_SetDefaultAnchor(GameTooltip, self)
+                    GameTooltip:SetUnit(self.unit)
+                    GameTooltip:Show() 
+                end
+            </OnEnter>
+            <OnLeave>
+                GameTooltip:Hide()
+            </OnLeave>
+        </Scripts>
+    </Button>
+</Ui>

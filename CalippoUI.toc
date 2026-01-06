@@ -1,0 +1,33 @@
+## Title: CalippoUI
+## Version: 1.0.0
+## Interface: 120000
+## SavedVariables: CalippoDB
+## IconTexture: Interface\AddOns\CalippoUI\Media\Icon.tga
+
+
+Libs\LibStub\LibStub.lua
+Libs\CallbackHandler-1.0\CallbackHandler-1.0.lua
+Libs\AceGUI-3.0\AceGUI-3.0.xml
+Libs\AceDB-3.0\AceDB-3.0.xml
+Libs\LibSharedMedia-3.0\lib.xml
+
+Database.lua
+Frames.xml
+
+HideBlizzard.lua
+Util.lua
+UnitFrames.lua
+GroupFrames.lua
+ActionBars.lua
+Chat.lua
+TradeAutoWhisper.lua
+CooldownManager.lua
+ResourceBar.lua
+CastBar.lua
+Minimap.lua
+PlayerAuras.lua
+NamePlates.lua
+
+Config.lua
+
+OnLoad.lua
