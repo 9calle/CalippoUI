@@ -1,5 +1,10 @@
 local addonName, CUI = ...
 
+SetCVar("secretCombatRestrictionsForced", 1)
+SetCVar("secretEncounterRestrictionsForced", 1)
+SetCVar("secretChallengeModeRestrictionsForced", 1)
+SetCVar("secretMapRestrictionsForced", 1)
+
 local f = CreateFrame("Frame")
 f:RegisterEvent("PLAYER_ENTERING_WORLD")
 f:SetScript("OnEvent", function(self, event, isLogin, isReload)

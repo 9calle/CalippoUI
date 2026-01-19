@@ -657,7 +657,7 @@ local function CreateUnitFrameGeneralPage(container)
             dbEntry.HealthBar.Color.a = a
 
             UF.UpdateAllFrames()
-        end, 0.5)
+        end, 0.5, true)
 
     CreateColorPicker(healthColorGroup, "Background", dbEntry.HealthBar.BackgroundColor,
         function(self, event, r, g, b, a)
@@ -667,7 +667,7 @@ local function CreateUnitFrameGeneralPage(container)
             dbEntry.HealthBar.BackgroundColor.a = a
 
             UF.UpdateAllFrames()
-        end, 0.5)
+        end, 0.5, true)
 
     CreateColorPicker(healthColorGroup, "Healing Prediction", dbEntry.HealthBar.HealPredictionColor,
         function(self, event, r, g, b, a)
@@ -677,7 +677,7 @@ local function CreateUnitFrameGeneralPage(container)
             dbEntry.HealthBar.HealPredictionColor.a = a
 
             UF.UpdateAllFrames()
-        end, 0.5)
+        end, 0.5, true)
 
     local absorbColorGroup = CreateInlineGroup(scrollFrame, "Shield / Heal Absorb / Dead colors")
 
@@ -727,7 +727,7 @@ local function CreateUnitFrameGeneralPage(container)
             dbEntry.Name.Color.a = a
 
             UF.UpdateAllFrames()
-        end, 0.5)
+        end, 0.5, true)
 
     local castBarColorGroup = CreateInlineGroup(scrollFrame, "Cast bar colors")
 
@@ -737,7 +737,7 @@ local function CreateUnitFrameGeneralPage(container)
             dbEntry.CastBar.Color.g = g
             dbEntry.CastBar.Color.b = b
             dbEntry.CastBar.Color.a = a
-        end, 0.5)
+        end, 0.5, true)
 
     CreateColorPicker(castBarColorGroup, "Not interruptible", dbEntry.CastBar.ColorNotInterruptiple,
         function(self, event, r, g, b, a)
@@ -745,7 +745,7 @@ local function CreateUnitFrameGeneralPage(container)
             dbEntry.CastBar.ColorNotInterruptiple.g = g
             dbEntry.CastBar.ColorNotInterruptiple.b = b
             dbEntry.CastBar.ColorNotInterruptiple.a = a
-        end, 0.5)
+        end, 0.5, true)
 
     CreateColorPicker(castBarColorGroup, "Spell name color", dbEntry.CastBar.NameColor,
         function(self, event, r, g, b, a)
@@ -755,7 +755,7 @@ local function CreateUnitFrameGeneralPage(container)
             dbEntry.CastBar.NameColor.a = a
 
             UF.UpdateAllFrames()
-        end, 0.5)
+        end, 0.5, true)
 
     CreateColorPicker(castBarColorGroup, "Spell progress color", dbEntry.CastBar.TimeColor,
         function(self, event, r, g, b, a)
@@ -765,7 +765,7 @@ local function CreateUnitFrameGeneralPage(container)
             dbEntry.CastBar.TimeColor.a = a
 
             UF.UpdateAllFrames()
-        end, 0.5)
+        end, 0.5, true)
 
     scrollFrame:DoLayout()
 end
@@ -1180,7 +1180,7 @@ local function CreateGroupFrameGeneralPage(container)
 
             GF.UpdateFrame(raidFrame)
             GF.UpdateFrame(partyFrame)
-        end, 0.5)
+        end, 0.5, true)
 
     CreateColorPicker(healthColorGroup, "Background", dbEntry.HealthBar.BackgroundColor,
         function(self, event, r, g, b, a)
@@ -1191,7 +1191,7 @@ local function CreateGroupFrameGeneralPage(container)
 
             GF.UpdateFrame(raidFrame)
             GF.UpdateFrame(partyFrame)
-        end, 0.5)
+        end, 0.5, true)
 
     CreateColorPicker(healthColorGroup, "Healing Prediction", dbEntry.HealthBar.HealPredictionColor,
         function(self, event, r, g, b, a)
@@ -1202,7 +1202,7 @@ local function CreateGroupFrameGeneralPage(container)
 
             GF.UpdateFrame(raidFrame)
             GF.UpdateFrame(partyFrame)
-        end, 0.5)
+        end, 0.5, true)
 
     local absorbColorGroup = CreateInlineGroup(scrollFrame, "Shield / Heal Absorb / Dead colors")
 
@@ -1237,7 +1237,7 @@ local function CreateGroupFrameGeneralPage(container)
 
             GF.UpdateFrame(raidFrame)
             GF.UpdateFrame(partyFrame)
-        end, 0.5)
+        end, 0.5, true)
 
     local nameColorGroup = CreateInlineGroup(scrollFrame, "Name color")
 
@@ -1257,7 +1257,7 @@ local function CreateGroupFrameGeneralPage(container)
 
             GF.UpdateFrame(raidFrame)
             GF.UpdateFrame(partyFrame)
-        end, 0.5)
+        end, 0.5, true)
 
     scrollFrame:DoLayout()
 end

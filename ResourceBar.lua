@@ -255,8 +255,48 @@ local function UpdateRogueComboPoints(frame)
 end
 
 local function UpdateMalestromWeapon(frame)
-    -- TODO
-    -- local msw = C_UnitAuras.GetPlayerAuraBySpellID(344179)
+    local msw = C_UnitAuras.GetPlayerAuraBySpellID(344179)
+
+    if msw then
+        local apps = msw.applications
+        local overFive = apps > 5
+        if overFive then apps = apps - 5 end
+
+        for i=1, 5 do
+            local powerFrame = frame.frames[i]
+            if i <= apps then
+                if overFive then
+                    local c = frame.Power.AltColor
+                    powerFrame:SetStatusBarColor(c.r, c.g, c.b)
+                    local v = 0.2
+                    powerFrame.Background:SetVertexColor(c.r*v, c.g*v, c.b*v)
+                else
+                    local c = frame.Power.Color
+                    powerFrame:SetStatusBarColor(c.r, c.g, c.b)
+                    local v = 0.2
+                    powerFrame.Background:SetVertexColor(c.r*v, c.g*v, c.b*v)
+                end
+
+                powerFrame:SetValue(1)
+            else
+                local c = frame.Power.Color
+                powerFrame:SetStatusBarColor(c.r, c.g, c.b)
+                local v = 0.2
+                powerFrame.Background:SetVertexColor(c.r*v, c.g*v, c.b*v)
+
+                if overFive then
+                    powerFrame:SetValue(1)
+                else
+                    powerFrame:SetValue(0)
+                end
+            end
+        end
+    else
+        for i=1, 5 do
+            local powerFrame = frame.frames[i]
+            powerFrame:SetValue(0)
+        end
+    end
 end
 
 local function UpdateDevourer(frame)
@@ -304,8 +344,9 @@ local powerTypes = {
     Enhancement = {
         Value = nil,
         Name = "MAELSTROM_WEAPON",
-        Color = {r = 0, g = 1, b = 0.6},
-        Type = "SingleBar",
+        Color = {r = 0, g = 0.5, b = 1},
+        AltColor = {r = 1, g = 0.5, b = 0},
+        Type = "MultiBar",
         Func = UpdateMalestromWeapon,
     },
 
@@ -391,12 +432,16 @@ local function UpdateSecondaryPowerFrame(frame)
         else
             frame.Power = powerType
             frame.ClassSpec = currentSpecName
-            frame.PowerMax = UnitPowerMax("player" , powerType.Value)
+            if powerType.Name == "MAELSTROM_WEAPON" then
+                frame.PowerMax = 5
+            else
+                frame.PowerMax = UnitPowerMax("player", powerType.Value)
+            end
         end
     else
         frame.Power = powerType
         frame.ClassSpec = class
-        frame.PowerMax = UnitPowerMax("player" , powerType.Value)
+        frame.PowerMax = UnitPowerMax("player", powerType.Value)
      end
 
      if frame.PowerMax == 0 then
@@ -447,6 +492,9 @@ local function UpdateSecondaryPowerFrame(frame)
             frame.LastPowerTime = GetTime()
         elseif frame.Power.Name == "COMBO_POINTS" then
             frame:RegisterUnitEvent("UNIT_POWER_POINT_CHARGE", "player")
+        elseif frame.Power.Name == "MAELSTROM_WEAPON" then
+            frame:RegisterUnitEvent("UNIT_AURA", "player")
+            frame:UnregisterEvent("UNIT_POWER_UPDATE")
         end
     elseif frame.Power.Type == "SingleBar" then
         for i=1, #frame.frames do
@@ -462,11 +510,6 @@ local function UpdateSecondaryPowerFrame(frame)
             else
                 powerFrame:Hide()
             end
-        end
-
-        if frame.Power.Name == "MAELSTROM_WEAPON" then
-            frame:RegisterUnitEvent("UNIT_AURA", "player")
-            frame:UnregisterEvent("UNIT_POWER_UPDATE")
         end
     end
 
@@ -588,7 +631,7 @@ local function SetupSecondaryPowerBar()
                 self.Power.Func(self)
             end
         elseif event == "UNIT_AURA" then
-            self.Power.Func()
+            self.Power.Func(self)
         elseif event == "RUNE_POWER_UPDATE" then
             UpdateRunes(self)
         elseif event == "UNIT_POWER_POINT_CHARGE" then

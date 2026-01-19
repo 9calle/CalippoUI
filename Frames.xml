@@ -9,7 +9,7 @@
 			</Layer>
 		</Layers>
 		<Frames>
-			<Cooldown parentKey="Cooldown" inherits="CooldownFrameTemplate" hideCountdownNumbers="true" reverse="true" drawEdge="true">
+			<Cooldown parentKey="Cooldown" inherits="CooldownFrameTemplate" hideCountdownNumbers="true" reverse="true" drawEdge="true" drawBling="false">
 				<Anchors>
 					<Anchor point="CENTER" x="0" y="0"/>
 				</Anchors>

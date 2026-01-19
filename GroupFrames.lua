@@ -431,7 +431,7 @@ local function UpdateCenterIcon(frame)
     centerTexture:Show()
 end
 
-local function UpdateBorder(frame)
+local function UpdateBorderColor(frame)
     local aggroStatus = UnitThreatSituation(frame.unit)
 
     if UnitIsUnit("target", frame.unit) then
@@ -461,7 +461,7 @@ local function UpdateAll(frame)
     UpdateHealthColor(frame)
     UpdateAbsorbColor(frame)
 
-    UpdateBorder(frame)
+    UpdateBorderColor(frame)
 
     UpdateCenterIcon(frame)
 end
@@ -686,7 +686,7 @@ end
 
 ---------------------------------------------------------------------------------------------------------------------------------
 
-local function SetupGroupFrame(unit, groupType, frameName, parent)
+local function SetupGroupFrame(unit, groupType, frameName, parent, num)
     local dbEntryGF = CUI.DB.profile.GroupFrames
     local dbEntry = dbEntryGF[frameName]
 
@@ -703,6 +703,7 @@ local function SetupGroupFrame(unit, groupType, frameName, parent)
     frame.unit = unit
     frame.groupType = groupType
     frame.name = frameName
+    frame.num = num
     frame.calc = CreateUnitHealPredictionCalculator()
     frame.calc:SetHealAbsorbClampMode(Enum.UnitHealAbsorbClampMode.CurrentHealth)
     frame.calc:SetIncomingHealClampMode(Enum.UnitIncomingHealClampMode.MissingHealth)
@@ -833,9 +834,9 @@ local function SetupGroupFrame(unit, groupType, frameName, parent)
         elseif event == "UNIT_IN_RANGE_UPDATE" then
             UpdateInRange(self)
         elseif event == "UNIT_THREAT_SITUATION_UPDATE" or event == "UNIT_THREAT_LIST_UPDATE" then
-            UpdateBorder(frame)
+            UpdateBorderColor(frame)
         elseif event  == "PLAYER_TARGET_CHANGED" then
-            UpdateBorder(frame)
+            UpdateBorderColor(frame)
         elseif event == "PLAYER_FLAGS_CHANGED" then
             UpdateAFK(self)
             UpdateCenterIcon(self)
@@ -911,11 +912,11 @@ function GF.Load()
     end)
 
     for i=1, 4 do
-        local frame = SetupGroupFrame("party"..i, "party", "PartyFrame", partyFrame)
+        local frame = SetupGroupFrame("party"..i, "party", "PartyFrame", partyFrame, i)
         table.insert(partyFrame.frames, frame)
     end
 
-    local playerFrame = SetupGroupFrame("player", "party", "PartyFrame", partyFrame)
+    local playerFrame = SetupGroupFrame("player", "party", "PartyFrame", partyFrame, 0)
     table.insert(partyFrame.frames, playerFrame)
 
     GF.UpdateFrame(partyFrame)
@@ -959,7 +960,7 @@ function GF.Load()
     end)
 
     for i=1, 40 do
-        local frame = SetupGroupFrame("raid"..i, "raid", "RaidFrame", raidFrame)
+        local frame = SetupGroupFrame("raid"..i, "raid", "RaidFrame", raidFrame, i)
         table.insert(raidFrame.frames, frame)
     end
 
