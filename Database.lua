@@ -491,6 +491,7 @@ local defaults = {
                 },
 
                 CastBar = {
+                    Enabled = false,
                     AnchorFrame = "CUI_PetFrame"
                 },
             },

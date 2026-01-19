@@ -428,6 +428,9 @@ local function UpdateSecondaryPowerFrame(frame)
             for i=1, #frame.frames do
                 frame.frames[i]:Hide()
             end
+
+            frame:UnregisterEvent("UNIT_AURA")
+
             return
         else
             frame.Power = powerType
