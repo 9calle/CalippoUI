@@ -421,7 +421,7 @@ end
 local function UpdateHealth(frame)
     local unit = frame.unit
 
-    Util.SetUnitHealthText(frame.Overlay.UnitHealth, unit)
+    frame.Overlay.UnitHealth:SetText(AbbreviateNumbers(UnitHealth(unit)))
     frame.HealthBar:SetValue(UnitHealth(unit))
 end
 
@@ -430,7 +430,7 @@ local function UpdateMaxHealth(frame)
     local maxHealth = UnitHealthMax(frame.unit)
     local health = UnitHealth(frame.unit)
 
-    Util.SetUnitHealthText(frame.Overlay.UnitHealth, unit)
+    frame.Overlay.UnitHealth:SetText(AbbreviateNumbers(UnitHealth(unit)))
     frame.HealthBar:SetMinMaxValues(0, maxHealth)
     frame.HealthBar:SetValue(health)
 

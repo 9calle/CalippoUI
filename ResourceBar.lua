@@ -69,9 +69,9 @@ local function UpdatePower(frame)
 
     frame:SetValue(value)
     if frame.powerType == "MANA" and CUI.DB.profile.ResourceBar.Text.ShowManaPercent then
-        frame.Text:SetText(Util.UnitPowerPercent("player", frame.powerType))
+        frame.Text:SetText(string.format("%0.0f", UnitPowerPercent("player", 0, true, CurveConstants.ScaleTo100)).."%")
     else
-        frame.Text:SetText(Util.UnitPowerText("player"))
+        frame.Text:SetText(AbbreviateNumbers(UnitPower("player")))
     end
 end
 

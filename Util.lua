@@ -106,20 +106,6 @@ function Util.UnitHealthPercent(unit)
     return string.format("%0.0f", UnitHealthPercent(unit, true, CurveConstants.ScaleTo100)).."%"
 end
 
-function Util.UnitPowerPercent(unit, powerType)
-    return string.format("%0.0f", UnitPowerPercent(unit, 0, true, CurveConstants.ScaleTo100)).."%"
-end
-
-function Util.SetUnitHealthText(text, unit)
-    text:SetFormattedText("%s", AbbreviateNumbers(UnitHealth(unit)))
-end
-
-function Util.UnitPowerText(unit)
-    local power = UnitPower(unit)
-    local rounded = AbbreviateLargeNumbers(power)
-    return rounded
-end
-
 local frameFadeManager = CreateFrame("Frame")
 
 local function UIFrameFadeContains(frame)
