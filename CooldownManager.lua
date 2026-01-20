@@ -40,6 +40,8 @@ function CDM.UpdateStyle(viewer)
 
             if not frame.Border then
                 local border = CreateFrame("Frame", nil, frame, "BackdropTemplate")
+                border:SetIgnoreParentScale(true)
+                border:SetScale(UIParent:GetScale())
                 border:SetParentKey("Border")
                 border:SetPoint("TOPLEFT", frame, "TOPLEFT", -1, 1)
                 border:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 1, -1)
