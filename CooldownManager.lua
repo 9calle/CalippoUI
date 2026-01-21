@@ -193,7 +193,7 @@ local function UpdatePositions(viewer)
         frame:ClearAllPoints()
 
         if viewerName == "BuffIconCooldownViewer" then
-            frame:SetPoint("CENTER", viewer, "CENTER", (index*(frameSize+padding))-lastRowOffest, 0)
+            frame:SetPoint("TOP", viewer, "TOP", (index*(frameSize+padding))-lastRowOffest+padding, 0)
         elseif row == lastRow and row ~= 0 and lastRowSize ~= rowSize then
             frame:SetPoint("TOPLEFT", viewer, "TOPLEFT", (index*(frameSize+padding))-(row*rowSize*(frameSize+padding))+lastRowOffest, -(row*(frameSize+padding)))
         else
