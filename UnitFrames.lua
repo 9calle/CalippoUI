@@ -629,7 +629,6 @@ local function UpdateCastBar(castBarContainer, isChannel, isEmpower)
     castBar:SetTimerDuration(duration, 0, direction)
 
     if castBarContainer.Ticker then castBarContainer.Ticker:Cancel() end
-    castBarContainer.Ticker = nil
     castBarContainer.Ticker = C_Timer.NewTicker(0.1, function()
         castBar.Time:SetText(string.format("%.1f", duration:GetRemainingDuration()))
     end)
