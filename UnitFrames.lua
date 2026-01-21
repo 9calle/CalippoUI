@@ -628,6 +628,8 @@ local function UpdateCastBar(castBarContainer, isChannel, isEmpower)
 
     castBar:SetTimerDuration(duration, 0, direction)
 
+    if castBarContainer.Ticker then castBarContainer.Ticker:Cancel() end
+    castBarContainer.Ticker = nil
     castBarContainer.Ticker = C_Timer.NewTicker(0.1, function()
         castBar.Time:SetText(string.format("%.1f", duration:GetRemainingDuration()))
     end)
@@ -689,11 +691,7 @@ function SetupCastBar(unitFrame)
             or event == "UNIT_SPELLCAST_INTERRUPTED"
             or event == "UNIT_SPELLCAST_EMPOWER_STOP" then
             self:Hide()
-            self.Ticker:Cancel()
-            self.Ticker = nil
         elseif event == "PLAYER_FOCUS_CHANGED" or event == "PLAYER_TARGET_CHANGED" then
-            if self.Ticker then self.Ticker:Cancel() end
-            self.Ticker = nil
             UpdateCastBar(self, nil, nil)
         end
     end)
