@@ -774,7 +774,7 @@ function SetupUnitFrame(frameName, unit, number)
 
     local background = frame:CreateTexture(nil, "BACKGROUND")
     background:SetParentKey("Background")
-    background:SetTexture(dbEntry.HealthBar.Texture)
+    background:SetTexture("")
     background:SetPoint("TOPLEFT", healthBar:GetStatusBarTexture(), "TOPRIGHT")
     background:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT")
 

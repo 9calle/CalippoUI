@@ -27,7 +27,7 @@ local function SetupMinimap()
     MinimapCluster.BorderTop:Hide()
 
     MinimapCluster.Tracking.Button:ClearAllPoints()
-    MinimapCluster.Tracking.Button:SetPoint("TOPLEFT", Minimap, "TOPLEFT", 30, 0)
+    MinimapCluster.Tracking.Button:SetPoint("BOTTOM", Minimap, "BOTTOM", -10, 3)
     MinimapCluster.Tracking.Button:SetAlpha(0)
     MinimapCluster.Tracking.Button:SetAlpha(0)
     MinimapCluster.Tracking.Background:Hide()
@@ -54,7 +54,7 @@ local function SetupMinimap()
     clockText:SetFont("Interface/AddOns/CalippoUI/Fonts/FiraSans-Medium.ttf", 12, "")
 
     GameTimeFrame:ClearAllPoints()
-    GameTimeFrame:SetPoint("TOPRIGHT", Minimap, "TOPRIGHT", -30, 0)
+    GameTimeFrame:SetPoint("BOTTOM", Minimap, "BOTTOM", 10, 0)
     GameTimeFrame:SetAlpha(0)
 
     Minimap:SetMaskTexture("Interface\\ChatFrame\\ChatFrameBackground")

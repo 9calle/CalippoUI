@@ -1,5 +1,6 @@
 local addonName, CUI = ...
 
+-- TODO : Glöm inte att ta bort.
 SetCVar("secretCombatRestrictionsForced", 1)
 SetCVar("secretEncounterRestrictionsForced", 1)
 SetCVar("secretChallengeModeRestrictionsForced", 1)

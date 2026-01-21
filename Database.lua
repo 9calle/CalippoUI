@@ -318,8 +318,6 @@ local defaults = {
                     },
                 },
 
-                HealthBar = {
-                },
                 PowerBar = {
                     Enabled = true,
                     Height = 5,
@@ -370,13 +368,22 @@ local defaults = {
 
             PlayerFrame = {
                 Width = 174,
-                Height = 50,
+                Height = 52,
 
-                AnchorFrame = "UIParent",
-                AnchorPoint = "CENTER",
-                AnchorRelativePoint = "CENTER",
-                PosX = -300,
-                PosY = -200,
+                AnchorFrame = "CUI_PowerBar",
+                AnchorPoint = "TOPRIGHT",
+                AnchorRelativePoint = "TOPLEFT",
+                PosX = -2,
+                PosY = 0,
+
+                Name = {
+                    PosX = 5,
+                    PosY = 0,
+                },
+                HealthText = {
+                    PosX = -5,
+                    PosY = 0,
+                },
 
                 LeaderIcon = {
                     Enabled = true,
@@ -395,6 +402,10 @@ local defaults = {
                     Enabled = false,
                 },
 
+                PowerBar = {
+                    Enabled = false,
+                },
+
                 CastBar = {
                     Enabled = false,
                     AnchorFrame = "CUI_PlayerFrame"
@@ -402,13 +413,13 @@ local defaults = {
             },
             TargetFrame = {
                 Width = 174,
-                Height = 50,
+                Height = 52,
 
-                AnchorFrame = "UIParent",
-                AnchorPoint = "CENTER",
-                AnchorRelativePoint = "CENTER",
-                PosX = 300,
-                PosY = -200,
+                AnchorFrame = "CUI_PowerBar",
+                AnchorPoint = "TOPLEFT",
+                AnchorRelativePoint = "TOPRIGHT",
+                PosX = 2,
+                PosY = 0,
 
                 LeaderIcon = {
                     Enabled = true,
