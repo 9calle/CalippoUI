@@ -254,6 +254,7 @@ local function StyleXPBar()
         if frame.OverlayFrame then
             frame.OverlayFrame:SetAllPoints(MainStatusTrackingBarContainer)
             frame.OverlayFrame.Text:SetFont("Interface/AddOns/CalippoUI/Fonts/FiraSans-Medium.ttf", 10, "")
+            frame.OverlayFrame.Text:SetPoint("CENTER", MainStatusTrackingBarContainer, "CENTER", 0, -1)
         end
     end
 end
