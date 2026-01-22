@@ -28,17 +28,18 @@ function Chat.Load()
         _G["ChatFrame"..i.."EditBox"]:SetFont("Interface\\AddOns\\CalippoUI\\Fonts\\FiraSans-Medium.ttf", 12, "")
         _G["ChatFrame"..i.."EditBoxHeader"]:SetFont("Interface\\AddOns\\CalippoUI\\Fonts\\FiraSans-Medium.ttf", 12, "")
 
-        _G["ChatFrame"..i.."Tab"].HighlightLeft:SetTexture(nil)
-        _G["ChatFrame"..i.."Tab"].HighlightMiddle:SetTexture(nil)
-        _G["ChatFrame"..i.."Tab"].HighlightRight:SetTexture(nil)
-        _G["ChatFrame"..i.."Tab"].ActiveLeft:SetAlpha(0)
-        _G["ChatFrame"..i.."Tab"].ActiveMiddle:SetAlpha(0)
-        _G["ChatFrame"..i.."Tab"].ActiveRight:SetAlpha(0)
-        _G["ChatFrame"..i.."Tab"].Left:Hide()
-        _G["ChatFrame"..i.."Tab"].Middle:Hide()
-        _G["ChatFrame"..i.."Tab"].Right:Hide()
+        local chatTab = _G["ChatFrame"..i.."Tab"]
+        chatTab.HighlightLeft:SetTexture(nil)
+        chatTab.HighlightMiddle:SetTexture(nil)
+        chatTab.HighlightRight:SetTexture(nil)
+        chatTab.ActiveLeft:SetAlpha(0)
+        chatTab.ActiveMiddle:SetAlpha(0)
+        chatTab.ActiveRight:SetAlpha(0)
+        chatTab.Left:Hide()
+        chatTab.Middle:Hide()
+        chatTab.Right:Hide()
 
-        _G["ChatFrame"..i.."Tab"]:SetAlpha(0)
-        _G["ChatFrame"..i.."Tab"].noMouseAlpha = 0
+        chatTab:SetAlpha(0)
+        chatTab.noMouseAlpha = 0
 	end
 end
