@@ -795,6 +795,15 @@ local function SetupGroupFrame(unit, groupType, frameName, parent, num)
     local unitRole = overlayFrame:CreateTexture(nil, "OVERLAY")
     unitRole:SetParentKey("RoleIcon")
 
+    -- TODO : Private Auras
+    if num == 0 then
+        for i, privateFrame in ipairs(CompactPartyFrameMember1.PrivateAuraAnchors) do
+            privateFrame:SetParent(overlayFrame)
+            privateFrame:ClearAllPoints()
+            privateFrame:SetPoint("LEFT", overlayFrame, "LEFT")
+        end
+    end
+
     frame:RegisterUnitEvent("UNIT_AURA", unit)
     frame:RegisterUnitEvent("UNIT_HEALTH", unit)
     frame:RegisterUnitEvent("UNIT_MAXHEALTH", unit)
@@ -873,7 +882,7 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------
 
 function GF.Load()
-    HideBlizzard()
+    -- HideBlizzard()
 
     local dbEntryP = CUI.DB.profile.GroupFrames.PartyFrame
     local partyFrame = CreateFrame("Frame", "CUI_PartyFrame", UIParent)
