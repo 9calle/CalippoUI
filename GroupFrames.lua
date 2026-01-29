@@ -798,9 +798,25 @@ local function SetupGroupFrame(unit, groupType, frameName, parent, num)
     -- TODO : Private Auras
     if num == 0 then
         for i, privateFrame in ipairs(CompactPartyFrameMember1.PrivateAuraAnchors) do
-            privateFrame:SetParent(overlayFrame)
-            privateFrame:ClearAllPoints()
-            privateFrame:SetPoint("LEFT", overlayFrame, "LEFT")
+            -- C_UnitAuras.AddPrivateAuraAnchor({
+            --     unitToken = unit,
+            --     auraIndex = i,
+            --     parent = container,
+            --     showCountdownFrame = showCountdown,
+            --     showCountdownNumbers = showNumbers,
+            --     iconInfo = {
+            --         iconWidth = iconWidth,
+            --         iconHeight = iconHeight,
+            --         borderScale = borderScale,
+            --         iconAnchor = {
+            --             point = "CENTER",
+            --             relativeTo = container,
+            --             relativePoint = "CENTER",
+            --             offsetX = 0,
+            --             offsetY = 0,
+            --         },
+            --     },
+            -- })
         end
     end
 
