@@ -150,8 +150,7 @@ function UpdateAllAuras(frame)
     local dbEntry = CUI.DB.profile.GroupFrames[frame.name]
 
     if frame.name == "PartyFrame" then
-        if frame.BlizzFrame and frame.BlizzFrame.unit == frame.unit then
-        else
+        if not (frame.BlizzFrame and frame.BlizzFrame.unit == frame.unit) then
             for i=1, #CompactPartyFrame.memberUnitFrames do
                 local f = CompactPartyFrame.memberUnitFrames[i]
                 if f.unit == frame.unit then
@@ -161,16 +160,17 @@ function UpdateAllAuras(frame)
             end
         end
     elseif frame.name == "RaidFrame" then
-        if true then return end
+        if not (frame.BlizzFrame and frame.BlizzFrame.unit == frame.unit) then
+            for i=1, 8 do
+                local group = _G["CompactRaidGroup"..i]
+                if not group then return end
 
-        -- TODO
-        if frame.BlizzFrame and frame.BlizzFrame.unit == frame.unit then
-        else
-            for i=1, #CompactRaidFrameContainer.memberUnitFrames do
-                local f = CompactRaidFrameContainer.memberUnitFrames[i]
-                if f.unit == frame.unit then
-                    frame.BlizzFrame = f
-                    break
+                for j=1, #group.memberUnitFrames do
+                    local f = group.memberUnitFrames[j]
+                    if f.unit == frame.unit then
+                        frame.BlizzFrame = f
+                        break
+                    end
                 end
             end
         end
@@ -645,7 +645,8 @@ function GF.SortGroupFrames(groupFramesContainer)
     local padding = dbEntry.Padding
     local rL = dbEntry.RowLength
 
-    groupFramesContainer:SetWidth((GetNumGroupMembers() * (width + padding)) - padding)
+    local numMem = math.min(GetNumGroupMembers(), rL)
+    groupFramesContainer:SetWidth((numMem * (width + padding)) - padding)
     groupFramesContainer:SetHeight(height)
 
     -- TODO : Fixa läge där frames inte sorteras.
@@ -890,6 +891,7 @@ local function SetupGroupFrame(unit, groupType, frameName, parent, num)
     else
         RegisterAttributeDriver(frame, "state-visibility", "[group:raid, @"..unit..", exists]show;hide")
     end
+
     RegisterUnitWatch(frame, true)
 
     return frame
