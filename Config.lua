@@ -1330,11 +1330,13 @@ local function CreateGroupFrameAuraPage(container, groupFrame)
 
         local group = CreateInlineGroup(scrollFrame, type)
 
-        CreateCheckBox(group, "Toggle "..type, dbEntry.Enabled,
-            function(self, event, value)
-                dbEntry.Enabled = value
-                GF.UpdateAuras(frame)
-            end, 1)
+        if type ~= "PrivateAuras" then
+            CreateCheckBox(group, "Toggle "..type, dbEntry.Enabled,
+                function(self, event, value)
+                    dbEntry.Enabled = value
+                    GF.UpdateAuras(frame)
+                end, 1)
+        end
 
         CreateSlider(group, "Size", 1, 50, 1, dbEntry.Size,
             function(self, event, value)
@@ -1396,23 +1398,23 @@ local function CreateGroupFrameAuraPage(container, groupFrame)
                 GF.UpdateAuras(frame)
             end, 0.5)
 
-        CreateTextGroup(scrollFrame, dbEntry.Stacks, GF.UpdateAuras, frame, "Stacks")
+        if type ~= "PrivateAuras" then
+            CreateTextGroup(scrollFrame, dbEntry.Stacks, GF.UpdateAuras, frame, "Stacks")
+        end
 
         scrollFrame:DoLayout()
     end
 
     local function SelectGroup(container, event, tab)
         container:ReleaseChildren()
-        if tab == "Buffs" then
-            CreateAuraPage(container, groupFrame, "Buffs")
-        elseif tab == "Debuffs" then
-            CreateAuraPage(container, groupFrame, "Debuffs")
-        end
+        CreateAuraPage(container, groupFrame, tab)
     end
 
     local tabGroup = AceGUI:Create("TabGroup")
     tabGroup:SetLayout("Fill")
     tabGroup:SetTabs({{text="Buffs", value="Buffs"},
+                    {text="Debuffs", value="Debuffs"},
+                    {text="Private Auras", value="PrivateAuras"},
                     {text="Debuffs", value="Debuffs"},})
     tabGroup:SetCallback("OnGroupSelected", SelectGroup)
     tabGroup:SelectTab("Buffs")

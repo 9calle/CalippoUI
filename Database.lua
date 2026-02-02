@@ -741,6 +741,33 @@ local defaults = {
                         PosY = 0,
                     },
                 },
+                PrivateAuras = {
+                    Enabled = true,
+
+                    RowLength = 6,
+                    Size = 20,
+                    DirH = "RIGHT",
+                    DirV = "UP",
+                    Padding = 0,
+                    MaxShown = 20,
+
+                    AnchorPoint = "LEFT",
+                    AnchorRelativePoint = "LEFT",
+                    PosX = 1,
+                    PosY = 0,
+
+                    Stacks = {
+                        Enabled = true,
+                        Font = defaultFont,
+                        Outline = "OUTLINE",
+                        Size = 10,
+
+                        AnchorPoint = "BOTTOMRIGHT",
+                        AnchorRelativePoint = "BOTTOMRIGHT",
+                        PosX = 0,
+                        PosY = 0,
+                    },
+                },
             },
 
             PartyFrame = {
@@ -784,7 +811,15 @@ local defaults = {
                     },
                 },
                 Defensives = {
-                    RowLength = 8,
+                    RowLength = 6,
+                    Size = 20,
+
+                    Stacks = {
+                        Size = 10,
+                    },
+                },
+                PrivateAuras = {
+                    RowLength = 6,
                     Size = 20,
 
                     Stacks = {
@@ -840,6 +875,14 @@ local defaults = {
 
                     Stacks = {
                         Size = 8,
+                    },
+                },
+                PrivateAuras = {
+                    RowLength = 6,
+                    Size = 15,
+
+                    Stacks = {
+                        Size = 10,
                     },
                 },
             },

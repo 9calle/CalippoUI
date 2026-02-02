@@ -179,6 +179,8 @@ local function UpdateAllAuras(frame)
         end
     end
 
+    if not frame.BlizzFrame then return end
+
     frame.pool:ReleaseAll()
     if dbEntry.Buffs.Enabled then
         UpdateAuras(frame, frame.BlizzFrame, "Buffs")
@@ -199,20 +201,37 @@ function GF.UpdateAuras(groupFramesContainer)
 end
 
 local function SetupPrivateAnchors(frame)
+    local dbEntry = CUI.DB.profile.GroupFrames[frame.name].PrivateAuras
+    local anchorPoint = dbEntry.AnchorPoint
+    local anchorRelativePoint = dbEntry.AnchorRelativePoint
+    local dirH = dbEntry.DirH
+    local dirV = dbEntry.DirV
+    local size = dbEntry.Size
+    local padding = dbEntry.Padding
+    local posX = dbEntry.PosX
+    local posY = dbEntry.PosY
+    local rowLength = dbEntry.RowLength
+    local maxShown = dbEntry.MaxShown
+
     for i=1, 6 do
+        local container = CreateFrame("Frame", nil, frame.Overlay)
+        container:SetParentKey("PrivateAuraContainer"..i)
+        container:SetSize(size, size)
+        Util.PositionFromIndex(i-1, container, frame.Overlay, anchorPoint, anchorRelativePoint, dirH, dirV, size, size, padding, posX, posY, rowLength)
+
         local anchor = C_UnitAuras.AddPrivateAuraAnchor({
             unitToken = frame.unit,
             auraIndex = i,
-            parent = frame.Overlay,
+            parent = container,
             showCountdownFrame = true,
             showCountdownNumbers = false,
             iconInfo = {
-                iconWidth = 20,
-                iconHeight = 20,
+                iconWidth = size,
+                iconHeight = size,
                 borderScale = 1,
                 iconAnchor = {
                     point = "CENTER",
-                    relativeTo = frame.Overlay,
+                    relativeTo = container,
                     relativePoint = "CENTER",
                     offsetX = 0,
                     offsetY = 0,
@@ -719,15 +738,15 @@ local function SetupGroupFrame(unit, groupType, frameName, parent, num)
     local dbEntryGF = CUI.DB.profile.GroupFrames
     local dbEntry = dbEntryGF[frameName]
 
-    local frame = CreateFrame("Button", nil, parent, "CUI_UnitFrameTemplate")
+    local frame = CreateFrame("Frame", nil, parent)
     frame:SetParentKey(unit)
     frame:SetSize(dbEntry.Width, dbEntry.Height)
 
-    frame:SetAttribute("unit", unit)
-    frame:RegisterForClicks("AnyDown")
-    frame:SetAttribute("*type1", "target")
-    frame:SetAttribute("*type2", "togglemenu")
-    frame:SetAttribute("ping-receiver", true)
+    -- frame:SetAttribute("unit", unit)
+    -- frame:RegisterForClicks("AnyDown")
+    -- frame:SetAttribute("*type1", "target")
+    -- frame:SetAttribute("*type2", "togglemenu")
+    -- frame:SetAttribute("ping-receiver", true)
 
     frame.unit = unit
     frame.groupType = groupType
@@ -827,6 +846,18 @@ local function SetupGroupFrame(unit, groupType, frameName, parent, num)
 
     -- TODO : Private Auras
     SetupPrivateAnchors(frame)
+
+    local clickFrame = CreateFrame("Button", nil, overlayFrame, "CUI_UnitFrameTemplate")
+    clickFrame:SetParentKey("ClickFrame")
+    clickFrame:SetAllPoints(overlayFrame)
+    clickFrame:SetFrameLevel(overlayFrame:GetFrameLevel() + 20)
+    clickFrame.unit = unit
+    clickFrame:SetAttribute("unit", unit)
+    clickFrame:RegisterForClicks("AnyDown")
+    clickFrame:SetAttribute("*type1", "target")
+    clickFrame:SetAttribute("*type2", "togglemenu")
+    clickFrame:SetAttribute("ping-receiver", true)
+    clickFrame:Show()
 
     frame:RegisterUnitEvent("UNIT_AURA", unit)
     frame:RegisterUnitEvent("UNIT_HEALTH", unit)
