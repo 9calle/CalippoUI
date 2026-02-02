@@ -146,11 +146,11 @@ local function UpdateAuras(frame, blizzFrame, type)
     end
 end
 
-function UpdateAllAuras(frame)
+local function UpdateAllAuras(frame)
     local dbEntry = CUI.DB.profile.GroupFrames[frame.name]
 
     if frame.name == "PartyFrame" then
-        if not (frame.BlizzFrame and frame.BlizzFrame.unit == frame.unit) then
+        if (not frame.BlizzFrame) or (frame.BlizzFrame and frame.BlizzFrame.unit ~= frame.unit) then
             for i=1, #CompactPartyFrame.memberUnitFrames do
                 local f = CompactPartyFrame.memberUnitFrames[i]
                 if f.unit == frame.unit then
@@ -160,17 +160,20 @@ function UpdateAllAuras(frame)
             end
         end
     elseif frame.name == "RaidFrame" then
-        if not (frame.BlizzFrame and frame.BlizzFrame.unit == frame.unit) then
+        if (not frame.BlizzFrame) or (frame.BlizzFrame and frame.BlizzFrame.unit ~= frame.unit) then
             for i=1, 8 do
                 local group = _G["CompactRaidGroup"..i]
-                if not group then return end
-
-                for j=1, #group.memberUnitFrames do
-                    local f = group.memberUnitFrames[j]
-                    if f.unit == frame.unit then
-                        frame.BlizzFrame = f
-                        break
+                if group then
+                    local shouldBreak = false
+                    for j=1, #group.memberUnitFrames do
+                        local f = group.memberUnitFrames[j]
+                        if f.unit == frame.unit then
+                            frame.BlizzFrame = f
+                            shouldBreak = true
+                            break
+                        end
                     end
+                    if shouldBreak then break end
                 end
             end
         end
@@ -192,6 +195,31 @@ function GF.UpdateAuras(groupFramesContainer)
     for i=1, #groupFramesContainer.frames do
         local frame = groupFramesContainer.frames[i]
         UpdateAllAuras(frame)
+    end
+end
+
+local function SetupPrivateAnchors(frame)
+    for i=1, 6 do
+        local anchor = C_UnitAuras.AddPrivateAuraAnchor({
+            unitToken = frame.unit,
+            auraIndex = i,
+            parent = frame.Overlay,
+            showCountdownFrame = true,
+            showCountdownNumbers = false,
+            iconInfo = {
+                iconWidth = 20,
+                iconHeight = 20,
+                borderScale = 1,
+                iconAnchor = {
+                    point = "CENTER",
+                    relativeTo = frame.Overlay,
+                    relativePoint = "CENTER",
+                    offsetX = 0,
+                    offsetY = 0,
+                },
+            },
+        })
+        table.insert(frame.privateAnchors, anchor)
     end
 end
 
@@ -708,6 +736,7 @@ local function SetupGroupFrame(unit, groupType, frameName, parent, num)
     frame.calc = CreateUnitHealPredictionCalculator()
     frame.calc:SetHealAbsorbClampMode(Enum.UnitHealAbsorbClampMode.CurrentHealth)
     frame.calc:SetIncomingHealClampMode(Enum.UnitIncomingHealClampMode.MissingHealth)
+    frame.privateAnchors = {}
 
     frame.disconnected = nil
     frame.summon = nil
@@ -797,29 +826,7 @@ local function SetupGroupFrame(unit, groupType, frameName, parent, num)
     unitRole:SetParentKey("RoleIcon")
 
     -- TODO : Private Auras
-    if num == 0 then
-        for i, privateFrame in ipairs(CompactPartyFrameMember1.PrivateAuraAnchors) do
-            -- C_UnitAuras.AddPrivateAuraAnchor({
-            --     unitToken = unit,
-            --     auraIndex = i,
-            --     parent = container,
-            --     showCountdownFrame = showCountdown,
-            --     showCountdownNumbers = showNumbers,
-            --     iconInfo = {
-            --         iconWidth = iconWidth,
-            --         iconHeight = iconHeight,
-            --         borderScale = borderScale,
-            --         iconAnchor = {
-            --             point = "CENTER",
-            --             relativeTo = container,
-            --             relativePoint = "CENTER",
-            --             offsetX = 0,
-            --             offsetY = 0,
-            --         },
-            --     },
-            -- })
-        end
-    end
+    SetupPrivateAnchors(frame)
 
     frame:RegisterUnitEvent("UNIT_AURA", unit)
     frame:RegisterUnitEvent("UNIT_HEALTH", unit)
