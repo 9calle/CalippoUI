@@ -225,12 +225,12 @@ end
 ---------------------------------------------------------------------------------------------------
 
 local DEBUFF_DISPLAY_COLOR_INFO = {
-    [0] = CreateColor(0, 0, 0, 0),
+    [0] = CreateColor(0, 0, 0, 1),
     [1] = DEBUFF_TYPE_MAGIC_COLOR,
     [2] = DEBUFF_TYPE_CURSE_COLOR,
     [3] = DEBUFF_TYPE_DISEASE_COLOR,
     [4] = DEBUFF_TYPE_POISON_COLOR,
-    [9] = DEBUFF_TYPE_BLEED_COLOR, -- enrage
+    [9] = DEBUFF_TYPE_BLEED_COLOR,
     [11] = DEBUFF_TYPE_BLEED_COLOR,
 }
 
@@ -241,7 +241,17 @@ for i, c in pairs(DEBUFF_DISPLAY_COLOR_INFO) do
     dispelColorCurve:AddPoint(i, c)
 end
 
-local function UpdateAuras(frame, type)
+local function UpdateBossFrameAuras()
+    for i=1, 5 do
+        UF.UpdateAuras(_G["CUI_BossFrame"..i])
+    end
+end
+
+local buffFilter = "HELPFUL"
+local debuffFilter = "HARMFUL"
+local debuffFilterPlayerOnly = "PLAYER|HARMFUL"
+
+local function IterateAuras(frame, auraTable, pool, type)
     local dbEntry = CUI.DB.profile.UnitFrames[frame.name][type]
     local anchorPoint = dbEntry.AnchorPoint
     local anchorRelativePoint = dbEntry.AnchorRelativePoint
@@ -263,12 +273,13 @@ local function UpdateAuras(frame, type)
     local stacksOutline = dbEntry.Stacks.Outline
     local stacksSize = dbEntry.Stacks.Size
 
+    pool:ReleaseAll()
+
     local index = 0
-	local function HandleAura(aura)
+	for id, aura in pairs(auraTable) do
         if index >= maxShown then return end
 
-        local id = aura.auraInstanceID
-        local auraFrame = frame.pool:Acquire()
+        local auraFrame = pool:Acquire()
         auraFrame:Show()
 
         auraFrame.unit = frame.unit
@@ -278,16 +289,8 @@ local function UpdateAuras(frame, type)
 
         auraFrame:SetSize(size, size)
 
-        local color = C_UnitAuras.GetAuraDispelTypeColor(frame.unit, aura.auraInstanceID, dispelColorCurve)
-        if type == "Debuffs" and color then
-            if aura.dispelName then
-                auraFrame.Overlay.Backdrop:SetBackdropBorderColor(color.r, color.g, color.b, color.a)
-            else
-                auraFrame.Overlay.Backdrop:SetBackdropBorderColor(0, 0, 0, 1)
-            end
-        else
-            auraFrame.Overlay.Backdrop:SetBackdropBorderColor(0, 0, 0, 1)
-        end
+        local c = aura.borderColor
+        auraFrame.Overlay.Backdrop:SetBackdropBorderColor(c.r, c.g, c.b, c.a)
 
         auraFrame.Icon:SetTexture(aura.icon)
         auraFrame.Icon:SetTexCoord(.08, .92, .08, .92)
@@ -309,34 +312,126 @@ local function UpdateAuras(frame, type)
 
         index = index + 1
 	end
+end
 
-    if type == "Buffs" then
-        AuraUtil.ForEachAura(frame.unit, AuraUtil.CreateFilterString(AuraUtil.AuraFilters.Helpful), nil, HandleAura, true)
-    elseif type == "Debuffs" then
-        if UnitIsEnemy("player", frame.unit) then
-            AuraUtil.ForEachAura(frame.unit, AuraUtil.CreateFilterString(AuraUtil.AuraFilters.Harmful, AuraUtil.AuraFilters.Player), nil, HandleAura, true)
+local function ProcessAura(unit, aura)
+    if not aura then return end
+
+    local color = C_UnitAuras.GetAuraDispelTypeColor(unit, aura.auraInstanceID, dispelColorCurve)
+
+    if color then
+        aura.borderColor = color
+    else
+        aura.borderColor = CreateColor(0, 0, 0, 1)
+    end
+end
+
+local function AddAllAuras(frame)
+    local dbEntry = CUI.DB.profile.UnitFrames[frame.name]
+    local unit = frame.unit
+    table.wipe(frame.buffs)
+    table.wipe(frame.debuffs)
+
+    local function AddBuff(aura)
+        ProcessAura(unit, aura)
+		frame.buffs[aura.auraInstanceID] = aura
+	end
+
+    local function AddDebuff(aura)
+        ProcessAura(unit, aura)
+        frame.debuffs[aura.auraInstanceID] = aura
+	end
+
+    if dbEntry.Buffs.Enabled then
+	    AuraUtil.ForEachAura(unit, buffFilter, nil, AddBuff, true)
+    end
+
+    if dbEntry.Debuffs.Enabled then
+        if UnitIsFriend("player", unit) then
+            AuraUtil.ForEachAura(unit, debuffFilter, nil, AddDebuff, true)
         else
-            AuraUtil.ForEachAura(frame.unit, AuraUtil.CreateFilterString(AuraUtil.AuraFilters.Harmful), nil, HandleAura, true)
+            AuraUtil.ForEachAura(unit, debuffFilterPlayerOnly, nil, AddDebuff, true)
         end
     end
 end
 
-local function UpdateBossFrameAuras()
-    for i=1, 5 do
-        UF.UpdateAuras(_G["CUI_BossFrame"..i])
-    end
-end
-
-function UF.UpdateAuras(frame)
-    if frame == "BossFrame" then UpdateBossFrameAuras() return end
+function UF.UpdateAuras(frame, updateInfo)
     local dbEntry = CUI.DB.profile.UnitFrames[frame.name]
+    local buffsEnabled = dbEntry.Buffs.Enabled
+    local debuffsEnabled = dbEntry.Debuffs.Enabled
+    local unit = frame.unit
+	local buffsChanged = false
+    local debuffsChanged = false
 
-    frame.pool:ReleaseAll()
-    if dbEntry.Buffs.Enabled then
-        UpdateAuras(frame, "Buffs")
+    if not buffsEnabled and not debuffsEnabled then return end
+
+    if not updateInfo or updateInfo.isFullUpdate then
+        AddAllAuras(frame)
+        buffsChanged = true
+        debuffsChanged = true
+    else
+        if updateInfo.addedAuras then
+            for i=1, #updateInfo.addedAuras do
+                local aura = updateInfo.addedAuras[i]
+                if buffsEnabled and not C_UnitAuras.IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, buffFilter) then
+                    ProcessAura(unit, aura)
+                    frame.buffs[aura.auraInstanceID] = aura
+                    buffsChanged = true
+                elseif debuffsEnabled then
+                    if UnitIsFriend("player", unit) then
+                        if not C_UnitAuras.IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, debuffFilter) then
+                            ProcessAura(unit, aura)
+                            frame.debuffs[aura.auraInstanceID] = aura
+                            debuffsChanged = true
+                        end
+                    else
+                        if not C_UnitAuras.IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, debuffFilterPlayerOnly) then
+                            ProcessAura(unit, aura)
+                            frame.debuffs[aura.auraInstanceID] = aura
+                            debuffsChanged = true
+                        end
+                    end
+                end
+            end
+        end
+
+        if updateInfo.updatedAuraInstanceIDs then
+            for i=1, #updateInfo.updatedAuraInstanceIDs do
+                local id = updateInfo.updatedAuraInstanceIDs[i]
+				if frame.buffs[id] then
+					local newAura = C_UnitAuras.GetAuraDataByAuraInstanceID(unit, id)
+                    ProcessAura(unit, newAura)
+                    frame.buffs[id] = newAura
+                    buffsChanged = true
+                elseif frame.debuffs[id] then
+                    local newAura = C_UnitAuras.GetAuraDataByAuraInstanceID(unit, id)
+                    ProcessAura(unit, newAura)
+                    frame.debuffs[id] = newAura
+                    debuffsChanged = true
+				end 
+            end
+        end
+
+        if updateInfo.removedAuraInstanceIDs then
+            for i=1, #updateInfo.removedAuraInstanceIDs do
+                local id = updateInfo.removedAuraInstanceIDs[i]
+                if frame.buffs[id] then
+                    frame.buffs[id] = nil
+                    buffsChanged = true
+                elseif frame.debuffs[id] then
+                    frame.debuffs[id] = nil
+                    debuffsChanged = true
+                end
+            end
+        end
     end
-    if dbEntry.Debuffs.Enabled then
-        UpdateAuras(frame, "Debuffs")
+
+    if buffsChanged then
+        IterateAuras(frame, frame.buffs, frame.buffPool, "Buffs")
+    end
+
+    if debuffsChanged then
+        IterateAuras(frame, frame.debuffs, frame.debuffPool, "Debuffs")
     end
 end
 
@@ -744,7 +839,8 @@ function SetupUnitFrame(frameName, unit, number)
     frame.number = number
     frame.buffs = {}
     frame.debuffs = {}
-    frame.pool = CreateFramePool("Frame", frame, "CUI_AuraFrameTemplate")
+    frame.buffPool = CreateFramePool("Frame", frame, "CUI_AuraFrameTemplate")
+    frame.debuffPool = CreateFramePool("Frame", frame, "CUI_AuraFrameTemplate")
     frame.calc = CreateUnitHealPredictionCalculator()
     frame.calc:SetHealAbsorbClampMode(Enum.UnitHealAbsorbClampMode.CurrentHealth)
     frame.calc:SetIncomingHealClampMode(Enum.UnitIncomingHealClampMode.MissingHealth)
@@ -842,18 +938,10 @@ function SetupUnitFrame(frameName, unit, number)
     frame:RegisterEvent("GROUP_FORMED")
     frame:RegisterEvent("GROUP_LEFT")
     frame:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
-    frame:HookScript("OnEvent", function(self, event)
-        if event == "PLAYER_TARGET_CHANGED" or event == "PLAYER_FOCUS_CHANGED" then
-            if not UnitExists(self.unit) then return end
-            UpdateAll(self)
-            if EditModeManagerFrame:IsShown() then return end
-             UF.UpdateAuras(self)
-        end
-
-        if not self:IsShown() then return end
-
+    frame:HookScript("OnEvent", function(self, event, ...)
         if event == "UNIT_AURA" then
-            UF.UpdateAuras(self)
+            local unit, updateInfo = ...
+            UF.UpdateAuras(self, updateInfo)
         elseif event == "UNIT_HEALTH" then
             UpdateHealth(self)
             UpdateHealPrediction(self)
@@ -870,6 +958,11 @@ function SetupUnitFrame(frameName, unit, number)
             UpdateHealAbsorb(self)
         elseif event == "UNIT_HEAL_PREDICTION" then
             UpdateHealPrediction(self)
+        elseif event == "PLAYER_TARGET_CHANGED" or event == "PLAYER_FOCUS_CHANGED" then
+            if not UnitExists(self.unit) then return end
+            UpdateAll(self)
+            if EditModeManagerFrame:IsShown() then return end
+             UF.UpdateAuras(self)
         elseif event == "PLAYER_REGEN_ENABLED" then
             UF.UpdateAlpha(self)
         elseif event == "PLAYER_REGEN_DISABLED" then

@@ -1,6 +1,6 @@
 ## Title: CalippoUI
 ## Version: 1.0.0
-## Interface: 120000
+## Interface: 120000, 120001
 ## SavedVariables: CalippoDB
 ## IconTexture: Interface\AddOns\CalippoUI\Media\Icon.tga
 
