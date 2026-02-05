@@ -834,6 +834,8 @@ local function CreateUnitFramAuraSettings(container, unitFrame, type)
     CreateCheckBox(group, "Toggle "..type, dbEntry.Enabled,
         function(self, event, value)
             dbEntry.Enabled = value
+            frame.buffPool:ReleaseAll()
+            frame.debuffPool:ReleaseAll()
             UF.UpdateAuras(frame)
         end, 1)
 
