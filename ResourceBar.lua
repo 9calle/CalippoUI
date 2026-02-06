@@ -489,7 +489,7 @@ local function UpdateSecondaryPowerFrame(frame)
 
         if frame.Power.Name == "RUNES" then
             frame:RegisterEvent("RUNE_POWER_UPDATE")
-            frame:UnregisterEvent("UNIT_POWER_UPDATE")
+            frame:UnregisterEvent("UNIT_POWER_FREQUENT")
         elseif frame.Power.Name == "ESSENCE" then
             frame.LastPower = UnitPower("player", frame.Power.Value)
             frame.LastPowerTime = GetTime()
@@ -497,7 +497,7 @@ local function UpdateSecondaryPowerFrame(frame)
             frame:RegisterUnitEvent("UNIT_POWER_POINT_CHARGE", "player")
         elseif frame.Power.Name == "MAELSTROM_WEAPON" then
             frame:RegisterUnitEvent("UNIT_AURA", "player")
-            frame:UnregisterEvent("UNIT_POWER_UPDATE")
+            frame:UnregisterEvent("UNIT_POWER_FREQUENT")
         end
     elseif frame.Power.Type == "SingleBar" then
         for i=1, #frame.frames do
@@ -523,7 +523,7 @@ function RB.UpdateSecondaryPowerBar(frame)
     local dbEntry = CUI.DB.profile.ResourceBar.SecondaryResourceBar
 
     if dbEntry.Enabled then
-        frame:RegisterUnitEvent("UNIT_POWER_UPDATE", "player")
+        frame:RegisterUnitEvent("UNIT_POWER_FREQUENT", "player")
         frame:RegisterUnitEvent("UNIT_MAXPOWER", "player")
         frame:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
         frame:RegisterEvent("PLAYER_REGEN_DISABLED")
@@ -579,13 +579,13 @@ local function SetupPowerBar()
         UpdatePowerColor(powerBar)
     end)
 
-    powerBar:RegisterUnitEvent("UNIT_POWER_UPDATE", "player")
+    powerBar:RegisterUnitEvent("UNIT_POWER_FREQUENT", "player")
     powerBar:RegisterUnitEvent("UNIT_MAXPOWER", "player")
     powerBar:RegisterEvent("PLAYER_REGEN_ENABLED")
     powerBar:RegisterEvent("PLAYER_REGEN_DISABLED")
     powerBar:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
     powerBar:SetScript("OnEvent", function(self, event, unit, powerType)
-        if event == "UNIT_POWER_UPDATE" then
+        if event == "UNIT_POWER_FREQUENT" then
             if self.PowerType == powerType then
                 UpdatePower(self)
             end
@@ -629,7 +629,7 @@ local function SetupSecondaryPowerBar()
     end
 
     secondaryPowerContainer:SetScript("OnEvent", function(self, event, _, powerType)
-        if event == "UNIT_POWER_UPDATE" then
+        if event == "UNIT_POWER_FREQUENT" then
             if self.Power.Name == powerType then
                 self.Power.Func(self)
             end

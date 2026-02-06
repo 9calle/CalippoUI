@@ -81,7 +81,7 @@ function Util.GetUnitColor(unit, prioClass)
         if reaction <= 3 then     -- Hostile
             r, g, b = 0.8, 0, 0
         elseif reaction == 4 then -- Neutral
-            r, g, b = 0.9, 0.9, 0
+            r, g, b = 1, 1, 0
         else                      -- Friendly
             r, g, b = 0, 0.8, 0
         end

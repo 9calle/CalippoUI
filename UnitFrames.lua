@@ -95,7 +95,7 @@ function UF.ToggleBossTest(active)
         frame:RegisterUnitEvent("UNIT_AURA", unit)
         frame:RegisterUnitEvent("UNIT_HEALTH", unit)
         frame:RegisterUnitEvent("UNIT_MAXHEALTH", unit)
-        frame:RegisterUnitEvent("UNIT_POWER_UPDATE", unit)
+        frame:RegisterUnitEvent("UNIT_POWER_FREQUENT", unit)
         frame:RegisterUnitEvent("UNIT_MAXPOWER", unit)
 
         local castBar = frame.CastBar
@@ -646,12 +646,12 @@ function UF.UpdateFrame(frame)
         frame.PowerBar:SetHeight(dbEntry.PowerBar.Height)
         frame.PowerBar:SetStatusBarTexture(dbEntryUF.PowerBar.Texture)
         frame.HealthBar:SetPoint("BOTTOMRIGHT", frame.PowerBar, "TOPRIGHT")
-        frame:RegisterUnitEvent("UNIT_POWER_UPDATE", unit)
+        frame:RegisterUnitEvent("UNIT_POWER_FREQUENT", unit)
         frame:RegisterUnitEvent("UNIT_MAXPOWER", unit)
     else
         frame.PowerBar:Hide()
         frame.HealthBar:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT")
-        frame:UnregisterEvent("UNIT_POWER_UPDATE")
+        frame:UnregisterEvent("UNIT_POWER_FREQUENT")
         frame:UnregisterEvent("UNIT_MAXPOWER")
     end
 
@@ -948,7 +948,7 @@ function SetupUnitFrame(frameName, unit, number)
             UpdateIsDead(self)
         elseif event == "UNIT_MAXHEALTH" then
             UpdateMaxHealth(self)
-        elseif event == "UNIT_POWER_UPDATE" then
+        elseif event == "UNIT_POWER_FREQUENT" then
             UpdatePower(self)
         elseif event == "UNIT_MAXPOWER" then
             UpdateMaxPower(self)
