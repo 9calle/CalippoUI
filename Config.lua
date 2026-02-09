@@ -1416,8 +1416,8 @@ local function CreateGroupFrameAuraPage(container, groupFrame)
     tabGroup:SetLayout("Fill")
     tabGroup:SetTabs({{text="Buffs", value="Buffs"},
                     {text="Debuffs", value="Debuffs"},
-                    {text="Private Auras", value="PrivateAuras"},
-                    {text="Debuffs", value="Debuffs"},})
+                    {text="Defensives", value="Defensives"},
+                    {text="Private Auras", value="PrivateAuras"},})
     tabGroup:SetCallback("OnGroupSelected", SelectGroup)
     tabGroup:SelectTab("Buffs")
 

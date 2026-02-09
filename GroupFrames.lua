@@ -47,7 +47,7 @@ local buffFilter = "PLAYER|HELPFUL|RAID"
 local buffFilterInCombat = "PLAYER|HELPFUL|RAID_IN_COMBAT"
 local debuffFilter = "HARMFUL|RAID"
 local debuffFilterInCombat = "HARMFUL|RAID_IN_COMBAT"
-local defensiveFilter = "BIG_DEFENSIVE"
+local defensiveFilter = "HELPFUL|BIG_DEFENSIVE"
 
 local function IterateAuras(frame, auraTable, pool, type)
     local dbEntry = CUI.DB.profile.GroupFrames[frame.name][type]
@@ -171,7 +171,7 @@ local function AddAllAuras(frame)
     end
 end
 
-function GF.UpdateAuras(frame, updateInfo)
+local function UpdateAuras(frame, updateInfo)
     local dbEntry = CUI.DB.profile.GroupFrames[frame.name]
     local buffsEnabled = dbEntry.Buffs.Enabled
     local debuffsEnabled = dbEntry.Debuffs.Enabled
@@ -179,6 +179,7 @@ function GF.UpdateAuras(frame, updateInfo)
     local unit = frame.unit
 	local buffsChanged = false
     local debuffsChanged = false
+    local defensivesChanged = false
 
     if not buffsEnabled and not debuffsEnabled then return end
 
@@ -194,10 +195,8 @@ function GF.UpdateAuras(frame, updateInfo)
                 if defensivesEnabled and not C_UnitAuras.IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, defensiveFilter) then
                     ProcessAura(unit, aura)
                     frame.defensives[aura.auraInstanceID] = aura
-                    buffsChanged = true
-                end
-
-                if buffsEnabled then
+                    defensivesChanged = true
+                elseif buffsEnabled then
                     if UnitAffectingCombat("player") then
                         if not C_UnitAuras.IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, buffFilterInCombat) then
                             ProcessAura(unit, aura)
@@ -242,6 +241,11 @@ function GF.UpdateAuras(frame, updateInfo)
                     ProcessAura(unit, newAura)
                     frame.debuffs[id] = newAura
                     debuffsChanged = true
+                elseif frame.defensives[id] then
+                    local newAura = C_UnitAuras.GetAuraDataByAuraInstanceID(unit, id)
+                    ProcessAura(unit, newAura)
+                    frame.defensives[id] = newAura
+                    defensivesChanged = true
 				end 
             end
         end
@@ -255,6 +259,9 @@ function GF.UpdateAuras(frame, updateInfo)
                 elseif frame.debuffs[id] then
                     frame.debuffs[id] = nil
                     debuffsChanged = true
+                elseif frame.defensives[id] then
+                    frame.defensives[id] = nil
+                    defensivesChanged = true
                 end
             end
         end
@@ -262,11 +269,20 @@ function GF.UpdateAuras(frame, updateInfo)
 
     if buffsChanged then
         IterateAuras(frame, frame.buffs, frame.buffPool, "Buffs")
+    end
+
+    if defensivesChanged then
         IterateAuras(frame, frame.defensives, frame.defensivePool, "Defensives")
     end
 
     if debuffsChanged then
         IterateAuras(frame, frame.debuffs, frame.debuffPool, "Debuffs")
+    end
+end
+
+function GF.UpdateAuras(groupFrame)
+    for _, frame in ipairs(groupFrame.frames) do
+        UpdateAuras(frame)
     end
 end
 
@@ -623,7 +639,7 @@ function GF.ToggleGroupTestFrames(type, state)
                 RegisterAttributeDriver(frame, "state-visibility", "[group:raid]hide;[group:party, @"..unit..", exists]show;hide")
             end
         end
-        GF.UpdateAuras(CUI_PartyFrame)
+        UpdateAuras(CUI_PartyFrame)
         GF.SortGroupFrames(CUI_PartyFrame)
     elseif type == "RaidFrame" then
         for i=1, #CUI_RaidFrame.frames do
@@ -643,7 +659,7 @@ function GF.ToggleGroupTestFrames(type, state)
                 RegisterAttributeDriver(frame, "state-visibility", "[group:raid, @"..unit..", exists]show;hide")
             end
         end
-        GF.UpdateAuras(CUI_RaidFrame)
+        UpdateAuras(CUI_RaidFrame)
         GF.SortGroupFrames(CUI_RaidFrame)
     end
 end
@@ -792,7 +808,7 @@ local function UpdateGroupFrames(groupFramesContainer)
         local frame = groupFramesContainer[unit]
 
         UpdateAll(frame)
-        GF.UpdateAuras(frame)
+        UpdateAuras(frame)
     end
 
     if groupFramesContainer.LastNumMem == numMem then return end
@@ -953,7 +969,7 @@ local function SetupGroupFrame(unit, groupType, frameName, parent, num)
 
         if event == "UNIT_AURA" then
             local _, updateInfo = ...
-            GF.UpdateAuras(self, updateInfo)
+            UpdateAuras(self, updateInfo)
         elseif event == "UNIT_HEALTH" then
             UpdateHealth(self)
             UpdateHealPrediction(self)
@@ -973,9 +989,9 @@ local function SetupGroupFrame(unit, groupType, frameName, parent, num)
         elseif event  == "PLAYER_TARGET_CHANGED" then
             UpdateBorderColor(frame)
         elseif event == "PLAYER_REGEN_ENABLED" then
-            GF.UpdateAuras(self)
+            UpdateAuras(self)
         elseif event == "PLAYER_REGEN_DISABLED" then
-            GF.UpdateAuras(self)
+            UpdateAuras(self)
         elseif event == "PLAYER_FLAGS_CHANGED" then
             UpdateAFK(self)
             UpdateCenterIcon(self)
