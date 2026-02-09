@@ -419,7 +419,8 @@ local function UpdateMaxHealth(frame)
 end
 
 local function UpdateInRange(frame)
-    frame:SetAlphaFromBoolean(UnitInRange(frame.unit), 1, 0.5)
+    local alpha = CUI.DB.profile.GroupFrames[frame.name].OutOfRangeAlpha
+    frame:SetAlphaFromBoolean(UnitInRange(frame.unit), 1, alpha)
 end
 
 local function UpdateInPhase(frame)

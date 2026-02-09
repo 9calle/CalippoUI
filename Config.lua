@@ -1296,7 +1296,13 @@ local function CreateGroupFrameFramePage(container, groupFrame)
             GF.UpdateFrame(frame)
         end, 1)
 
-    CreateAlphaGroup(scrollFrame, dbEntry, GF.UpdateAlpha, frame)
+    local alphaGroup = CreateAlphaGroup(scrollFrame, dbEntry, GF.UpdateAlpha, frame)
+
+    CreateSlider(alphaGroup, "Out of range alpha", 0, 100, 1, dbEntry.OutOfRangeAlpha*100,
+        function(self, event, value)
+            dbEntry.OutOfRangeAlpha = value/100
+            GF.UpdateFrame(frame)
+        end, 1)
 
     local anchorGroup = CreateAnchorGroup(scrollFrame, dbEntry, GF.UpdateFrame, frame)
 

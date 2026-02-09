@@ -607,6 +607,8 @@ local defaults = {
                 Alpha = 1,
                 CombatAlpha = 1,
 
+                OutOfRangeAlpha = 0.5,
+
                 AnchorFrame = "UIParent",
                 AnchorPoint = "TOPLEFT",
                 AnchorRelativePoint = "CENTER",
