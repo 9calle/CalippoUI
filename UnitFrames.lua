@@ -839,8 +839,6 @@ function SetupUnitFrame(frameName, unit, number)
     frame.number = number
     frame.buffs = {}
     frame.debuffs = {}
-    frame.buffPool = CreateFramePool("Frame", frame, "CUI_AuraFrameTemplate")
-    frame.debuffPool = CreateFramePool("Frame", frame, "CUI_AuraFrameTemplate")
     frame.calc = CreateUnitHealPredictionCalculator()
     frame.calc:SetHealAbsorbClampMode(Enum.UnitHealAbsorbClampMode.CurrentHealth)
     frame.calc:SetIncomingHealClampMode(Enum.UnitIncomingHealClampMode.MissingHealth)
@@ -907,6 +905,9 @@ function SetupUnitFrame(frameName, unit, number)
     overlayFrame:SetFrameLevel(frame:GetFrameLevel()+10)
     overlayFrame:SetAllPoints(frame)
     Util.AddBorder(overlayFrame)
+
+    frame.buffPool = CreateFramePool("Frame", overlayFrame, "CUI_AuraFrameTemplate")
+    frame.debuffPool = CreateFramePool("Frame", overlayFrame, "CUI_AuraFrameTemplate")
 
     local unitName = overlayFrame:CreateFontString(nil, "OVERLAY")
     unitName:SetParentKey("UnitName")

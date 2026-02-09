@@ -43,7 +43,13 @@ for i, c in pairs(DEBUFF_DISPLAY_COLOR_INFO) do
     dispelColorCurve:AddPoint(i, c)
 end
 
-local function UpdateAuras(frame, blizzFrame, type)
+local buffFilter = "PLAYER|HELPFUL|RAID"
+local buffFilterInCombat = "PLAYER|HELPFUL|RAID_IN_COMBAT"
+local debuffFilter = "HARMFUL|RAID"
+local debuffFilterInCombat = "HARMFUL|RAID_IN_COMBAT"
+local defensiveFilter = "BIG_DEFENSIVE"
+
+local function IterateAuras(frame, auraTable, pool, type)
     local dbEntry = CUI.DB.profile.GroupFrames[frame.name][type]
     local anchorPoint = dbEntry.AnchorPoint
     local anchorRelativePoint = dbEntry.AnchorRelativePoint
@@ -65,138 +71,202 @@ local function UpdateAuras(frame, blizzFrame, type)
     local stacksOutline = dbEntry.Stacks.Outline
     local stacksSize = dbEntry.Stacks.Size
 
-    local dispelColor = nil
+    pool:ReleaseAll()
+
     local index = 0
-    local function HandleAura(id)
-        if id then
-            local aura = AuraUtil.GetAuraDataByAuraInstanceID(frame.unit, id)
-            if aura then
-                if index >= maxShown then return end
+	for id, aura in pairs(auraTable) do
+        if index >= maxShown then return end
 
-                local auraFrame = frame.pool:Acquire()
-                auraFrame:Show()
+        local auraFrame = pool:Acquire()
+        auraFrame:Show()
 
-                auraFrame.unit = frame.unit
-                auraFrame.type = type
-                auraFrame.auraInstanceID = aura.auraInstanceID
+        auraFrame.unit = frame.unit
+        auraFrame.type = type
+        auraFrame.showTooltip = true
+        auraFrame.auraInstanceID = id
 
-                auraFrame:SetSize(size, size)
+        auraFrame:SetSize(size, size)
 
-                local color = C_UnitAuras.GetAuraDispelTypeColor(frame.unit, aura.auraInstanceID, dispelColorCurve)
-                if type == "Debuffs" and color then
-                    if aura.dispelName then
-                        dispelColor = color
-                        auraFrame.Overlay.Backdrop:SetBackdropBorderColor(color.r, color.g, color.b, color.a)
-                    else
-                        auraFrame.Overlay.Backdrop:SetBackdropBorderColor(0, 0, 0, 1)
-                    end
-                else
-                    auraFrame.Overlay.Backdrop:SetBackdropBorderColor(0, 0, 0, 1)
-                end
-
-                auraFrame.Icon:SetTexture(aura.icon)
-                auraFrame.Icon:SetTexCoord(.08, .92, .08, .92)
-
-                local stacksFrame = auraFrame.Overlay.Count
-                if stacksEnabled then
-                    stacksFrame:Show()
-                    stacksFrame:ClearAllPoints()
-                    stacksFrame:SetPoint(stacksAP, auraFrame.Overlay, stacksARP, stacksPX, stacksPY)
-                    stacksFrame:SetFont(stacksFont, stacksSize, stacksOutline)
-                    stacksFrame:SetText(C_StringUtil.TruncateWhenZero(aura.applications))
-                else
-                    stacksFrame:Hide()
-                end
-
-                auraFrame.Cooldown:SetCooldownFromExpirationTime(aura.expirationTime, aura.duration)
-
-                Util.PositionFromIndex(index, auraFrame, frame.Overlay, anchorPoint, anchorRelativePoint, dirH, dirV, size, size, padding, posX, posY, rowLength)
-
-                index = index + 1
-            end
-        end
-    end
-
-    if type == "Buffs" then
-        for i=1, #blizzFrame.buffFrames do
-            local f = blizzFrame.buffFrames[i]
-            if f:IsShown() then
-                HandleAura(f.auraInstanceID)
-            else
-                return
-            end
-        end
-    elseif type == "Debuffs" then
-        for i=1, #blizzFrame.debuffFrames do
-            local f = blizzFrame.debuffFrames[i]
-            if f:IsShown() then
-                HandleAura(f.auraInstanceID)
-            else
-                break
-            end
-        end
-
-        if dispelColor then
-            frame.Overlay.DispelGradient:SetColorTexture(dispelColor.r, dispelColor.g, dispelColor.b, dispelColor.a)
+        if type == "Debuffs" then
+            local c = aura.borderColor
+            auraFrame.Overlay.Backdrop:SetBackdropBorderColor(c.r, c.g, c.b, c.a)
         else
-            frame.Overlay.DispelGradient:SetColorTexture(0, 0, 0, 0)
+            auraFrame.Overlay.Backdrop:SetBackdropBorderColor(0, 0, 0, 1)
         end
-    elseif type == "Defensives" then
-        HandleAura(blizzFrame.CenterDefensiveBuff.auraInstanceID)
+
+        auraFrame.Icon:SetTexture(aura.icon)
+        auraFrame.Icon:SetTexCoord(.08, .92, .08, .92)
+
+        local stacksFrame = auraFrame.Overlay.Count
+        if stacksEnabled then
+            stacksFrame:Show()
+            stacksFrame:ClearAllPoints()
+            stacksFrame:SetPoint(stacksAP, auraFrame.Overlay, stacksARP, stacksPX, stacksPY)
+            stacksFrame:SetFont(stacksFont, stacksSize, stacksOutline)
+            stacksFrame:SetText(C_StringUtil.TruncateWhenZero(aura.applications))
+        else
+            stacksFrame:Hide()
+        end
+
+        auraFrame.Cooldown:SetCooldownFromExpirationTime(aura.expirationTime, aura.duration)
+
+        Util.PositionFromIndex(index, auraFrame, frame, anchorPoint, anchorRelativePoint, dirH, dirV, size, size, padding, posX, posY, rowLength)
+
+        index = index + 1
+	end
+end
+
+local function ProcessAura(unit, aura)
+    if not aura then return end
+
+    local color = C_UnitAuras.GetAuraDispelTypeColor(unit, aura.auraInstanceID, dispelColorCurve)
+
+    if color then
+        aura.borderColor = color
+    else
+        aura.borderColor = CreateColor(0, 0, 0, 1)
     end
 end
 
-local function UpdateAllAuras(frame)
+local function AddAllAuras(frame)
     local dbEntry = CUI.DB.profile.GroupFrames[frame.name]
+    local unit = frame.unit
+    table.wipe(frame.buffs)
+    table.wipe(frame.debuffs)
+    table.wipe(frame.defensives)
 
-    if frame.name == "PartyFrame" then
-        if (not frame.BlizzFrame) or (frame.BlizzFrame and frame.BlizzFrame.unit ~= frame.unit) then
-            for i=1, #CompactPartyFrame.memberUnitFrames do
-                local f = CompactPartyFrame.memberUnitFrames[i]
-                if f.unit == frame.unit then
-                    frame.BlizzFrame = f
-                    break
-                end
-            end
+    local function AddBuff(aura)
+        ProcessAura(unit, aura)
+		frame.buffs[aura.auraInstanceID] = aura
+	end
+
+    local function AddDebuff(aura)
+        ProcessAura(unit, aura)
+        frame.debuffs[aura.auraInstanceID] = aura
+	end
+
+    local function AddDefensive(aura)
+        ProcessAura(unit, aura)
+        frame.defensives[aura.auraInstanceID] = aura
+    end
+
+    if dbEntry.Buffs.Enabled then
+        if UnitAffectingCombat("player") then
+            AuraUtil.ForEachAura(unit, buffFilterInCombat, nil, AddBuff, true)
+        else
+            AuraUtil.ForEachAura(unit, buffFilter, nil, AddBuff, true)
         end
-    elseif frame.name == "RaidFrame" then
-        if (not frame.BlizzFrame) or (frame.BlizzFrame and frame.BlizzFrame.unit ~= frame.unit) then
-            for i=1, 8 do
-                local group = _G["CompactRaidGroup"..i]
-                if group then
-                    local shouldBreak = false
-                    for j=1, #group.memberUnitFrames do
-                        local f = group.memberUnitFrames[j]
-                        if f.unit == frame.unit then
-                            frame.BlizzFrame = f
-                            shouldBreak = true
-                            break
+    end
+
+    if dbEntry.Defensives.Enabled then
+        AuraUtil.ForEachAura(unit, defensiveFilter, nil, AddDefensive, true)
+    end
+
+    if dbEntry.Debuffs.Enabled then
+        if UnitAffectingCombat("player") then
+            AuraUtil.ForEachAura(unit, debuffFilterInCombat, nil, AddDebuff, true)
+        else
+            AuraUtil.ForEachAura(unit, debuffFilter, nil, AddDebuff, true)
+        end
+    end
+end
+
+function GF.UpdateAuras(frame, updateInfo)
+    local dbEntry = CUI.DB.profile.GroupFrames[frame.name]
+    local buffsEnabled = dbEntry.Buffs.Enabled
+    local debuffsEnabled = dbEntry.Debuffs.Enabled
+    local defensivesEnabled = dbEntry.Defensives.Enabled
+    local unit = frame.unit
+	local buffsChanged = false
+    local debuffsChanged = false
+
+    if not buffsEnabled and not debuffsEnabled then return end
+
+    if not updateInfo or updateInfo.isFullUpdate then
+        AddAllAuras(frame)
+        buffsChanged = true
+        debuffsChanged = true
+    else
+        if updateInfo.addedAuras then
+            for i=1, #updateInfo.addedAuras do
+                local aura = updateInfo.addedAuras[i]
+
+                if defensivesEnabled and not C_UnitAuras.IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, defensiveFilter) then
+                    ProcessAura(unit, aura)
+                    frame.defensives[aura.auraInstanceID] = aura
+                    buffsChanged = true
+                end
+
+                if buffsEnabled then
+                    if UnitAffectingCombat("player") then
+                        if not C_UnitAuras.IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, buffFilterInCombat) then
+                            ProcessAura(unit, aura)
+                            frame.buffs[aura.auraInstanceID] = aura
+                            buffsChanged = true
+                        end
+                    else
+                        if not C_UnitAuras.IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, buffFilter) then
+                            ProcessAura(unit, aura)
+                            frame.buffs[aura.auraInstanceID] = aura
+                            buffsChanged = true
                         end
                     end
-                    if shouldBreak then break end
+                elseif debuffsEnabled then
+                    if UnitAffectingCombat("player") then
+                        if not C_UnitAuras.IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, debuffFilterInCombat) then
+                            ProcessAura(unit, aura)
+                            frame.debuffs[aura.auraInstanceID] = aura
+                            debuffsChanged = true
+                        end
+                    else
+                        if not C_UnitAuras.IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, debuffFilter) then
+                            ProcessAura(unit, aura)
+                            frame.debuffs[aura.auraInstanceID] = aura
+                            debuffsChanged = true
+                        end
+                    end
+                end
+            end
+        end
+
+        if updateInfo.updatedAuraInstanceIDs then
+            for i=1, #updateInfo.updatedAuraInstanceIDs do
+                local id = updateInfo.updatedAuraInstanceIDs[i]
+				if frame.buffs[id] then
+					local newAura = C_UnitAuras.GetAuraDataByAuraInstanceID(unit, id)
+                    ProcessAura(unit, newAura)
+                    frame.buffs[id] = newAura
+                    buffsChanged = true
+                elseif frame.debuffs[id] then
+                    local newAura = C_UnitAuras.GetAuraDataByAuraInstanceID(unit, id)
+                    ProcessAura(unit, newAura)
+                    frame.debuffs[id] = newAura
+                    debuffsChanged = true
+				end 
+            end
+        end
+
+        if updateInfo.removedAuraInstanceIDs then
+            for i=1, #updateInfo.removedAuraInstanceIDs do
+                local id = updateInfo.removedAuraInstanceIDs[i]
+                if frame.buffs[id] then
+                    frame.buffs[id] = nil
+                    buffsChanged = true
+                elseif frame.debuffs[id] then
+                    frame.debuffs[id] = nil
+                    debuffsChanged = true
                 end
             end
         end
     end
 
-    if not frame.BlizzFrame then return end
+    if buffsChanged then
+        IterateAuras(frame, frame.buffs, frame.buffPool, "Buffs")
+        IterateAuras(frame, frame.defensives, frame.defensivePool, "Defensives")
+    end
 
-    frame.pool:ReleaseAll()
-    if dbEntry.Buffs.Enabled then
-        UpdateAuras(frame, frame.BlizzFrame, "Buffs")
-    end
-    if dbEntry.Debuffs.Enabled then
-        UpdateAuras(frame, frame.BlizzFrame,  "Debuffs")
-    end
-    if dbEntry.Defensives.Enabled then
-        UpdateAuras(frame, frame.BlizzFrame,  "Defensives")
-    end
-end
-
-function GF.UpdateAuras(groupFramesContainer)
-    for i=1, #groupFramesContainer.frames do
-        local frame = groupFramesContainer.frames[i]
-        UpdateAllAuras(frame)
+    if debuffsChanged then
+        IterateAuras(frame, frame.debuffs, frame.debuffPool, "Debuffs")
     end
 end
 
@@ -722,7 +792,7 @@ local function UpdateGroupFrames(groupFramesContainer)
         local frame = groupFramesContainer[unit]
 
         UpdateAll(frame)
-        UpdateAllAuras(frame)
+        GF.UpdateAuras(frame)
     end
 
     if groupFramesContainer.LastNumMem == numMem then return end
@@ -742,16 +812,13 @@ local function SetupGroupFrame(unit, groupType, frameName, parent, num)
     frame:SetParentKey(unit)
     frame:SetSize(dbEntry.Width, dbEntry.Height)
 
-    -- frame:SetAttribute("unit", unit)
-    -- frame:RegisterForClicks("AnyDown")
-    -- frame:SetAttribute("*type1", "target")
-    -- frame:SetAttribute("*type2", "togglemenu")
-    -- frame:SetAttribute("ping-receiver", true)
-
     frame.unit = unit
     frame.groupType = groupType
     frame.name = frameName
     frame.num = num
+    frame.buffs = {}
+    frame.debuffs = {}
+    frame.defensives = {}
     frame.calc = CreateUnitHealPredictionCalculator()
     frame.calc:SetHealAbsorbClampMode(Enum.UnitHealAbsorbClampMode.CurrentHealth)
     frame.calc:SetIncomingHealClampMode(Enum.UnitIncomingHealClampMode.MissingHealth)
@@ -806,6 +873,10 @@ local function SetupGroupFrame(unit, groupType, frameName, parent, num)
     overlayFrame:SetAllPoints(frame)
     overlayFrame:SetFrameLevel(damageAbsorbBar:GetFrameLevel()+1)
 
+    frame.buffPool = CreateFramePool("Frame", overlayFrame, "CUI_AuraFrameTemplate")
+    frame.debuffPool = CreateFramePool("Frame", overlayFrame, "CUI_AuraFrameTemplate")
+    frame.defensivePool = CreateFramePool("Frame", overlayFrame, "CUI_AuraFrameTemplate")
+
     local border = CreateFrame("Frame", nil, overlayFrame, "BackdropTemplate")
     border:SetParentKey("Border")
     border:SetPoint("TOPLEFT", frame, "TOPLEFT", -1, 1)
@@ -815,8 +886,6 @@ local function SetupGroupFrame(unit, groupType, frameName, parent, num)
         edgeSize = PixelUtil.GetNearestPixelSize(1, UIParent:GetEffectiveScale(), 1) * 3,
         bgFile = nil
     })
-
-    frame.pool = CreateFramePool("Frame", overlayFrame, "CUI_AuraFrameTemplate")
 
     local dispelTexture = overlayFrame:CreateTexture(nil, "OVERLAY")
     dispelTexture:SetParentKey("DispelGradient")
@@ -844,7 +913,6 @@ local function SetupGroupFrame(unit, groupType, frameName, parent, num)
     local unitRole = overlayFrame:CreateTexture(nil, "OVERLAY")
     unitRole:SetParentKey("RoleIcon")
 
-    -- TODO : Private Auras
     SetupPrivateAnchors(frame)
 
     local clickFrame = CreateFrame("Button", nil, overlayFrame, "CUI_UnitFrameTemplate")
@@ -878,11 +946,14 @@ local function SetupGroupFrame(unit, groupType, frameName, parent, num)
     frame:RegisterEvent("INCOMING_SUMMON_CHANGED")
     frame:RegisterEvent("PLAYER_ROLES_ASSIGNED")
     frame:RegisterEvent("PLAYER_TARGET_CHANGED")
-    frame:SetScript("OnEvent", function(self, event)
+    frame:RegisterEvent("PLAYER_REGEN_DISABLED")
+    frame:RegisterEvent("PLAYER_REGEN_ENABLED")
+    frame:SetScript("OnEvent", function(self, event, ...)
         if not self:IsShown() then return end
 
         if event == "UNIT_AURA" then
-            UpdateAllAuras(self)
+            local _, updateInfo = ...
+            GF.UpdateAuras(self, updateInfo)
         elseif event == "UNIT_HEALTH" then
             UpdateHealth(self)
             UpdateHealPrediction(self)
@@ -901,6 +972,10 @@ local function SetupGroupFrame(unit, groupType, frameName, parent, num)
             UpdateBorderColor(frame)
         elseif event  == "PLAYER_TARGET_CHANGED" then
             UpdateBorderColor(frame)
+        elseif event == "PLAYER_REGEN_ENABLED" then
+            GF.UpdateAuras(self)
+        elseif event == "PLAYER_REGEN_DISABLED" then
+            GF.UpdateAuras(self)
         elseif event == "PLAYER_FLAGS_CHANGED" then
             UpdateAFK(self)
             UpdateCenterIcon(self)
@@ -953,8 +1028,8 @@ function GF.Load()
     partyFrame:RegisterEvent("GROUP_JOINED")
     partyFrame:RegisterEvent("GROUP_LEFT")
     partyFrame:RegisterEvent("GROUP_FORMED")
-    partyFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
     partyFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
+    partyFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
     partyFrame:SetScript("OnEvent", function(self, event)
         if not IsInGroup() or IsInRaid() then return end
 
@@ -966,9 +1041,7 @@ function GF.Load()
             self.LastNumMem = 0
         elseif event == "PLAYER_REGEN_ENABLED" then
             GF.UpdateAlpha(self)
-            GF.UpdateAuras(self)
         elseif event == "PLAYER_REGEN_DISABLED" then
-            GF.UpdateAuras(self)
             GF.UpdateAlpha(self, true)
             if GetNumGroupMembers() ~= self.LastNumMem then
                 UpdateGroupFrames(self)
@@ -1001,8 +1074,8 @@ function GF.Load()
     raidFrame:RegisterEvent("GROUP_JOINED")
     raidFrame:RegisterEvent("GROUP_LEFT")
     raidFrame:RegisterEvent("GROUP_FORMED")
-    raidFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
     raidFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
+    raidFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
     raidFrame:SetScript("OnEvent", function(self, event)
         if not IsInRaid() then return end
 
@@ -1013,10 +1086,8 @@ function GF.Load()
         elseif event == "GROUP_JOINED" or event == "GROUP_LEFT" or event == "GROUP_FORMED" then
             self.LastNumMem = 0
         elseif event == "PLAYER_REGEN_ENABLED" then
-            GF.UpdateAuras(self)
             GF.UpdateAlpha(self)
         elseif event == "PLAYER_REGEN_DISABLED" then
-            GF.UpdateAuras(self)
             GF.UpdateAlpha(self, true)
             if GetNumGroupMembers() ~= self.LastNumMem then
                 UpdateGroupFrames(self)
