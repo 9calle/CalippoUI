@@ -933,12 +933,12 @@ function SetupUnitFrame(frameName, unit, number)
     frame:RegisterUnitEvent("UNIT_ABSORB_AMOUNT_CHANGED", unit)
     frame:RegisterUnitEvent("UNIT_HEAL_ABSORB_AMOUNT_CHANGED", unit)
     frame:RegisterUnitEvent("UNIT_HEAL_PREDICTION", unit)
+    frame:RegisterUnitEvent("UNIT_DISPLAYPOWER", unit)
     frame:RegisterEvent("PLAYER_REGEN_ENABLED")
     frame:RegisterEvent("PLAYER_REGEN_DISABLED")
     frame:RegisterEvent("PARTY_LEADER_CHANGED")
     frame:RegisterEvent("GROUP_FORMED")
     frame:RegisterEvent("GROUP_LEFT")
-    frame:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
     frame:HookScript("OnEvent", function(self, event, ...)
         if event == "UNIT_AURA" then
             local unit, updateInfo = ...
@@ -970,11 +970,9 @@ function SetupUnitFrame(frameName, unit, number)
             UF.UpdateAlpha(self, true)
         elseif event == "PARTY_LEADER_CHANGED" or event == "GROUP_FORMED" or event == "GROUP_LEFT" then
             UpdateLeaderAssist(self)
-        elseif event == "ACTIVE_TALENT_GROUP_CHANGED" then
-            C_Timer.After(0.5, function()
-                    UpdateMaxPower(frame)
-                    UpdatePowerColor(frame)
-                end)
+        elseif event == "UNIT_DISPLAYPOWER" then
+            UpdateMaxPower(frame)
+            UpdatePowerColor(frame)
         end
     end)
 

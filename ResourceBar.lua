@@ -367,7 +367,7 @@ local powerTypes = {
         Func = UpdateRogueComboPoints,
     },
 
-    Feral = {
+    CatForm = {
         Value = 4,
         Name = "COMBO_POINTS",
         Color = {r = 0.8, g = 0, b = 0},
@@ -419,6 +419,10 @@ local function UpdateSecondaryPowerFrame(frame)
     end
 
     local _, class = UnitClass("player")
+    if class == "DRUID" and GetShapeshiftForm() == 2 then
+        class = "CatForm"
+    end
+
     local powerType = powerTypes[class]
     if not powerType then
         powerType = powerTypes[currentSpecName]
@@ -525,7 +529,7 @@ function RB.UpdateSecondaryPowerBar(frame)
     if dbEntry.Enabled then
         frame:RegisterUnitEvent("UNIT_POWER_FREQUENT", "player")
         frame:RegisterUnitEvent("UNIT_MAXPOWER", "player")
-        frame:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
+        frame:RegisterUnitEvent("UNIT_DISPLAYPOWER", "player")
         frame:RegisterEvent("PLAYER_REGEN_DISABLED")
         frame:RegisterEvent("PLAYER_REGEN_ENABLED")
 
@@ -581,9 +585,9 @@ local function SetupPowerBar()
 
     powerBar:RegisterUnitEvent("UNIT_POWER_FREQUENT", "player")
     powerBar:RegisterUnitEvent("UNIT_MAXPOWER", "player")
+    powerBar:RegisterUnitEvent("UNIT_DISPLAYPOWER", "player")
     powerBar:RegisterEvent("PLAYER_REGEN_ENABLED")
     powerBar:RegisterEvent("PLAYER_REGEN_DISABLED")
-    powerBar:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
     powerBar:SetScript("OnEvent", function(self, event, unit, powerType)
         if event == "UNIT_POWER_FREQUENT" then
             if self.PowerType == powerType then
@@ -591,17 +595,15 @@ local function SetupPowerBar()
             end
         elseif event == "UNIT_MAXPOWER" then
             UpdateMaxPower(self)
+        elseif event == "UNIT_DISPLAYPOWER" then
+            local _, powerType = UnitPowerType("player")
+            self.PowerType = powerType
+            UpdateMaxPower(self)
+            UpdatePowerColor(self)
         elseif event == "PLAYER_REGEN_ENABLED" then
             RB.UpdateAlpha(self)
         elseif event == "PLAYER_REGEN_DISABLED" then
             RB.UpdateAlpha(self, true)
-        elseif event == "ACTIVE_TALENT_GROUP_CHANGED" then
-            C_Timer.After(0.5, function()
-                local _, powerType = UnitPowerType("player")
-                self.PowerType = powerType
-                UpdateMaxPower(self)
-                UpdatePowerColor(self)
-            end)
         end
     end)
 
@@ -643,12 +645,12 @@ local function SetupSecondaryPowerBar()
             if self.Power.Name == powerType then
                 UpdateSecondaryPowerFrame(self)
             end
+        elseif event == "UNIT_DISPLAYPOWER" then
+            UpdateSecondaryPowerFrame(self)
         elseif event == "PLAYER_REGEN_DISABLED" then
             RB.UpdateAlpha(self, true)
         elseif event == "PLAYER_REGEN_ENABLED" then
             RB.UpdateAlpha(self)
-        elseif event == "ACTIVE_TALENT_GROUP_CHANGED" then
-            C_Timer.After(0.5, function() UpdateSecondaryPowerFrame(self) end)
         end
     end)
 
@@ -684,13 +686,13 @@ local function SetupPersonalResourceBar()
         RB.UpdatePersonalBar(PersonalResourceDisplayFrame)
     end)
 
+    PersonalResourceDisplayFrame:RegisterUnitEvent("UNIT_DISPLAYPOWER", "player")
     PersonalResourceDisplayFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
-    PersonalResourceDisplayFrame:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
     PersonalResourceDisplayFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
     PersonalResourceDisplayFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
     PersonalResourceDisplayFrame:HookScript("OnEvent", function(self, event)
-        if event == "PLAYER_ENTERING_WORLD" or event == "ACTIVE_TALENT_GROUP_CHANGED" then
-            C_Timer.After(0.5, function() RB.UpdatePersonalBar(self) end)
+        if event == "PLAYER_ENTERING_WORLD" or event == "UNIT_DISPLAYPOWER" then
+            RB.UpdatePersonalBar(self)
         elseif event == "PLAYER_REGEN_ENABLED" then
             RB.UpdateAlpha(self)
         elseif event == "PLAYER_REGEN_DISABLED" then
