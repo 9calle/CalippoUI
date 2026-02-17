@@ -207,10 +207,12 @@ local function UpdateBlizzardFrame(frame)
     elseif frame.groupType == "raid" then
         for i=1, 8 do
             local group = _G["CompactRaidGroup"..i]
-            for _, blizzFrame in ipairs(group.memberUnitFrames) do
-                if blizzFrame.unit == frame.unit then
-                    frame.blizzFrame = blizzFrame
-                    return
+            if group then
+                for _, blizzFrame in ipairs(group.memberUnitFrames) do
+                    if blizzFrame.unit == frame.unit then
+                        frame.blizzFrame = blizzFrame
+                        return
+                    end
                 end
             end
         end
