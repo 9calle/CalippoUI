@@ -28,7 +28,7 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------
 
 local DEBUFF_DISPLAY_COLOR_INFO = {
-    [0] = CreateColor(0, 0, 0, 0),
+    [0] = CreateColor(0, 0, 0, 1),
     [1] = DEBUFF_TYPE_MAGIC_COLOR,
     [2] = DEBUFF_TYPE_CURSE_COLOR,
     [3] = DEBUFF_TYPE_DISEASE_COLOR,
@@ -85,13 +85,14 @@ local function IterateAuras(frame, auraTable, pool, type)
 
     pool:ReleaseAll()
 
-    local index = 0
-	for _, aF in ipairs(auraTable) do
-        if not aF:IsShown() or index >= maxShown then return end
+	for i=1, #auraTable do
+        local blizzAuraFrame = auraTable[i]
+        if not blizzAuraFrame:IsShown() or i > maxShown then return end
         
-        local id = aF.auraInstanceID
+        local id = blizzAuraFrame.auraInstanceID
         local aura = C_UnitAuras.GetAuraDataByAuraInstanceID(frame.unit, id)
-
+        if not aura then return end
+        
         local auraFrame = pool:Acquire()
         auraFrame:Show()
 
@@ -126,9 +127,7 @@ local function IterateAuras(frame, auraTable, pool, type)
 
         auraFrame.Cooldown:SetCooldownFromExpirationTime(aura.expirationTime, aura.duration)
 
-        Util.PositionFromIndex(index, auraFrame, frame, anchorPoint, anchorRelativePoint, dirH, dirV, size, size, padding, posX, posY, rowLength)
-
-        index = index + 1
+        Util.PositionFromIndex(i-1, auraFrame, frame, anchorPoint, anchorRelativePoint, dirH, dirV, size, size, padding, posX, posY, rowLength)
 	end
 end
 

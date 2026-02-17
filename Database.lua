@@ -669,13 +669,13 @@ local defaults = {
                     Size = 20,
                     DirH = "LEFT",
                     DirV = "DOWN",
-                    Padding = 0,
+                    Padding = 1,
                     MaxShown = 20,
 
                     AnchorPoint = "TOPRIGHT",
                     AnchorRelativePoint = "TOPRIGHT",
-                    PosX = 0,
-                    PosY = 0,
+                    PosX = -1,
+                    PosY = -1,
 
                     Stacks = {
                         Enabled = true,
@@ -696,13 +696,13 @@ local defaults = {
                     Size = 20,
                     DirH = "RIGHT",
                     DirV = "UP",
-                    Padding = 0,
+                    Padding = 1,
                     MaxShown = 20,
 
                     AnchorPoint = "BOTTOMLEFT",
                     AnchorRelativePoint = "BOTTOMLEFT",
-                    PosX = 0,
-                    PosY = 0,
+                    PosX = 1,
+                    PosY = 1,
 
                     Stacks = {
                         Enabled = true,
