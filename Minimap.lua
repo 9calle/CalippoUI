@@ -50,6 +50,8 @@ local function SetupMinimap()
     TimeManagerClockButton:ClearAllPoints()
     TimeManagerClockButton:SetPoint("BOTTOMLEFT", Minimap, "BOTTOMLEFT", -3, 13)
 
+    AddonCompartmentFrame:Hide()
+
     local clockText = TimeManagerClockButton:GetRegions()
     clockText:SetFont("Interface/AddOns/CalippoUI/Fonts/FiraSans-Medium.ttf", 12, "")
 
