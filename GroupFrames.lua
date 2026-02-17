@@ -33,7 +33,7 @@ local DEBUFF_DISPLAY_COLOR_INFO = {
     [2] = DEBUFF_TYPE_CURSE_COLOR,
     [3] = DEBUFF_TYPE_DISEASE_COLOR,
     [4] = DEBUFF_TYPE_POISON_COLOR,
-    [9] = DEBUFF_TYPE_BLEED_COLOR, -- enrage
+    [9] = DEBUFF_TYPE_BLEED_COLOR,
     [11] = DEBUFF_TYPE_BLEED_COLOR,
 }
 local dispelColorCurve = C_CurveUtil.CreateColorCurve()
@@ -46,7 +46,7 @@ end
 local buffFilter = "PLAYER|HELPFUL|RAID"
 local buffFilterInCombat = "PLAYER|HELPFUL|RAID_IN_COMBAT"
 local debuffFilter = "HARMFUL|RAID"
-local debuffFilterInCombat = "HARMFUL|RAID_IN_COMBAT" -- TODO : RAID_IN_COMBAT fungerar inte bra...
+local debuffFilterInCombat = "HARMFUL|RAID_IN_COMBAT"
 local defensiveFilter = "HELPFUL|BIG_DEFENSIVE"
 local playerDispellableFilter = "HARMFUL|RAID_PLAYER_DISPELLABLE"
 
