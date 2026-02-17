@@ -1131,6 +1131,7 @@ end
 
 local partyTestFrame = false
 local raidTestFrame = false
+local privateAuraTestFrame = false
 
 local function CreateGroupFrameGeneralPage(container)
     local dbEntry = CUI.DB.profile.GroupFrames
@@ -1343,6 +1344,12 @@ local function CreateGroupFrameAuraPage(container, groupFrame)
                 function(self, event, value)
                     dbEntry.Enabled = value
                     GF.UpdateAuras(frame)
+                end, 1)
+        else
+            CreateCheckBox(group, "Toggle test frames", privateAuraTestFrame,
+                function(self, event, value)
+                    privateAuraTestFrame = value
+                    GF.UpdateAuras(frame, privateAuraTestFrame)
                 end, 1)
         end
 

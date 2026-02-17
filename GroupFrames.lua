@@ -85,13 +85,9 @@ local function IterateAuras(frame, auraTable, pool, type)
 
     pool:ReleaseAll()
 
-	for i=1, #auraTable do
-        local blizzAuraFrame = auraTable[i]
-        if not blizzAuraFrame:IsShown() or i > maxShown then return end
-        
-        local id = blizzAuraFrame.auraInstanceID
-        local aura = C_UnitAuras.GetAuraDataByAuraInstanceID(frame.unit, id)
-        if not aura then return end
+    index = 0
+	auraTable:Iterate(function(id, aura)
+        if index > maxShown then return end
         
         local auraFrame = pool:Acquire()
         auraFrame:Show()
@@ -127,8 +123,10 @@ local function IterateAuras(frame, auraTable, pool, type)
 
         auraFrame.Cooldown:SetCooldownFromExpirationTime(aura.expirationTime, aura.duration)
 
-        Util.PositionFromIndex(i-1, auraFrame, frame, anchorPoint, anchorRelativePoint, dirH, dirV, size, size, padding, posX, posY, rowLength)
-	end
+        Util.PositionFromIndex(index, auraFrame, frame, anchorPoint, anchorRelativePoint, dirH, dirV, size, size, padding, posX, posY, rowLength)
+
+        index = index + 1
+	end)
 end
 
 local function ProcessAura(unit, aura)
@@ -231,20 +229,19 @@ local function UpdateAuras(frame, updateInfo)
 
     if not buffsEnabled and not debuffsEnabled then return end
 
+    -- Temp tills filters fixas.
     UpdateBlizzardFrame(frame)
 
-    -- Temp tills filters fixas.
     if buffsEnabled then
-        IterateAuras(frame, frame.blizzFrame.buffFrames, frame.buffPool, "Buffs")
+        IterateAuras(frame, frame.blizzFrame.buffs, frame.buffPool, "Buffs")
     end
 
     if debuffsEnabled then
-        IterateAuras(frame, frame.blizzFrame.debuffFrames, frame.debuffPool, "Debuffs")
+        IterateAuras(frame, frame.blizzFrame.debuffs, frame.debuffPool, "Debuffs")
     end
 
     if defensivesEnabled then
-        frame.defensives[1] = frame.blizzFrame.CenterDefensiveBuff
-        IterateAuras(frame, frame.defensives, frame.defensivePool, "Defensives")
+        IterateAuras(frame, frame.blizzFrame.bigDefensives, frame.defensivePool, "Defensives")
     end
 
     if not updateInfo or updateInfo.isFullUpdate then
@@ -374,9 +371,36 @@ local function UpdateAuras(frame, updateInfo)
     end
 end
 
-function GF.UpdateAuras(groupFrame)
+local function UpdatePrivateAuraAnchors(frame, showTest)
+    local dbEntry = CUI.DB.profile.GroupFrames[frame.name].PrivateAuras
+    local anchorPoint = dbEntry.AnchorPoint
+    local anchorRelativePoint = dbEntry.AnchorRelativePoint
+    local dirH = dbEntry.DirH
+    local dirV = dbEntry.DirV
+    local size = dbEntry.Size
+    local padding = dbEntry.Padding
+    local posX = dbEntry.PosX
+    local posY = dbEntry.PosY
+    local rowLength = dbEntry.RowLength
+    local maxShown = dbEntry.MaxShown
+
+    for i=1, 6 do
+        local container = frame.Overlay["PrivateAuraContainer"..i]
+        container:SetSize(size, size)
+        Util.PositionFromIndex(i-1, container, frame.Overlay, anchorPoint, anchorRelativePoint, dirH, dirV, size, size, padding, posX, posY, rowLength)
+
+        if showTest == true then
+            container.TestTexture:Show()
+        elseif showTest == false then
+            container.TestTexture:Hide()
+        end
+    end
+end
+
+function GF.UpdateAuras(groupFrame, privateAuraTest)
     for _, frame in ipairs(groupFrame.frames) do
         UpdateAuras(frame)
+        UpdatePrivateAuraAnchors(frame, privateAuraTest)
     end
 end
 
@@ -398,6 +422,12 @@ local function SetupPrivateAnchors(frame)
         container:SetParentKey("PrivateAuraContainer"..i)
         container:SetSize(size, size)
         Util.PositionFromIndex(i-1, container, frame.Overlay, anchorPoint, anchorRelativePoint, dirH, dirV, size, size, padding, posX, posY, rowLength)
+
+        local texture = container:CreateTexture(nil, "OVERLAY")
+        texture:SetParentKey("TestTexture")
+        texture:SetAllPoints(container)
+        texture:SetColorTexture(0, 0, 0, 1)
+        texture:Hide()
 
         local anchor = C_UnitAuras.AddPrivateAuraAnchor({
             unitToken = frame.unit,
