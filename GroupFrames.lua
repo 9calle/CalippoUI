@@ -86,8 +86,11 @@ local function IterateAuras(frame, auraTable, pool, type)
     pool:ReleaseAll()
 
     local index = 0
-	for id, aura in pairs(auraTable) do
-        if index >= maxShown then return end
+	for _, aF in ipairs(auraTable) do
+        if not aF:IsShown() or index >= maxShown then return end
+        
+        local id = aF.auraInstanceID
+        local aura = C_UnitAuras.GetAuraDataByAuraInstanceID(frame.unit, id)
 
         local auraFrame = pool:Acquire()
         auraFrame:Show()
@@ -100,7 +103,8 @@ local function IterateAuras(frame, auraTable, pool, type)
         auraFrame:SetSize(size, size)
 
         if type == "Debuffs" then
-            local c = aura.borderColor
+            -- local c = aura.borderColor
+            local c = C_UnitAuras.GetAuraDispelTypeColor(frame.unit, id, dispelColorCurve)
             auraFrame.Overlay.Backdrop:SetBackdropBorderColor(c.r, c.g, c.b, c.a)
         else
             auraFrame.Overlay.Backdrop:SetBackdropBorderColor(0, 0, 0, 1)
@@ -143,47 +147,72 @@ end
 local function AddAllAuras(frame)
     local dbEntry = CUI.DB.profile.GroupFrames[frame.name]
     local unit = frame.unit
-    table.wipe(frame.buffs)
-    table.wipe(frame.debuffs)
-    table.wipe(frame.defensives)
+    -- table.wipe(frame.buffs)
+    -- table.wipe(frame.debuffs)
+    -- table.wipe(frame.defensives)
     table.wipe(frame.dispels)
 
-    local function AddBuff(aura)
-        ProcessAura(unit, aura)
-		frame.buffs[aura.auraInstanceID] = aura
-	end
+    -- local function AddBuff(aura)
+    --     ProcessAura(unit, aura)
+	-- 	frame.buffs[aura.auraInstanceID] = aura
+	-- end
 
-    local function AddDebuff(aura)
-        ProcessAura(unit, aura)
-        frame.debuffs[aura.auraInstanceID] = aura
-	end
+    -- local function AddDebuff(aura)
+    --     ProcessAura(unit, aura)
+    --     frame.debuffs[aura.auraInstanceID] = aura
+	-- end
 
-    local function AddDefensive(aura)
-        ProcessAura(unit, aura)
-        frame.defensives[aura.auraInstanceID] = aura
-    end
+    -- local function AddDefensive(aura)
+    --     ProcessAura(unit, aura)
+    --     frame.defensives[aura.auraInstanceID] = aura
+    -- end
 
     local function AddDispel(aura)
         frame.dispels[aura.auraInstanceID] = aura
     end
 
-    if dbEntry.Buffs.Enabled then
-        if UnitAffectingCombat("player") then
-            AuraUtil.ForEachAura(unit, buffFilterInCombat, nil, AddBuff, true)
-        else
-            AuraUtil.ForEachAura(unit, buffFilter, nil, AddBuff, true)
+    AuraUtil.ForEachAura(unit, playerDispellableFilter, nil, AddDispel, true)
+
+    -- if dbEntry.Buffs.Enabled then
+    --     if UnitAffectingCombat("player") then
+    --         AuraUtil.ForEachAura(unit, buffFilterInCombat, nil, AddBuff, true)
+    --     else
+    --         AuraUtil.ForEachAura(unit, buffFilter, nil, AddBuff, true)
+    --     end
+    -- end
+
+    -- if dbEntry.Defensives.Enabled then
+    --     AuraUtil.ForEachAura(unit, defensiveFilter, nil, AddDefensive, true)
+    -- end
+
+    -- if dbEntry.Debuffs.Enabled then
+    --     if UnitAffectingCombat("player") then
+    --         AuraUtil.ForEachAura(unit, debuffFilterInCombat, nil, AddDebuff, true)
+    --     else
+    --         AuraUtil.ForEachAura(unit, debuffFilter, nil, AddDebuff, true)
+    --     end
+    -- end
+end
+
+local function UpdateBlizzardFrame(frame)
+    if frame.blizzFrame and frame.blizzFrame.unit == frame.unit then return end
+
+    if frame.groupType == "party" then
+        for _, blizzFrame in ipairs(CompactPartyFrame.memberUnitFrames) do
+            if blizzFrame.unit == frame.unit then
+                frame.blizzFrame = blizzFrame
+                return
+            end
         end
-    end
-
-    if dbEntry.Defensives.Enabled then
-        AuraUtil.ForEachAura(unit, defensiveFilter, nil, AddDefensive, true)
-    end
-
-    if dbEntry.Debuffs.Enabled then
-        if UnitAffectingCombat("player") then
-            AuraUtil.ForEachAura(unit, debuffFilterInCombat, nil, AddDebuff, true)
-        else
-            AuraUtil.ForEachAura(unit, debuffFilter, nil, AddDebuff, true)
+    elseif frame.groupType == "raid" then
+        for i=1, 8 do
+            local group = _G["CompactRaidGroup"..i]
+            for _, blizzFrame in ipairs(group.memberUnitFrames) do
+                if blizzFrame.unit == frame.unit then
+                    frame.blizzFrame = blizzFrame
+                    return
+                end
+            end
         end
     end
 end
@@ -194,24 +223,40 @@ local function UpdateAuras(frame, updateInfo)
     local debuffsEnabled = dbEntry.Debuffs.Enabled
     local defensivesEnabled = dbEntry.Defensives.Enabled
     local unit = frame.unit
-	local buffsChanged = false
-    local debuffsChanged = false
-    local defensivesChanged = false
+	-- local buffsChanged = false
+    -- local debuffsChanged = false
+    -- local defensivesChanged = false
     local dispelsChanged = false
 
     if not buffsEnabled and not debuffsEnabled then return end
 
+    UpdateBlizzardFrame(frame)
+
+    -- Temp tills filters fixas.
+    if buffsEnabled then
+        IterateAuras(frame, frame.blizzFrame.buffFrames, frame.buffPool, "Buffs")
+    end
+
+    if debuffsEnabled then
+        IterateAuras(frame, frame.blizzFrame.debuffFrames, frame.debuffPool, "Debuffs")
+    end
+
+    if defensivesEnabled then
+        frame.defensives[1] = frame.blizzFrame.CenterDefensiveBuff
+        IterateAuras(frame, frame.defensives, frame.defensivePool, "Defensives")
+    end
+
     if not updateInfo or updateInfo.isFullUpdate then
         AddAllAuras(frame)
-        buffsChanged = true
-        debuffsChanged = true
-        defensivesChanged = true
+        -- buffsChanged = true
+        -- debuffsChanged = true
+        -- defensivesChanged = true
         dispelChanged = true
     else
         if updateInfo.addedAuras then
             for i=1, #updateInfo.addedAuras do
                 local aura = updateInfo.addedAuras[i]
-                local done = false
+                -- local done = false
 
                 -- TODO : Optimera?
 
@@ -220,108 +265,108 @@ local function UpdateAuras(frame, updateInfo)
                     dispelChanged = true
                 end
 
-                if defensivesEnabled and not C_UnitAuras.IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, defensiveFilter) then
-                    ProcessAura(unit, aura)
-                    frame.defensives[aura.auraInstanceID] = aura
-                    defensivesChanged = true
-                    done = true
-                elseif not done and buffsEnabled then
-                    if UnitAffectingCombat("player") then
-                        if not C_UnitAuras.IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, buffFilterInCombat) then
-                            ProcessAura(unit, aura)
-                            frame.buffs[aura.auraInstanceID] = aura
-                            buffsChanged = true
-                            done = true
-                        end
-                    else
-                        if not C_UnitAuras.IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, buffFilter) then
-                            ProcessAura(unit, aura)
-                            frame.buffs[aura.auraInstanceID] = aura
-                            buffsChanged = true
-                            done = true
-                        end
-                    end
-                end
+                -- if defensivesEnabled and not C_UnitAuras.IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, defensiveFilter) then
+                --     ProcessAura(unit, aura)
+                --     frame.defensives[aura.auraInstanceID] = aura
+                --     defensivesChanged = true
+                --     done = true
+                -- elseif not done and buffsEnabled then
+                --     if UnitAffectingCombat("player") then
+                --         if not C_UnitAuras.IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, buffFilterInCombat) then
+                --             ProcessAura(unit, aura)
+                --             frame.buffs[aura.auraInstanceID] = aura
+                --             buffsChanged = true
+                --             done = true
+                --         end
+                --     else
+                --         if not C_UnitAuras.IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, buffFilter) then
+                --             ProcessAura(unit, aura)
+                --             frame.buffs[aura.auraInstanceID] = aura
+                --             buffsChanged = true
+                --             done = true
+                --         end
+                --     end
+                -- end
 
-                if not done and debuffsEnabled then
-                    if UnitAffectingCombat("player") then
-                        if not C_UnitAuras.IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, debuffFilterInCombat) then
-                            ProcessAura(unit, aura)
-                            frame.debuffs[aura.auraInstanceID] = aura
-                            debuffsChanged = true
-                        end
-                    else
-                        if not C_UnitAuras.IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, debuffFilter) then
-                            ProcessAura(unit, aura)
-                            frame.debuffs[aura.auraInstanceID] = aura
-                            debuffsChanged = true
-                        end
-                    end
-                end
+                -- if not done and debuffsEnabled then
+                --     if UnitAffectingCombat("player") then
+                --         if not C_UnitAuras.IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, debuffFilterInCombat) then
+                --             ProcessAura(unit, aura)
+                --             frame.debuffs[aura.auraInstanceID] = aura
+                --             debuffsChanged = true
+                --         end
+                --     else
+                --         if not C_UnitAuras.IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, debuffFilter) then
+                --             ProcessAura(unit, aura)
+                --             frame.debuffs[aura.auraInstanceID] = aura
+                --             debuffsChanged = true
+                --         end
+                --     end
+                -- end
             end
         end
 
         if updateInfo.updatedAuraInstanceIDs then
-            for i=1, #updateInfo.updatedAuraInstanceIDs do
-                local id = updateInfo.updatedAuraInstanceIDs[i]
+            -- for i=1, #updateInfo.updatedAuraInstanceIDs do
+            --     local id = updateInfo.updatedAuraInstanceIDs[i]
 
-				if frame.buffs[id] then
-					local newAura = C_UnitAuras.GetAuraDataByAuraInstanceID(unit, id)
-                    ProcessAura(unit, newAura)
-                    frame.buffs[id] = newAura
-                    buffsChanged = true
-                elseif frame.debuffs[id] then
-                    local newAura = C_UnitAuras.GetAuraDataByAuraInstanceID(unit, id)
-                    ProcessAura(unit, newAura)
-                    frame.debuffs[id] = newAura
-                    debuffsChanged = true
-                end
+			-- 	if frame.buffs[id] then
+			-- 		local newAura = C_UnitAuras.GetAuraDataByAuraInstanceID(unit, id)
+            --         ProcessAura(unit, newAura)
+            --         frame.buffs[id] = newAura
+            --         buffsChanged = true
+            --     elseif frame.debuffs[id] then
+            --         local newAura = C_UnitAuras.GetAuraDataByAuraInstanceID(unit, id)
+            --         ProcessAura(unit, newAura)
+            --         frame.debuffs[id] = newAura
+            --         debuffsChanged = true
+            --     end
 
-                if frame.defensives[id] then
-                    local newAura = C_UnitAuras.GetAuraDataByAuraInstanceID(unit, id)
-                    ProcessAura(unit, newAura)
-                    frame.defensives[id] = newAura
-                    defensivesChanged = true
-				end 
-            end
+            --     if frame.defensives[id] then
+            --         local newAura = C_UnitAuras.GetAuraDataByAuraInstanceID(unit, id)
+            --         ProcessAura(unit, newAura)
+            --         frame.defensives[id] = newAura
+            --         defensivesChanged = true
+			-- 	end 
+            -- end
         end
 
         if updateInfo.removedAuraInstanceIDs then
             for i=1, #updateInfo.removedAuraInstanceIDs do
                 local id = updateInfo.removedAuraInstanceIDs[i]
 
-                if frame.buffs[id] then
-                    frame.buffs[id] = nil
-                    buffsChanged = true
-                elseif frame.debuffs[id] then
-                    frame.debuffs[id] = nil
-                    debuffsChanged = true
-                end
+                -- if frame.buffs[id] then
+                --     frame.buffs[id] = nil
+                --     buffsChanged = true
+                -- elseif frame.debuffs[id] then
+                --     frame.debuffs[id] = nil
+                --     debuffsChanged = true
+                -- end
 
                 if frame.dispels[id] then
                     frame.dispels[id] = nil
                     dispelChanged = true
                 end
                 
-                if frame.defensives[id] then
-                    frame.defensives[id] = nil
-                    defensivesChanged = true
-                end
+                -- if frame.defensives[id] then
+                --     frame.defensives[id] = nil
+                --     defensivesChanged = true
+                -- end
             end
         end
     end
 
-    if buffsChanged then
-        IterateAuras(frame, frame.buffs, frame.buffPool, "Buffs")
-    end
+    -- if buffsChanged then
+    --     IterateAuras(frame, frame.buffs, frame.buffPool, "Buffs")
+    -- end
 
-    if defensivesChanged then
-        IterateAuras(frame, frame.defensives, frame.defensivePool, "Defensives")
-    end
+    -- if defensivesChanged then
+    --     IterateAuras(frame, frame.defensives, frame.defensivePool, "Defensives")
+    -- end
 
-    if debuffsChanged then
-        IterateAuras(frame, frame.debuffs, frame.debuffPool, "Debuffs")
-    end
+    -- if debuffsChanged then
+    --     IterateAuras(frame, frame.debuffs, frame.debuffPool, "Debuffs")
+    -- end
 
     if dispelChanged then
         UpdateDispel(frame)
