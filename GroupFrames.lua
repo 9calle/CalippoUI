@@ -192,13 +192,13 @@ local function AddAllAuras(frame)
 end
 
 local function UpdateBlizzardFrame(frame)
-    if frame.blizzFrame and frame.blizzFrame.unit == frame.unit then return end
+    if frame.blizzFrame and frame.blizzFrame.unit == frame.unit then return true end
 
     if frame.groupType == "party" then
         for _, blizzFrame in ipairs(CompactPartyFrame.memberUnitFrames) do
             if blizzFrame.unit == frame.unit then
                 frame.blizzFrame = blizzFrame
-                return
+                return true
             end
         end
     elseif frame.groupType == "raid" then
@@ -208,12 +208,24 @@ local function UpdateBlizzardFrame(frame)
                 for _, blizzFrame in ipairs(group.memberUnitFrames) do
                     if blizzFrame.unit == frame.unit then
                         frame.blizzFrame = blizzFrame
-                        return
+                        return true
                     end
                 end
             end
         end
+
+        for i=1, 40 do
+            local blizzFrame = _G["CompactRaidFrame"..i]
+            if blizzFrame then
+                if blizzFrame.unit == frame.unit then
+                    frame.blizzFrame = blizzFrame
+                    return true
+                end
+            end
+        end
     end
+
+    return false
 end
 
 local function UpdateAuras(frame, updateInfo)
@@ -230,7 +242,8 @@ local function UpdateAuras(frame, updateInfo)
     if not buffsEnabled and not debuffsEnabled then return end
 
     -- Temp tills filters fixas.
-    UpdateBlizzardFrame(frame)
+    local foundBlizzFrame = UpdateBlizzardFrame(frame)
+    if not foundBlizzFrame then return end
 
     if buffsEnabled then
         IterateAuras(frame, frame.blizzFrame.buffs, frame.buffPool, "Buffs")

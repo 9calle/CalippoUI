@@ -33,7 +33,7 @@ end
 function Chat.Load()
     local frame = CreateFrame("Frame")
     frame:RegisterEvent("CHAT_MSG_WHISPER")
-    frame:SetScript("OnEvent", function(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p)
+    frame:SetScript("OnEvent", function()
         for i=NUM_CHAT_WINDOWS+1, NUM_CHAT_WINDOWS+10 do
             local chatTab = _G["ChatFrame"..i.."Tab"]
             if chatTab and not chatTab.Styled then
@@ -49,10 +49,11 @@ function Chat.Load()
 	CHAT_TAB_HIDE_DELAY = 0
 	CHAT_FRAME_FADE_TIME = 0.2
 	CHAT_FRAME_FADE_OUT_TIME = 0.2
-	CHAT_FRAME_BUTTON_FRAME_MIN_ALPHA = 0
-	CHAT_FRAME_TAB_NORMAL_NOMOUSE_ALPHA = 0
-	CHAT_FRAME_TAB_SELECTED_NOMOUSE_ALPHA = 0
-    CHAT_FRAME_DEFAULT_FONT_SIZE = 12
+
+	-- CHAT_FRAME_BUTTON_FRAME_MIN_ALPHA = 0
+	-- CHAT_FRAME_TAB_NORMAL_NOMOUSE_ALPHA = 0
+	-- CHAT_FRAME_TAB_SELECTED_NOMOUSE_ALPHA = 0
+    -- CHAT_FRAME_DEFAULT_FONT_SIZE = 12
 
     for i = 1, NUM_CHAT_WINDOWS do
         StyleChatBox(i)
