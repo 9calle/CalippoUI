@@ -742,7 +742,6 @@ local function UpdateAll(frame)
     UpdateNameColor(frame)
     UpdateHealthColor(frame)
     UpdateAbsorbColor(frame)
-
     UpdateBorderColor(frame)
 
     UpdateCenterIcon(frame)
@@ -919,6 +918,9 @@ end
 
 function GF.SortGroupFrames(groupFramesContainer)
     if InCombatLockdown() then return end
+    
+    groupFramesContainer.groupChanged = false
+
     local dbEntry = CUI.DB.profile.GroupFrames[groupFramesContainer.name]
     local dirH = dbEntry.DirH
     local dirV = dbEntry.DirV
@@ -960,11 +962,9 @@ local function UpdateGroupFrames(groupFramesContainer)
         UpdateAuras(frame)
     end
 
-    if groupFramesContainer.LastNumMem == numMem then return end
-
-    groupFramesContainer.LastNumMem = numMem
-
-    GF.SortGroupFrames(groupFramesContainer)
+    if groupFramesContainer.groupChanged then
+        GF.SortGroupFrames(groupFramesContainer)
+    end
 end
 
 ---------------------------------------------------------------------------------------------------------------------------------
@@ -1186,30 +1186,26 @@ function GF.Load()
     partyFrame.groupType = "party"
     partyFrame.name = "PartyFrame"
     partyFrame.frames = {}
-    partyFrame.LastNumMem = 0
+    partyFrame.groupChanged = true
     partyFrame:SetPoint(dbEntryP.AnchorPoint, dbEntryP.AnchorFrame, dbEntryP.AnchorRelativePoint, dbEntryP.PosX, dbEntryP.PosY)
     partyFrame:SetSize(1, 1)
     partyFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
     partyFrame:RegisterEvent("PLAYER_ROLES_ASSIGNED")
-    partyFrame:RegisterEvent("GROUP_JOINED")
-    partyFrame:RegisterEvent("GROUP_LEFT")
-    partyFrame:RegisterEvent("GROUP_FORMED")
     partyFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
     partyFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
     partyFrame:SetScript("OnEvent", function(self, event)
         if not IsInGroup() or IsInRaid() then return end
 
         if event == "GROUP_ROSTER_UPDATE" then
+            self.groupChanged = true
             UpdateGroupFrames(self)
         elseif event == "PLAYER_ROLES_ASSIGNED" then
             GF.SortGroupFrames(self)
-        elseif event == "GROUP_JOINED" or event == "GROUP_LEFT" or event == "GROUP_FORMED" then
-            self.LastNumMem = 0
         elseif event == "PLAYER_REGEN_ENABLED" then
             GF.UpdateAlpha(self)
         elseif event == "PLAYER_REGEN_DISABLED" then
             GF.UpdateAlpha(self, true)
-            if GetNumGroupMembers() ~= self.LastNumMem then
+            if self.groupChanged then
                 UpdateGroupFrames(self)
             end
         end
@@ -1232,30 +1228,26 @@ function GF.Load()
     raidFrame.groupType = "raid"
     raidFrame.name = "RaidFrame"
     raidFrame.frames = {}
-    raidFrame.LastNumMem = 0
+    raidFrame.groupChanged = true
     raidFrame:SetPoint(dbEntryR.AnchorPoint, dbEntryR.AnchorFrame, dbEntryR.AnchorRelativePoint, dbEntryR.PosX, dbEntryR.PosY)
     raidFrame:SetSize(1, 1)
     raidFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
     raidFrame:RegisterEvent("PLAYER_ROLES_ASSIGNED")
-    raidFrame:RegisterEvent("GROUP_JOINED")
-    raidFrame:RegisterEvent("GROUP_LEFT")
-    raidFrame:RegisterEvent("GROUP_FORMED")
     raidFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
     raidFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
     raidFrame:SetScript("OnEvent", function(self, event)
         if not IsInRaid() then return end
 
         if event == "GROUP_ROSTER_UPDATE" then
+            self.groupChanged = true
             UpdateGroupFrames(self)
         elseif event == "PLAYER_ROLES_ASSIGNED" then
             GF.SortGroupFrames(self)
-        elseif event == "GROUP_JOINED" or event == "GROUP_LEFT" or event == "GROUP_FORMED" then
-            self.LastNumMem = 0
         elseif event == "PLAYER_REGEN_ENABLED" then
             GF.UpdateAlpha(self)
         elseif event == "PLAYER_REGEN_DISABLED" then
             GF.UpdateAlpha(self, true)
-            if GetNumGroupMembers() ~= self.LastNumMem then
+            if self.groupChanged then
                 UpdateGroupFrames(self)
             end
         end
