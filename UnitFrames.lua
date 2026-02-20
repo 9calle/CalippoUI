@@ -548,7 +548,6 @@ end
 
 local function UpdateName(frame)
     frame.Overlay.UnitName:SetText(UnitName(frame.unit))
-    UpdateTextColor(frame)
 end
 
 local function UpdateIsDead(frame)
@@ -646,8 +645,8 @@ function UF.UpdateFrame(frame)
         frame.PowerBar:SetHeight(dbEntry.PowerBar.Height)
         frame.PowerBar:SetStatusBarTexture(dbEntryUF.PowerBar.Texture)
         frame.HealthBar:SetPoint("BOTTOMRIGHT", frame.PowerBar, "TOPRIGHT")
-        frame:RegisterUnitEvent("UNIT_POWER_FREQUENT", unit)
-        frame:RegisterUnitEvent("UNIT_MAXPOWER", unit)
+        frame:RegisterUnitEvent("UNIT_POWER_FREQUENT", frame.unit)
+        frame:RegisterUnitEvent("UNIT_MAXPOWER", frame.unit)
     else
         frame.PowerBar:Hide()
         frame.HealthBar:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT")
@@ -963,7 +962,7 @@ function SetupUnitFrame(frameName, unit, number)
             if not UnitExists(self.unit) then return end
             UpdateAll(self)
             if EditModeManagerFrame:IsShown() then return end
-             UF.UpdateAuras(self)
+            UF.UpdateAuras(self)
         elseif event == "PLAYER_REGEN_ENABLED" then
             UF.UpdateAlpha(self)
         elseif event == "PLAYER_REGEN_DISABLED" then
