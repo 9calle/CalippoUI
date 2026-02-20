@@ -220,11 +220,9 @@ local function UpdateBlizzardFrame(frame)
 
         for i=1, 40 do
             local blizzFrame = _G["CompactRaidFrame"..i]
-            if blizzFrame then
-                if blizzFrame.unit == frame.unit then
-                    frame.blizzFrame = blizzFrame
-                    return true
-                end
+            if blizzFrame and blizzFrame.unit == frame.unit then
+                frame.blizzFrame = blizzFrame
+                return true
             end
         end
     end
@@ -943,30 +941,6 @@ function GF.SortGroupFrames(groupFramesContainer)
     end
 end
 
-local function UpdateGroupFrames(groupFramesContainer)
-    local numMem = GetNumGroupMembers()
-    if numMem == 0 then return end
-
-    local groupType = groupFramesContainer.groupType
-
-    if groupType == "raid" and not IsInRaid() then return end
-    if groupType == "party" and (not IsInGroup() or IsInRaid()) then return end
-
-    for i=1, numMem do
-        local unit = groupType..i
-        if groupType == "party" and i == numMem then unit = "player" end
-
-        local frame = groupFramesContainer[unit]
-
-        UpdateAll(frame)
-        UpdateAuras(frame)
-    end
-
-    if groupFramesContainer.groupChanged then
-        GF.SortGroupFrames(groupFramesContainer)
-    end
-end
-
 ---------------------------------------------------------------------------------------------------------------------------------
 
 local function SetupGroupFrame(unit, groupType, frameName, parent, num)
@@ -1167,6 +1141,9 @@ local function SetupGroupFrame(unit, groupType, frameName, parent, num)
             UpdateCenterIcon(self)
         end
     end)
+
+    UpdateAll(frame)
+    UpdateAuras(frame)
 
     if groupType == "party" then
         RegisterAttributeDriver(frame, "state-visibility", "[group:raid]hide;[group:party, @"..unit..", exists]show;hide")
