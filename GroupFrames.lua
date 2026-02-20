@@ -200,7 +200,7 @@ local function UpdateBlizzardFrame(frame)
 
     if frame.groupType == "party" then
         for _, blizzFrame in ipairs(CompactPartyFrame.memberUnitFrames) do
-            if blizzFrame.unit == frame.unit then
+            if blizzFrame:IsShown() and blizzFrame.unit == frame.unit then
                 frame.blizzFrame = blizzFrame
                 return true
             end
@@ -558,8 +558,14 @@ local function UpdateMaxHealth(frame)
 end
 
 local function UpdateInRange(frame)
-    local alpha = CUI.DB.profile.GroupFrames[frame.name].OutOfRangeAlpha
-    frame:SetAlphaFromBoolean(UnitInRange(frame.unit), 1, alpha)
+    local dbEntry = CUI.DB.profile.GroupFrames[frame.name]
+    local rangeAlpha = CUI.DB.profile.GroupFrames[frame.name].OutOfRangeAlpha
+
+    if UnitAffectingCombat(frame.unit) then
+        frame:SetAlphaFromBoolean(UnitInRange(frame.unit), dbEntry.CombatAlpha, rangeAlpha)
+    else
+        frame:SetAlphaFromBoolean(UnitInRange(frame.unit), dbEntry.Alpha, rangeAlpha)
+    end
 end
 
 local function UpdateInPhase(frame)
@@ -1090,6 +1096,12 @@ local function SetupGroupFrame(unit, groupType, frameName, parent, num)
     frame:RegisterEvent("PLAYER_REGEN_ENABLED")
     frame:RegisterEvent("GROUP_ROSTER_UPDATE")
     frame:SetScript("OnEvent", function(self, event, ...)
+        if event == "GROUP_ROSTER_UPDATE" then
+            if UnitExists(self.unit) then
+                UpdateAll(self)
+            end
+        end
+
         if not self:IsShown() then return end
 
         if event == "UNIT_AURA" then
@@ -1117,8 +1129,6 @@ local function SetupGroupFrame(unit, groupType, frameName, parent, num)
             UpdateAuras(self)
         elseif event == "PLAYER_REGEN_DISABLED" then
             UpdateAuras(self)
-        elseif event == "GROUP_ROSTER_UPDATE" then
-            UpdateAll(self)
         elseif event == "PLAYER_FLAGS_CHANGED" then
             UpdateAFK(self)
             UpdateCenterIcon(self)
