@@ -241,14 +241,8 @@ local function StyleXPBar()
         if frame.StatusBar then
             frame.StatusBar:SetAllPoints(MainStatusTrackingBarContainer)
 
-            local r, g, b = 0.6, 0.2, 0.9
-            local v = 0.2
-
-            frame.StatusBar.BarTexture:SetTexture("Interface/AddOns/CalippoUI/Media/Statusbar.tga")
-            frame.StatusBar.BarTexture:SetVertexColor(r, g, b)
-
             frame.StatusBar.Background:SetTexture("Interface/AddOns/CalippoUI/Media/Statusbar.tga")
-            frame.StatusBar.Background:SetVertexColor(r*v, g*v, b*v)
+            frame.StatusBar.Background:SetVertexColor(0, 0, 0, 1)
         end
 
         if frame.OverlayFrame then
