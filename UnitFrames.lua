@@ -982,10 +982,6 @@ function SetupUnitFrame(frameName, unit, number)
     UF.UpdateTexts(frame)
     UpdateAll(frame)
 
-    C_Timer.After(0.5, function()
-        UpdatePowerColor(frame)
-    end)
-
     RegisterUnitWatch(frame, false)
 end
 

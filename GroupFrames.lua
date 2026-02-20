@@ -1114,6 +1114,7 @@ local function SetupGroupFrame(unit, groupType, frameName, parent, num)
     frame:RegisterEvent("PLAYER_TARGET_CHANGED")
     frame:RegisterEvent("PLAYER_REGEN_DISABLED")
     frame:RegisterEvent("PLAYER_REGEN_ENABLED")
+    frame:RegisterEvent("GROUP_ROSTER_UPDATE")
     frame:SetScript("OnEvent", function(self, event, ...)
         if not self:IsShown() then return end
 
@@ -1142,6 +1143,8 @@ local function SetupGroupFrame(unit, groupType, frameName, parent, num)
             UpdateAuras(self)
         elseif event == "PLAYER_REGEN_DISABLED" then
             UpdateAuras(self)
+        elseif event == "GROUP_ROSTER_UPDATE" then
+            UpdateAll(self)
         elseif event == "PLAYER_FLAGS_CHANGED" then
             UpdateAFK(self)
             UpdateCenterIcon(self)
@@ -1198,7 +1201,7 @@ function GF.Load()
 
         if event == "GROUP_ROSTER_UPDATE" then
             self.groupChanged = true
-            UpdateGroupFrames(self)
+            GF.SortGroupFrames(self)
         elseif event == "PLAYER_ROLES_ASSIGNED" then
             GF.SortGroupFrames(self)
         elseif event == "PLAYER_REGEN_ENABLED" then
@@ -1206,7 +1209,7 @@ function GF.Load()
         elseif event == "PLAYER_REGEN_DISABLED" then
             GF.UpdateAlpha(self, true)
             if self.groupChanged then
-                UpdateGroupFrames(self)
+                GF.SortGroupFrames(self)
             end
         end
     end)
@@ -1221,7 +1224,6 @@ function GF.Load()
 
     GF.UpdateFrame(partyFrame)
     GF.UpdateAlpha(partyFrame)
-    UpdateGroupFrames(partyFrame)
 
     local dbEntryR = CUI.DB.profile.GroupFrames.RaidFrame
     local raidFrame = CreateFrame("Frame", "CUI_RaidFrame", UIParent)
@@ -1240,7 +1242,7 @@ function GF.Load()
 
         if event == "GROUP_ROSTER_UPDATE" then
             self.groupChanged = true
-            UpdateGroupFrames(self)
+            GF.SortGroupFrames(self)
         elseif event == "PLAYER_ROLES_ASSIGNED" then
             GF.SortGroupFrames(self)
         elseif event == "PLAYER_REGEN_ENABLED" then
@@ -1248,7 +1250,7 @@ function GF.Load()
         elseif event == "PLAYER_REGEN_DISABLED" then
             GF.UpdateAlpha(self, true)
             if self.groupChanged then
-                UpdateGroupFrames(self)
+                GF.SortGroupFrames(self)
             end
         end
     end)
@@ -1260,5 +1262,4 @@ function GF.Load()
 
     GF.UpdateFrame(raidFrame)
     GF.UpdateAlpha(raidFrame)
-    UpdateGroupFrames(raidFrame)
 end
