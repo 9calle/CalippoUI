@@ -101,8 +101,12 @@ local function IterateAuras(frame, auraTable, pool, type)
 
         if type == "Debuffs" then
             -- local c = aura.borderColor
-            local c = C_UnitAuras.GetAuraDispelTypeColor(frame.unit, id, dispelColorCurve)
-            auraFrame.Overlay.Backdrop:SetBackdropBorderColor(c.r, c.g, c.b, c.a)
+            local color = C_UnitAuras.GetAuraDispelTypeColor(frame.unit, id, dispelColorCurve)
+            if color then
+                auraFrame.Overlay.Backdrop:SetBackdropBorderColor(color.r, color.g, color.b, color.a)
+            else
+                auraFrame.Overlay.Backdrop:SetBackdropBorderColor(0, 0, 0, 1)
+            end
         else
             auraFrame.Overlay.Backdrop:SetBackdropBorderColor(0, 0, 0, 1)
         end
@@ -654,7 +658,14 @@ local function UpdateSummon(frame)
 end
 
 local function UpdateAFK(frame)
-    if UnitIsAFK(frame.unit) then
+    local isAFK = UnitIsAFK(frame.unit)
+
+    if issecretvalue(isAFK) then
+        frame.afk = false
+        return
+    end
+
+    if isAFK then
         frame.afk = true
     else
         frame.afk = false
