@@ -36,11 +36,28 @@ local DEBUFF_DISPLAY_COLOR_INFO = {
     [9] = DEBUFF_TYPE_BLEED_COLOR,
     [11] = DEBUFF_TYPE_BLEED_COLOR,
 }
-local dispelColorCurve = C_CurveUtil.CreateColorCurve()
 
+local DEBUFF_DISPLAY_COLOR_INFO_GRADIENT = {
+    [0] = CreateColor(0, 0, 0, 0),
+    [1] = DEBUFF_TYPE_MAGIC_COLOR,
+    [2] = DEBUFF_TYPE_CURSE_COLOR,
+    [3] = DEBUFF_TYPE_DISEASE_COLOR,
+    [4] = DEBUFF_TYPE_POISON_COLOR,
+    [9] = DEBUFF_TYPE_BLEED_COLOR,
+    [11] = DEBUFF_TYPE_BLEED_COLOR,
+}
+
+local dispelColorCurve = C_CurveUtil.CreateColorCurve()
 dispelColorCurve:SetType(Enum.LuaCurveType.Step)
 for i, c in pairs(DEBUFF_DISPLAY_COLOR_INFO) do
     dispelColorCurve:AddPoint(i, c)
+end
+
+
+local dispelColorCurveGradient = C_CurveUtil.CreateColorCurve()
+dispelColorCurveGradient:SetType(Enum.LuaCurveType.Step)
+for i, c in pairs(DEBUFF_DISPLAY_COLOR_INFO_GRADIENT) do
+    dispelColorCurveGradient:AddPoint(i, c)
 end
 
 local buffFilter = "PLAYER|HELPFUL|RAID"
@@ -52,16 +69,12 @@ local playerDispellableFilter = "HARMFUL|RAID_PLAYER_DISPELLABLE"
 
 local function UpdateDispel(frame)
     for id, aura in pairs(frame.dispels) do
-        local dispelColor = C_UnitAuras.GetAuraDispelTypeColor(frame.unit, aura.auraInstanceID, dispelColorCurve)
-
+        local dispelColor = C_UnitAuras.GetAuraDispelTypeColor(frame.unit, aura.auraInstanceID, dispelColorCurveGradient)
         if dispelColor then
             frame.Overlay.DispelGradient:SetColorTexture(dispelColor.r, dispelColor.g, dispelColor.b, dispelColor.a)
             frame.Overlay.DispelGradient:Show()
-        else
-            frame.Overlay.DispelGradient:Hide()
+            return
         end
-
-        return
     end
 
     frame.Overlay.DispelGradient:Hide()
