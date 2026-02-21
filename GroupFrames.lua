@@ -53,8 +53,14 @@ local playerDispellableFilter = "HARMFUL|RAID_PLAYER_DISPELLABLE"
 local function UpdateDispel(frame)
     for id, aura in pairs(frame.dispels) do
         local dispelColor = C_UnitAuras.GetAuraDispelTypeColor(frame.unit, aura.auraInstanceID, dispelColorCurve)
-        frame.Overlay.DispelGradient:SetColorTexture(dispelColor.r, dispelColor.g, dispelColor.b, dispelColor.a)
-        frame.Overlay.DispelGradient:Show()
+
+        if dispelColor then
+            frame.Overlay.DispelGradient:SetColorTexture(dispelColor.r, dispelColor.g, dispelColor.b, dispelColor.a)
+            frame.Overlay.DispelGradient:Show()
+        else
+            frame.Overlay.DispelGradient:Hide()
+        end
+
         return
     end
 
@@ -924,7 +930,7 @@ local function RoleComp(a, b)
     elseif not aExists and bExists then
         return false
     else
-        return a.unit < b.unit
+        return a.num < b.num
     end
 end
 
@@ -1199,6 +1205,9 @@ function GF.Load()
             GF.SortGroupFrames(self)
         elseif event == "PLAYER_REGEN_ENABLED" then
             GF.UpdateAlpha(self)
+            if self.groupChanged then
+                GF.SortGroupFrames(self)
+            end
         elseif event == "PLAYER_REGEN_DISABLED" then
             GF.UpdateAlpha(self, true)
             if self.groupChanged then
@@ -1240,6 +1249,9 @@ function GF.Load()
             GF.SortGroupFrames(self)
         elseif event == "PLAYER_REGEN_ENABLED" then
             GF.UpdateAlpha(self)
+            if self.groupChanged then
+                GF.SortGroupFrames(self)
+            end
         elseif event == "PLAYER_REGEN_DISABLED" then
             GF.UpdateAlpha(self, true)
             if self.groupChanged then
