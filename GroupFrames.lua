@@ -562,9 +562,17 @@ local function UpdateInRange(frame)
     local rangeAlpha = CUI.DB.profile.GroupFrames[frame.name].OutOfRangeAlpha
 
     if UnitAffectingCombat(frame.unit) then
-        frame:SetAlphaFromBoolean(UnitInRange(frame.unit), dbEntry.CombatAlpha, rangeAlpha)
+        if frame.unit == "player" then
+            frame:SetAlpha(dbEntry.CombatAlpha)
+        else
+            frame:SetAlphaFromBoolean(UnitInRange(frame.unit), dbEntry.CombatAlpha, rangeAlpha)
+        end
     else
-        frame:SetAlphaFromBoolean(UnitInRange(frame.unit), dbEntry.Alpha, rangeAlpha)
+        if frame.unit == "player" then
+            frame:SetAlpha(dbEntry.Alpha)
+        else
+            frame:SetAlphaFromBoolean(UnitInRange(frame.unit), dbEntry.Alpha, rangeAlpha)
+        end
     end
 end
 
@@ -1097,7 +1105,7 @@ local function SetupGroupFrame(unit, groupType, frameName, parent, num)
     frame:RegisterEvent("GROUP_ROSTER_UPDATE")
     frame:SetScript("OnEvent", function(self, event, ...)
         if event == "GROUP_ROSTER_UPDATE" then
-            if UnitExists(self.unit) then
+            if UnitExists(self.unit) and IsInGroup() then
                 UpdateAll(self)
             end
         end
@@ -1160,8 +1168,6 @@ local function SetupGroupFrame(unit, groupType, frameName, parent, num)
     else
         RegisterAttributeDriver(frame, "state-visibility", "[group:raid, @"..unit..", exists]show;hide")
     end
-
-    RegisterUnitWatch(frame, true)
 
     return frame
 end
