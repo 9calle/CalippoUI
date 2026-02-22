@@ -968,7 +968,6 @@ function GF.SortGroupFrames(groupFramesContainer)
     groupFramesContainer:SetWidth((numMem * (width + padding)) - padding)
     groupFramesContainer:SetHeight(height)
 
-    -- TODO : Fixa läge där frames inte sorteras.
     if dbEntry.SortByRole then
         table.sort(groupFramesContainer.frames, SortyByRole)
     else
