@@ -1,10 +1,10 @@
 local addonName, CUI = ...
 
 -- TODO : Glöm inte att ta bort.
-SetCVar("secretCombatRestrictionsForced", 1)
-SetCVar("secretEncounterRestrictionsForced", 1)
-SetCVar("secretChallengeModeRestrictionsForced", 1)
-SetCVar("secretMapRestrictionsForced", 1)
+-- SetCVar("secretCombatRestrictionsForced", 1)
+-- SetCVar("secretEncounterRestrictionsForced", 1)
+-- SetCVar("secretChallengeModeRestrictionsForced", 1)
+-- SetCVar("secretMapRestrictionsForced", 1)
 
 local f = CreateFrame("Frame")
 f:RegisterEvent("PLAYER_ENTERING_WORLD")

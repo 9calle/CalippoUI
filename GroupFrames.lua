@@ -1037,6 +1037,7 @@ local function SetupGroupFrame(unit, groupType, frameName, parent, num)
     local absorbTexture = healAbsorbBar:GetStatusBarTexture()
     absorbTexture:SetTexture("", "REPEAT", "REPEAT")
     absorbTexture:SetHorizTile(true)
+    absorbTexture:SetVertTile(true)
 
     local damageAbsorbBar = CreateFrame("StatusBar", nil, frame)
     damageAbsorbBar:SetParentKey("DamageAbsorbBar")
@@ -1046,6 +1047,7 @@ local function SetupGroupFrame(unit, groupType, frameName, parent, num)
     local shieldTexture = damageAbsorbBar:GetStatusBarTexture()
     shieldTexture:SetTexture("", "REPEAT", "REPEAT")
     shieldTexture:SetHorizTile(true)
+    shieldTexture:SetVertTile(true)
 
     local overlayFrame = CreateFrame("Frame", nil, frame)
     overlayFrame:SetParentKey("Overlay")
@@ -1200,7 +1202,7 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------
 
 function GF.Load()
-    -- HideBlizzard()
+    HideBlizzard()
 
     local dbEntryP = CUI.DB.profile.GroupFrames.PartyFrame
     local partyFrame = CreateFrame("Frame", "CUI_PartyFrame", UIParent)
