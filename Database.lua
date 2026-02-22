@@ -621,8 +621,9 @@ local defaults = {
 
                 Width = 150,
                 Height = 70,
-
                 Padding = 2,
+
+                SortByRole = true,
 
                 Name = {
                     Enabled = true,

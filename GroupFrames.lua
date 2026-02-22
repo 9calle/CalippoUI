@@ -815,10 +815,10 @@ function GF.ToggleGroupTestFrames(type, state)
                 frame.unit = unit
                 frame:SetAttribute("unit", unit)
                 UpdateAll(frame)
+                UpdateAuras(frame)
                 RegisterAttributeDriver(frame, "state-visibility", "[group:raid]hide;[group:party, @"..unit..", exists]show;hide")
             end
         end
-        UpdateAuras(CUI_PartyFrame)
         GF.SortGroupFrames(CUI_PartyFrame)
     elseif type == "RaidFrame" then
         for i=1, #CUI_RaidFrame.frames do
@@ -828,6 +828,7 @@ function GF.ToggleGroupTestFrames(type, state)
                 frame.unit = "player"
                 frame:SetAttribute("unit", "player")
                 UpdateAll(frame)
+                UpdateAuras(frame)
                 RegisterAttributeDriver(frame, "state-visibility", "show")
             else
                 local unit = "raid"..i
@@ -838,7 +839,6 @@ function GF.ToggleGroupTestFrames(type, state)
                 RegisterAttributeDriver(frame, "state-visibility", "[group:raid, @"..unit..", exists]show;hide")
             end
         end
-        UpdateAuras(CUI_RaidFrame)
         GF.SortGroupFrames(CUI_RaidFrame)
     end
 end
@@ -922,7 +922,7 @@ local classPriority = {
     EVOKER       = 13,
 }
 
-local function RoleComp(a, b)
+local function SortyByRole(a, b)
     local aExists = UnitExists(a.unit)
     local bExists = UnitExists(b.unit)
 
@@ -947,6 +947,10 @@ local function RoleComp(a, b)
     end
 end
 
+local function SortByNumber(a, b)
+    return a.num < b.num
+end
+
 function GF.SortGroupFrames(groupFramesContainer)
     if InCombatLockdown() then return end
     
@@ -965,8 +969,11 @@ function GF.SortGroupFrames(groupFramesContainer)
     groupFramesContainer:SetHeight(height)
 
     -- TODO : Fixa läge där frames inte sorteras.
-
-    table.sort(groupFramesContainer.frames, RoleComp)
+    if dbEntry.SortByRole then
+        table.sort(groupFramesContainer.frames, SortyByRole)
+    else
+        table.sort(groupFramesContainer.frames, SortByNumber)
+    end
 
     for i=1, #groupFramesContainer.frames do
         local frame = groupFramesContainer.frames[i]

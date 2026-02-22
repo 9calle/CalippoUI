@@ -1289,6 +1289,13 @@ local function CreateGroupFrameFramePage(container, groupFrame)
             end, 1)
     end
 
+    local sortGroup = CreateInlineGroup(scrollFrame, "Sorting")
+    CreateCheckBox(sortGroup, "Sort by role", dbEntry.SortByRole,
+        function(self, event, value)
+            dbEntry.SortByRole = value
+            GF.SortGroupFrames(frame)
+        end, 1)
+
     local sizeGroup = CreateSizeGroup(scrollFrame, dbEntry, GF.UpdateFrame, frame)
 
     CreateSlider(sizeGroup, "Padding", 0, 50, 1, dbEntry.Padding,
