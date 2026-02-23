@@ -148,6 +148,8 @@ local defaults = {
                     ["b"] = 0,
                     ["a"] = 1,
                 },
+
+                CustomBackgroundColor = false,
                 BackgroundColor = {
                     ["r"] = 1,
                     ["g"] = 1,
@@ -555,12 +557,16 @@ local defaults = {
                     ["b"] = 0,
                     ["a"] = 1,
                 },
+
+                CustomBackgroundColor = false,
                 BackgroundColor = {
                     ["r"] = 1,
                     ["g"] = 1,
                     ["b"] = 1,
                     ["a"] = 1,
                 },
+
+                CustomHealPredictionColor = false,
                 HealPredictionColor = {
                     ["r"] = 0.5,
                     ["g"] = 0.5,

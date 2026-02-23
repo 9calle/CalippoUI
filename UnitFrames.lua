@@ -456,24 +456,31 @@ local function UpdateHealthColor(frame)
     if frame.dead then
         local dc = dbEntry.HealthBar.DeadColor
         frame.HealthBar:SetStatusBarColor(dc.r, dc.g, dc.b, dc.a)
-    elseif dbEntry.HealthBar.CustomColor then
-        local hc = dbEntry.HealthBar.Color
-        frame.HealthBar:SetStatusBarColor(hc.r, hc.g, hc.b, hc.a)
-
-        local bc = dbEntry.HealthBar.BackgroundColor
-        frame.Background:SetVertexColor(bc.r, bc.g, bc.b, bc.a)
-
-        local hpc = dbEntry.HealthBar.HealPredictionColor
-        frame.HealPredictionBar:SetStatusBarColor(hpc.r, hpc.g, hpc.b, hpc.a)
     else
         local r, g, b = Util.GetUnitColor(frame.unit)
-        frame.HealthBar:SetStatusBarColor(r, g, b)
 
-        local v = 0.2
-        frame.Background:SetVertexColor(r*v, g*v, b*v)
+        if dbEntry.HealthBar.CustomColor then
+            local hc = dbEntry.HealthBar.Color
+            frame.HealthBar:SetStatusBarColor(hc.r, hc.g, hc.b, hc.a)
+        else
+            frame.HealthBar:SetStatusBarColor(r, g, b)
+        end
 
-        local v2 = 0.5
-        frame.HealPredictionBar:SetStatusBarColor(r*v2, g*v2, b*v2)
+        if dbEntry.HealthBar.CustomBackgroundColor then
+            local bc = dbEntry.HealthBar.BackgroundColor
+            frame.Background:SetVertexColor(bc.r, bc.g, bc.b, bc.a)
+        else
+            local v = 0.2
+            frame.Background:SetVertexColor(r*v, g*v, b*v)
+        end
+
+        if dbEntry.HealthBar.CustomHealPredictionColor then
+            local hpc = dbEntry.HealthBar.HealPredictionColor
+            frame.HealPredictionBar:SetStatusBarColor(hpc.r, hpc.g, hpc.b, hpc.a)
+        else
+            local v2 = 0.5
+            frame.HealPredictionBar:SetStatusBarColor(r*v2, g*v2, b*v2)
+        end
     end
 end
 

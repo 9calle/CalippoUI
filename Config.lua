@@ -630,13 +630,13 @@ local function CreateUnitFrameGeneralPage(container)
             UF.UpdateAllFrames()
         end, 0.33)
 
-    CreateCheckBox(textureGroup, "Vert tiling", dbEntry.DamageAbsorbBar.VertTiling,
+    CreateCheckBox(textureGroup, "Vertical tiling", dbEntry.DamageAbsorbBar.VertTiling,
         function(self, event, value)
             dbEntry.DamageAbsorbBar.VertTiling = value
             UF.UpdateAllFrames()
         end, 0.33)
 
-    CreateCheckBox(textureGroup, "Horiz tiling", dbEntry.DamageAbsorbBar.HorizTiling,
+    CreateCheckBox(textureGroup, "Horizontal tiling", dbEntry.DamageAbsorbBar.HorizTiling,
         function(self, event, value)
             dbEntry.DamageAbsorbBar.HorizTiling = value
             UF.UpdateAllFrames()
@@ -648,13 +648,13 @@ local function CreateUnitFrameGeneralPage(container)
             UF.UpdateAllFrames()
         end, 0.33)
 
-    CreateCheckBox(textureGroup, "Vert tiling", dbEntry.HealAbsorbBar.VertTiling,
+    CreateCheckBox(textureGroup, "Vertical tiling", dbEntry.HealAbsorbBar.VertTiling,
         function(self, event, value)
             dbEntry.HealAbsorbBar.VertTiling = value
             UF.UpdateAllFrames()
         end, 0.33)
 
-    CreateCheckBox(textureGroup, "Horiz tiling", dbEntry.HealAbsorbBar.HorizTiling,
+    CreateCheckBox(textureGroup, "Horizontal tiling", dbEntry.HealAbsorbBar.HorizTiling,
         function(self, event, value)
             dbEntry.HealAbsorbBar.HorizTiling = value
             UF.UpdateAllFrames()
@@ -668,7 +668,7 @@ local function CreateUnitFrameGeneralPage(container)
 
     local healthColorGroup = CreateInlineGroup(scrollFrame, "Health bar colors")
 
-    CreateCheckBox(healthColorGroup, "Custom colors", dbEntry.HealthBar.CustomColor,
+    CreateCheckBox(healthColorGroup, "Custom color", dbEntry.HealthBar.CustomColor,
         function(self, event, value)
             dbEntry.HealthBar.CustomColor = value
             UF.UpdateAllFrames()
@@ -684,6 +684,12 @@ local function CreateUnitFrameGeneralPage(container)
             UF.UpdateAllFrames()
         end, 0.5, true)
 
+    CreateCheckBox(healthColorGroup, "Custom color", dbEntry.HealthBar.CustomBackgroundColor,
+        function(self, event, value)
+            dbEntry.HealthBar.CustomBackgroundColor = value
+            UF.UpdateAllFrames()
+        end, 0.5)
+
     CreateColorPicker(healthColorGroup, "Background", dbEntry.HealthBar.BackgroundColor,
         function(self, event, r, g, b, a)
             dbEntry.HealthBar.BackgroundColor.r = r
@@ -693,6 +699,12 @@ local function CreateUnitFrameGeneralPage(container)
 
             UF.UpdateAllFrames()
         end, 0.5, true)
+
+    CreateCheckBox(healthColorGroup, "Custom color", dbEntry.HealthBar.CustomHealPredictionColor,
+        function(self, event, value)
+            dbEntry.HealthBar.CustomHealPredictionColor = value
+            UF.UpdateAllFrames()
+        end, 0.5)
 
     CreateColorPicker(healthColorGroup, "Healing Prediction", dbEntry.HealthBar.HealPredictionColor,
         function(self, event, r, g, b, a)
@@ -1220,7 +1232,7 @@ local function CreateGroupFrameGeneralPage(container)
 
     local healthColorGroup = CreateInlineGroup(scrollFrame, "Health bar colors")
 
-    CreateCheckBox(healthColorGroup, "Toggle custom colors", dbEntry.HealthBar.CustomColor,
+    CreateCheckBox(healthColorGroup, "Custom color", dbEntry.HealthBar.CustomColor,
         function(self, event, value)
             dbEntry.HealthBar.CustomColor = value
             GF.UpdateFrame(raidFrame)
@@ -1238,6 +1250,13 @@ local function CreateGroupFrameGeneralPage(container)
             GF.UpdateFrame(partyFrame)
         end, 0.5, true)
 
+    CreateCheckBox(healthColorGroup, "Custom color", dbEntry.HealthBar.CustomBackgroundColor,
+        function(self, event, value)
+            dbEntry.HealthBar.CustomBackgroundColor = value
+            GF.UpdateFrame(raidFrame)
+            GF.UpdateFrame(partyFrame)
+        end, 0.5)
+
     CreateColorPicker(healthColorGroup, "Background", dbEntry.HealthBar.BackgroundColor,
         function(self, event, r, g, b, a)
             dbEntry.HealthBar.BackgroundColor.r = r
@@ -1248,6 +1267,13 @@ local function CreateGroupFrameGeneralPage(container)
             GF.UpdateFrame(raidFrame)
             GF.UpdateFrame(partyFrame)
         end, 0.5, true)
+
+    CreateCheckBox(healthColorGroup, "Custom color", dbEntry.HealthBar.CustomHealPredictionColor,
+        function(self, event, value)
+            dbEntry.HealthBar.CustomHealPredictionColor = value
+            GF.UpdateFrame(raidFrame)
+            GF.UpdateFrame(partyFrame)
+        end, 0.5)
 
     CreateColorPicker(healthColorGroup, "Healing Prediction", dbEntry.HealthBar.HealPredictionColor,
         function(self, event, r, g, b, a)
