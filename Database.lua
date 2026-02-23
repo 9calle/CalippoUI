@@ -225,6 +225,14 @@ local defaults = {
                     ["a"] = 1
                 },
 
+                CustomBackgroundColor = false,
+                BackgroundColor = {
+                    ["r"] = 0,
+                    ["g"] = 0,
+                    ["b"] = 0,
+                    ["a"] = 1
+                },
+
                 NameColor = {
                     ["r"] = 1,
                     ["g"] = 1,
@@ -918,9 +926,18 @@ local defaults = {
             Width = 200,
             Height = 10,
 
+            CustomColor = false,
             Color = {
                 ["r"] = 0,
                 ["g"] = 0.8,
+                ["b"] = 0,
+                ["a"] = 1
+            },
+
+            CustomBackgroundColor = false,
+            BackgroundColor = {
+                ["r"] = 0,
+                ["g"] = 0,
                 ["b"] = 0,
                 ["a"] = 1
             },
@@ -954,50 +971,49 @@ local defaults = {
         Nameplates = {
             Enabled = false,
         },
-        ResourceBar = {
+        ResourceBars = {
             Enabled = true,
 
-            Alpha = 1,
-            CombatAlpha = 1,
-
-            MatchWidth = true,
-            Width = 200,
-            Height = 15,
-
-            Texture = defaultTexture,
-
-            AnchorFrame = "EssentialCooldownViewer",
-            AnchorPoint = "BOTTOM",
-            AnchorRelativePoint = "TOP",
-            PosX = 0,
-            PosY = 2,
-
-            Text = {
+            PrimaryResourceBar = {
                 Enabled = true,
-
-                Font = defaultFont,
-                Outline = "",
-                Size = 14,
-
-                ShowManaPercent = true,
-
-                AnchorPoint = "CENTER",
-                AnchorRelativePoint = "CENTER",
-                PosX = 0,
-                PosY = -1,
-            },
-
-            PersonalResourceBar = {
-                Enabled = false,
 
                 Alpha = 1,
                 CombatAlpha = 1,
 
-                AnchorFrame = "CUI_PowerBar",
+                MatchWidth = true,
+                Width = 200,
+                Height = 15,
+
+                Texture = defaultTexture,
+
+                CustomBackgroundColor = false,
+                BackgroundColor = {
+                    ["r"] = 0,
+                    ["g"] = 0,
+                    ["b"] = 0,
+                    ["a"] = 1
+                },
+
+                AnchorFrame = "EssentialCooldownViewer",
                 AnchorPoint = "BOTTOM",
                 AnchorRelativePoint = "TOP",
                 PosX = 0,
-                PosY = 20,
+                PosY = 2,
+
+                Text = {
+                    Enabled = true,
+
+                    Font = defaultFont,
+                    Outline = "",
+                    Size = 14,
+
+                    ShowManaPercent = true,
+
+                    AnchorPoint = "CENTER",
+                    AnchorRelativePoint = "CENTER",
+                    PosX = 0,
+                    PosY = -1,
+                },
             },
 
             SecondaryResourceBar = {
@@ -1014,11 +1030,32 @@ local defaults = {
 
                 Texture = defaultTexture,
 
+                CustomBackgroundColor = false,
+                BackgroundColor = {
+                    ["r"] = 0,
+                    ["g"] = 0,
+                    ["b"] = 0,
+                    ["a"] = 1
+                },
+
                 AnchorFrame = "CUI_PowerBar",
                 AnchorPoint = "BOTTOM",
                 AnchorRelativePoint = "TOP",
                 PosX = 0,
                 PosY = 2,
+            },
+
+            PersonalResourceBar = {
+                Enabled = false,
+
+                Alpha = 1,
+                CombatAlpha = 1,
+
+                AnchorFrame = "CUI_PowerBar",
+                AnchorPoint = "BOTTOM",
+                AnchorRelativePoint = "TOP",
+                PosX = 0,
+                PosY = 20,
             },
         },
         CooldownManager = {

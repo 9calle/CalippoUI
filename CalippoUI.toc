@@ -22,7 +22,7 @@ ActionBars.lua
 Chat.lua
 TradeAutoWhisper.lua
 CooldownManager.lua
-ResourceBar.lua
+ResourceBars.lua
 CastBar.lua
 Minimap.lua
 PlayerAuras.lua

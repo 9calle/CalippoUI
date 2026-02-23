@@ -410,9 +410,9 @@ local function CreateGeneralSettings(container)
             dbEntry.CooldownManager.Enabled = value
         end, 0.33)
 
-    CreateCheckBox(modulesGroup, "Resource Bar", dbEntry.ResourceBar.Enabled,
+    CreateCheckBox(modulesGroup, "Resource Bars", dbEntry.ResourceBars.Enabled,
         function(self, event, value)
-            dbEntry.ResourceBar.Enabled = value
+            dbEntry.ResourceBars.Enabled = value
         end, 0.33)
 
     CreateCheckBox(modulesGroup, "Player Cast Bar", dbEntry.PlayerCastBar.Enabled,
@@ -800,6 +800,22 @@ local function CreateUnitFrameGeneralPage(container)
             dbEntry.CastBar.TimeColor.g = g
             dbEntry.CastBar.TimeColor.b = b
             dbEntry.CastBar.TimeColor.a = a
+
+            UF.UpdateAllFrames()
+        end, 0.5, true)
+
+    CreateCheckBox(castBarColorGroup, "Custom color", dbEntry.CastBar.CustomBackgroundColor,
+        function(self, event, value)
+            dbEntry.CastBar.CustomBackgroundColor = value
+            UF.UpdateAllFrames()
+        end, 0.5)
+
+    CreateColorPicker(castBarColorGroup, "Background color", dbEntry.CastBar.BackgroundColor,
+        function(self, event, r, g, b, a)
+            dbEntry.CastBar.BackgroundColor.r = r
+            dbEntry.CastBar.BackgroundColor.g = g
+            dbEntry.CastBar.BackgroundColor.b = b
+            dbEntry.CastBar.BackgroundColor.a = a
 
             UF.UpdateAllFrames()
         end, 0.5, true)
@@ -1195,14 +1211,14 @@ local function CreateGroupFrameGeneralPage(container)
             GF.UpdateFrame(partyFrame)
         end, 0.33)
 
-    CreateCheckBox(textureGroup, "Vert tiling", dbEntry.DamageAbsorbBar.VertTiling,
+    CreateCheckBox(textureGroup, "Vertical tiling", dbEntry.DamageAbsorbBar.VertTiling,
         function(self, event, value)
             dbEntry.DamageAbsorbBar.VertTiling = value
             GF.UpdateFrame(raidFrame)
             GF.UpdateFrame(partyFrame)
         end, 0.33)
 
-    CreateCheckBox(textureGroup, "Horiz tiling", dbEntry.DamageAbsorbBar.HorizTiling,
+    CreateCheckBox(textureGroup, "Horizontal tiling", dbEntry.DamageAbsorbBar.HorizTiling,
         function(self, event, value)
             dbEntry.DamageAbsorbBar.HorizTiling = value
             GF.UpdateFrame(raidFrame)
@@ -1216,14 +1232,14 @@ local function CreateGroupFrameGeneralPage(container)
             GF.UpdateFrame(partyFrame)
         end, 0.33)
 
-    CreateCheckBox(textureGroup, "Vert tiling", dbEntry.HealAbsorbBar.VertTiling,
+    CreateCheckBox(textureGroup, "Vertical tiling", dbEntry.HealAbsorbBar.VertTiling,
         function(self, event, value)
             dbEntry.HealAbsorbBar.VertTiling = value
             GF.UpdateFrame(raidFrame)
             GF.UpdateFrame(partyFrame)
         end, 0.33)
 
-    CreateCheckBox(textureGroup, "Horiz tiling", dbEntry.HealAbsorbBar.HorizTiling,
+    CreateCheckBox(textureGroup, "Horizontal tiling", dbEntry.HealAbsorbBar.HorizTiling,
         function(self, event, value)
             dbEntry.HealAbsorbBar.HorizTiling = value
             GF.UpdateFrame(raidFrame)
@@ -1664,7 +1680,7 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------------
 
 local function CreatePrimaryResourceBarPage(container)
-    local dbEntry = CUI.DB.profile.ResourceBar
+    local dbEntry = CUI.DB.profile.ResourceBars.PrimaryResourceBar
     local frame = CUI_PowerBar
 
     local scrollFrame = AceGUI:Create("ScrollFrame")
@@ -1680,6 +1696,24 @@ local function CreatePrimaryResourceBarPage(container)
         end, 1)
 
     CreateAlphaGroup(scrollFrame, dbEntry, RB.UpdateAlpha, frame)
+
+    local colorGroup = CreateInlineGroup(scrollFrame, "Color")
+
+    CreateCheckBox(colorGroup, "Custom color", dbEntry.CustomBackgroundColor,
+        function(self, event, value)
+            dbEntry.CustomBackgroundColor = value
+            RB.UpdateFrame(frame)
+        end, 0.5)
+
+    CreateColorPicker(colorGroup, "Background color", dbEntry.BackgroundColor,
+        function(self, event, r, g, b, a)
+            dbEntry.BackgroundColor.r = r
+            dbEntry.BackgroundColor.g = g
+            dbEntry.BackgroundColor.b = b
+            dbEntry.BackgroundColor.a = a
+
+            RB.UpdateFrame(frame)
+        end, 0.5, true)
 
     CreateTextureGroup(scrollFrame, dbEntry, RB.UpdateFrame, frame)
 
@@ -1697,7 +1731,7 @@ local function CreatePrimaryResourceBarPage(container)
 end
 
 local function CreateSecondaryResourceBarPage(container)
-    local dbEntry = CUI.DB.profile.ResourceBar.SecondaryResourceBar
+    local dbEntry = CUI.DB.profile.ResourceBars.SecondaryResourceBar
     local frame = CUI_SecondaryPowerBar
 
     local scrollFrame = AceGUI:Create("ScrollFrame")
@@ -1728,6 +1762,24 @@ local function CreateSecondaryResourceBarPage(container)
 
     CreateAlphaGroup(scrollFrame, dbEntry, RB.UpdateAlpha, frame)
 
+    local colorGroup = CreateInlineGroup(scrollFrame, "Color")
+
+    CreateCheckBox(colorGroup, "Custom color", dbEntry.CustomBackgroundColor,
+        function(self, event, value)
+            dbEntry.CustomBackgroundColor = value
+            RB.UpdateSecondaryPowerBar(frame)
+        end, 0.5)
+
+    CreateColorPicker(colorGroup, "Background color", dbEntry.BackgroundColor,
+        function(self, event, r, g, b, a)
+            dbEntry.BackgroundColor.r = r
+            dbEntry.BackgroundColor.g = g
+            dbEntry.BackgroundColor.b = b
+            dbEntry.BackgroundColor.a = a
+
+            RB.UpdateSecondaryPowerBar(frame)
+        end, 0.5, true)
+
     CreateTextureGroup(scrollFrame, dbEntry, RB.UpdateSecondaryPowerBar, frame)
 
     CreateAnchorGroup(scrollFrame, dbEntry, RB.UpdateSecondaryPowerBar, frame)
@@ -1736,7 +1788,7 @@ local function CreateSecondaryResourceBarPage(container)
 end
 
 local function CreatePersonalResourceBarPage(container)
-    local dbEntry = CUI.DB.profile.ResourceBar.PersonalResourceBar
+    local dbEntry = CUI.DB.profile.ResourceBars.PersonalResourceBar
     local frame = PersonalResourceDisplayFrame
 
     local scrollFrame = AceGUI:Create("ScrollFrame")
@@ -1841,7 +1893,40 @@ local function CreatePlayerCastBarSettings(container)
             CB.UpdateFrame(frame)
         end, 1)
 
-    CreateColorGroup(scrollFrame, dbEntry, CB.UpdateFrame, frame)
+    
+    local colorGroup = CreateInlineGroup(scrollFrame, "Colors")
+
+    CreateCheckBox(colorGroup, "Custom color", dbEntry.CustomColor,
+        function(self, event, value)
+            dbEntry.CustomColor = value
+            CB.UpdateFrame(frame)
+        end, 0.5)
+
+    CreateColorPicker(colorGroup, "Cast bar color", dbEntry.Color,
+        function(self, event, r, g, b, a)
+            dbEntry.Color.r = r
+            dbEntry.Color.g = g
+            dbEntry.Color.b = b
+            dbEntry.Color.a = a
+
+            CB.UpdateFrame(frame)
+        end, 0.5, true)
+
+    CreateCheckBox(colorGroup, "Custom color", dbEntry.CustomBackgroundColor,
+        function(self, event, value)
+            dbEntry.CustomBackgroundColor = value
+            CB.UpdateFrame(frame)
+        end, 0.5)
+
+    CreateColorPicker(colorGroup, "Cast bar background color", dbEntry.BackgroundColor,
+        function(self, event, r, g, b, a)
+            dbEntry.BackgroundColor.r = r
+            dbEntry.BackgroundColor.g = g
+            dbEntry.BackgroundColor.b = b
+            dbEntry.BackgroundColor.a = a
+
+            CB.UpdateFrame(frame)
+        end, 0.5, true)
 
     CreateTextureGroup(scrollFrame, dbEntry, CB.UpdateFrame, frame)
 
@@ -1916,7 +2001,7 @@ local function SetupMainTabs(frame)
             CreateUnitFrameSettings(container)
         elseif group == "CooldownManager" then
             CreateCDMSettings(container)
-        elseif group == "ResourceBar" then
+        elseif group == "ResourceBars" then
             CreateResourceBarSettings(container)
         elseif group == "Minimap" then
             CreateMinimapSettings(container)
@@ -1946,8 +2031,8 @@ local function SetupMainTabs(frame)
     if dbEntry.CooldownManager.Enabled then
         table.insert(activeModules, {text="Cooldown Manager", value="CooldownManager"})
     end
-    if dbEntry.ResourceBar.Enabled then
-        table.insert(activeModules, {text="Resource Bar", value="ResourceBar"})
+    if dbEntry.ResourceBars.Enabled then
+        table.insert(activeModules, {text="Resource Bars", value="ResourceBars"})
     end
     if dbEntry.PlayerCastBar.Enabled then
         table.insert(activeModules, {text="Cast Bar", value="PlayerCastBar"})

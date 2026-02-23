@@ -9,11 +9,13 @@ local Util = CUI.Util
 
 function RB.UpdateAlpha(frame, inCombat)
     local frameName = frame:GetName()
-    local dbEntry = CUI.DB.profile.ResourceBar
-    if frameName == "PersonalResourceDisplayFrame" then
-        dbEntry = dbEntry.PersonalResourceBar
+    local dbEntry = CUI.DB.profile.ResourceBars
+    if frameName == "CUI_PowerBar" then
+        dbEntry = dbEntry.PrimaryResourceBar
     elseif frameName == "CUI_SecondaryPowerBar" then
         dbEntry = dbEntry.SecondaryResourceBar
+    elseif frameName == "PersonalResourceDisplayFrame" then
+        dbEntry = dbEntry.PersonalResourceBar
     end
 
     if InCombatLockdown() or inCombat then
@@ -23,26 +25,8 @@ function RB.UpdateAlpha(frame, inCombat)
     end
 end
 
-function RB.UpdateFrame(frame)
-    local dbEntry = CUI.DB.profile.ResourceBar
-
-    frame:SetSize(dbEntry.Width, dbEntry.Height)
-    frame:SetStatusBarTexture(dbEntry.Texture)
-    frame.Background:SetTexture(dbEntry.Texture)
-
-    Util.CheckAnchorFrame(frame, dbEntry)
-
-    frame:ClearAllPoints()
-    if dbEntry.MatchWidth then
-        frame:SetPoint("BOTTOMLEFT", dbEntry.AnchorFrame, "TOPLEFT", 0, dbEntry.PosY)
-        frame:SetPoint("BOTTOMRIGHT", dbEntry.AnchorFrame, "TOPRIGHT", 0, dbEntry.PosY)
-    else
-        frame:SetPoint(dbEntry.AnchorPoint, dbEntry.AnchorFrame, dbEntry.AnchorRelativePoint, dbEntry.PosX, dbEntry.PosY)
-    end
-end
-
 function RB.UpdatePersonalBar(frame)
-    local dbEntry = CUI.DB.profile.ResourceBar.PersonalResourceBar
+    local dbEntry = CUI.DB.profile.ResourceBars.PersonalResourceBar
 
     if dbEntry.Enabled then
         if not InCombatLockdown() then
@@ -68,7 +52,7 @@ local function UpdatePower(frame)
     local value = UnitPower("player")
 
     frame:SetValue(value)
-    if frame.powerType == "MANA" and CUI.DB.profile.ResourceBar.Text.ShowManaPercent then
+    if frame.powerType == "MANA" and CUI.DB.profile.ResourceBars.PrimaryResourceBar.Text.ShowManaPercent then
         frame.Text:SetText(string.format("%0.0f", UnitPowerPercent("player", 0, true, CurveConstants.ScaleTo100)).."%")
     else
         frame.Text:SetText(AbbreviateNumbers(UnitPower("player")))
@@ -84,17 +68,44 @@ local function UpdateMaxPower(frame)
 end
 
 local function UpdatePowerColor(frame)
+    local dbEntry = CUI.DB.profile.ResourceBars.PrimaryResourceBar
+
     local r, g, b = Util.GetUnitPowerColor("player")
     frame:SetStatusBarColor(r, g, b)
 
-    local v = 0.2
-    frame.Background:SetVertexColor(r*v, g*v, b*v)
+    if dbEntry.CustomBackgroundColor then
+        local c = dbEntry.BackgroundColor
+        frame.Background:SetVertexColor(c.r, c.g, c.b, c.a)
+    else
+        local v = 0.2
+        frame.Background:SetVertexColor(r*v, g*v, b*v)
+    end
 end
 
 ---------------------------------------------------------------------------------------------------
 
+function RB.UpdateFrame(frame)
+    local dbEntry = CUI.DB.profile.ResourceBars.PrimaryResourceBar
+
+    frame:SetSize(dbEntry.Width, dbEntry.Height)
+    frame:SetStatusBarTexture(dbEntry.Texture)
+    frame.Background:SetTexture(dbEntry.Texture)
+
+    UpdatePowerColor(frame)
+
+    Util.CheckAnchorFrame(frame, dbEntry)
+
+    frame:ClearAllPoints()
+    if dbEntry.MatchWidth then
+        frame:SetPoint("BOTTOMLEFT", dbEntry.AnchorFrame, "TOPLEFT", 0, dbEntry.PosY)
+        frame:SetPoint("BOTTOMRIGHT", dbEntry.AnchorFrame, "TOPRIGHT", 0, dbEntry.PosY)
+    else
+        frame:SetPoint(dbEntry.AnchorPoint, dbEntry.AnchorFrame, dbEntry.AnchorRelativePoint, dbEntry.PosX, dbEntry.PosY)
+    end
+end
+
 function RB.UpdateText(frame)
-    local dbEntry = CUI.DB.profile.ResourceBar.Text
+    local dbEntry = CUI.DB.profile.ResourceBars.PrimaryResourceBar.Text
 
     if dbEntry.Enabled then
         frame.Text:Show()
@@ -217,6 +228,7 @@ local function UpdateSoulShards(frame)
 end
 
 local function UpdateRogueComboPoints(frame)
+    local dbEntry = CUI.DB.profile.ResourceBars.SecondaryResourceBar
     local power = UnitPower("player", frame.Power.Value)
     local charged = GetUnitChargedPowerPoints("player")
 
@@ -237,13 +249,20 @@ local function UpdateRogueComboPoints(frame)
         if isCharged then
             local c = frame.Power.AltColor
             powerFrame:SetStatusBarColor(c.r, c.g, c.b)
+
             local v = 0.2
             powerFrame.Background:SetVertexColor(c.r*v, c.g*v, c.b*v)
         else
             local c = frame.Power.Color
             powerFrame:SetStatusBarColor(c.r, c.g, c.b)
-            local v = 0.2
-            powerFrame.Background:SetVertexColor(c.r*v, c.g*v, c.b*v)
+
+            if dbEntry.CustomBackgroundColor then
+                local c = dbEntry.BackgroundColor
+                powerFrame.Background:SetVertexColor(c.r, c.g, c.b, c.a)
+            else
+                local v = 0.2
+                powerFrame.Background:SetVertexColor(c.r*v, c.g*v, c.b*v)
+            end
         end
 
         if i <= power then
@@ -268,21 +287,15 @@ local function UpdateMalestromWeapon(frame)
                 if overFive then
                     local c = frame.Power.AltColor
                     powerFrame:SetStatusBarColor(c.r, c.g, c.b)
-                    local v = 0.2
-                    powerFrame.Background:SetVertexColor(c.r*v, c.g*v, c.b*v)
                 else
                     local c = frame.Power.Color
                     powerFrame:SetStatusBarColor(c.r, c.g, c.b)
-                    local v = 0.2
-                    powerFrame.Background:SetVertexColor(c.r*v, c.g*v, c.b*v)
                 end
 
                 powerFrame:SetValue(1)
             else
                 local c = frame.Power.Color
                 powerFrame:SetStatusBarColor(c.r, c.g, c.b)
-                local v = 0.2
-                powerFrame.Background:SetVertexColor(c.r*v, c.g*v, c.b*v)
 
                 if overFive then
                     powerFrame:SetValue(1)
@@ -458,7 +471,7 @@ local function UpdateSecondaryPowerFrame(frame)
         return
     end
 
-    local dbEntry = CUI.DB.profile.ResourceBar.SecondaryResourceBar
+    local dbEntry = CUI.DB.profile.ResourceBars.SecondaryResourceBar
     local height = dbEntry.Height
 
     local width
@@ -481,7 +494,14 @@ local function UpdateSecondaryPowerFrame(frame)
                 powerFrame:Show()
                 powerFrame:SetSize(frameWidth, height)
                 powerFrame:SetStatusBarColor(color.r, color.g, color.b)
-                powerFrame.Background:SetVertexColor(color.r*0.2, color.g*0.2, color.b*0.2)
+
+                if dbEntry.CustomBackgroundColor then
+                    local c = dbEntry.BackgroundColor
+                    powerFrame.Background:SetVertexColor(c.r, c.g, c.b, c.a)
+                else
+                    powerFrame.Background:SetVertexColor(color.r*0.2, color.g*0.2, color.b*0.2)
+                end
+                
                 if frame.Power.Name == "SOUL_SHARDS" then
                     powerFrame:SetMinMaxValues(0, 10)
                 else
@@ -524,7 +544,7 @@ local function UpdateSecondaryPowerFrame(frame)
 end
 
 function RB.UpdateSecondaryPowerBar(frame)
-    local dbEntry = CUI.DB.profile.ResourceBar.SecondaryResourceBar
+    local dbEntry = CUI.DB.profile.ResourceBars.SecondaryResourceBar
 
     if dbEntry.Enabled then
         frame:RegisterUnitEvent("UNIT_POWER_FREQUENT", "player")
@@ -563,7 +583,7 @@ end
 local powerBar = CreateFrame("Statusbar", "CUI_PowerBar", UIParent)
 
 local function SetupPowerBar()
-    powerBar:SetStatusBarTexture(CUI.DB.profile.ResourceBar.Texture)
+    powerBar:SetStatusBarTexture(CUI.DB.profile.ResourceBars.PrimaryResourceBar.Texture)
 
     local _, powerType = UnitPowerType("player")
     powerBar.PowerType = powerType
@@ -611,7 +631,7 @@ local function SetupPowerBar()
 end
 
 local function SetupSecondaryPowerBar()
-    local dbEntry = CUI.DB.profile.ResourceBar.SecondaryResourceBar
+    local dbEntry = CUI.DB.profile.ResourceBars.SecondaryResourceBar
     Util.CheckAnchorFrame(secondaryPowerContainer, dbEntry)
 
     local secondaryPowerContainer = CreateFrame("Frame", "CUI_SecondaryPowerBar", UIParent)
@@ -666,7 +686,7 @@ local function SetupSecondaryPowerBar()
 end
 
 local function SetupPersonalResourceBar()
-    if CUI.DB.profile.ResourceBar.PersonalResourceBar.Enabled then
+    if CUI.DB.profile.ResourceBars.PersonalResourceBar.Enabled then
         SetCVar("nameplateShowSelf", 1)
         SetCVar("nameplateHideHealthAndPower", 1)
         SetCVar("NameplatePersonalShowAlways", 1)

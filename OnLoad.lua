@@ -18,7 +18,7 @@ f:SetScript("OnEvent", function(self, event, isLogin, isReload)
             CUI.Chat.Load()
         end
 
-        if dbEntry.ResourceBar.Enabled then
+        if dbEntry.ResourceBars.Enabled then
             CUI.RB.Load()
         end
 

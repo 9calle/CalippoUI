@@ -733,10 +733,15 @@ local function UpdateCastBar(castBarContainer, isChannel, isEmpower)
     local colorNotInt = dbEntry.ColorNotInterruptiple
 
     castBar:GetStatusBarTexture():SetVertexColorFromBoolean(notInterruptible,
-        CreateColor(colorNotInt.r, colorNotInt.g, colorNotInt.b), CreateColor(color.r, color.g, color.b))
+        CreateColor(colorNotInt.r, colorNotInt.g, colorNotInt.b, colorNotInt.a), CreateColor(color.r, color.g, color.b, color.a))
 
-    castBar.Background:SetVertexColorFromBoolean(notInterruptible,
-        CreateColor(colorNotInt.r*0.2, colorNotInt.g*0.2, colorNotInt.b*0.2), CreateColor(color.r*0.2, color.g*0.2, color.b*0.2))
+    if dbEntry.CustomBackgroundColor then
+        local c = dbEntry.BackgroundColor
+        castBar.Background:SetVertexColor(c.r, c.g, c.b, c.a)
+    else
+        castBar.Background:SetVertexColorFromBoolean(notInterruptible,
+            CreateColor(colorNotInt.r*0.2, colorNotInt.g*0.2, colorNotInt.b*0.2, colorNotInt.a), CreateColor(color.r*0.2, color.g*0.2, color.b*0.2, color.a))
+    end
 
     local direction
     if isChannel then

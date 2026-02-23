@@ -22,11 +22,23 @@ function CB.UpdateFrame(frame)
     frame:SetStatusBarTexture(dbEntry.Texture)
     frame.Background:SetTexture(dbEntry.Texture)
 
-    local r, g, b, a = dbEntry.Color.r, dbEntry.Color.g, dbEntry.Color.b, dbEntry.Color.a
-    frame:SetStatusBarColor(r, g, b, a)
+    local r, g, b = Util.GetUnitColor("player")
+    
+    if dbEntry.CustomColor then
+        local c = dbEntry.Color
+        frame:SetStatusBarColor(c.r, c.g, c.b, c.a)
+    else
+        frame:SetStatusBarColor(r, g, b, 1)
+    end
 
-    local v = 0.2
-    frame.Background:SetVertexColor(r*v, g*v, b*v, 1)
+    if dbEntry.CustomBackgroundColor then
+        local c = dbEntry.BackgroundColor
+        frame.Background:SetVertexColor(c.r, c.g, c.b, c.a)
+    else
+        local v = 0.2
+        frame.Background:SetVertexColor(r*v, g*v, b*v, 1)
+    end
+
     frame:SetReverseFill(false)
 
     Util.CheckAnchorFrame(frame, dbEntry)
