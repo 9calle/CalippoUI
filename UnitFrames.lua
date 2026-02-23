@@ -495,11 +495,18 @@ local function UpdateAbsorbColor(frame)
 end
 
 local function UpdatePowerColor(frame)
+    local dbEntry = CUI.DB.profile.UnitFrames.PowerBar
+
     local r, g, b = Util.GetUnitPowerColor(frame.unit)
     frame.PowerBar:SetStatusBarColor(r, g, b)
 
-    local v = 0.2
-    frame.PowerBar.Background:SetVertexColor(r*v, g*v, b*v)
+    if dbEntry.CustomBackgroundColor then
+        local c = dbEntry.BackgroundColor
+        frame.PowerBar.Background:SetVertexColor(c.r, c.g, c.b, c.a)
+    else
+        local v = 0.2
+        frame.PowerBar.Background:SetVertexColor(r*v, g*v, b*v)
+    end
 end
 
 local function UpdateDamageAbsorb(frame)
@@ -678,6 +685,8 @@ function UF.UpdateFrame(frame)
         frame:UnregisterEvent("UNIT_POWER_FREQUENT")
         frame:UnregisterEvent("UNIT_MAXPOWER")
     end
+
+    UpdatePowerColor(frame)
 
     local leaderIcon = frame.Overlay.LeaderIcon
     if leaderIcon then

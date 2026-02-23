@@ -716,6 +716,24 @@ local function CreateUnitFrameGeneralPage(container)
             UF.UpdateAllFrames()
         end, 0.5, true)
 
+    local powerColorGroup = CreateInlineGroup(scrollFrame, "Power bar colors")
+
+    CreateCheckBox(powerColorGroup, "Custom color", dbEntry.PowerBar.CustomBackgroundColor,
+        function(self, event, value)
+            dbEntry.PowerBar.CustomBackgroundColor = value
+            UF.UpdateAllFrames()
+        end, 0.5)
+
+    CreateColorPicker(powerColorGroup, "Power bar background color", dbEntry.PowerBar.BackgroundColor,
+        function(self, event, r, g, b, a)
+            dbEntry.PowerBar.BackgroundColor.r = r
+            dbEntry.PowerBar.BackgroundColor.g = g
+            dbEntry.PowerBar.BackgroundColor.b = b
+            dbEntry.PowerBar.BackgroundColor.a = a
+
+            UF.UpdateAllFrames()
+        end, 0.5, true)
+
     local absorbColorGroup = CreateInlineGroup(scrollFrame, "Shield / Heal Absorb / Dead colors")
 
     CreateColorPicker(absorbColorGroup, "Shield color", dbEntry.DamageAbsorbBar.Color,
@@ -835,7 +853,7 @@ local function CreateUnitFrameFramePage(container, unitFrame)
     if unitFrame == "BossFrame" then
         local testGroup = CreateInlineGroup(scrollFrame, "Test")
 
-        CreateCheckBox(testGroup, "Toggle test boss frames", bossTestFrames,
+        CreateCheckBox(testGroup, "Test boss frames", bossTestFrames,
             function(self, event, value)
                 bossTestFrames = value
                 UF.ToggleBossTest(value)
@@ -1339,7 +1357,7 @@ local function CreateGroupFrameGeneralPage(container)
 
     local nameColorGroup = CreateInlineGroup(scrollFrame, "Name color")
 
-    CreateCheckBox(nameColorGroup, "Toggle custom color", dbEntry.Name.CustomColor,
+    CreateCheckBox(nameColorGroup, "Custom color", dbEntry.Name.CustomColor,
         function(self, event, value)
             dbEntry.Name.CustomColor = value
             GF.UpdateFrame(raidFrame)
@@ -1644,7 +1662,7 @@ local function CreateCDMPage(container, viewer)
 
     local centerGroup = CreateInlineGroup(scrollFrame, "Center Icons")
 
-    CreateCheckBox(centerGroup, "Toggle centering icons", dbEntry.CenterIcons,
+    CreateCheckBox(centerGroup, "Center icons", dbEntry.CenterIcons,
         function(self, event, value)
             dbEntry.CenterIcons = value
             frame:Hide()

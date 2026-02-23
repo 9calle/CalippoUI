@@ -206,6 +206,14 @@ local defaults = {
 
             PowerBar = {
                 Texture = defaultTexture,
+
+                CustomBackgroundColor = false,
+                BackgroundColor = {
+                    ["r"] = 0,
+                    ["g"] = 0,
+                    ["b"] = 0,
+                    ["a"] = 1,
+                },
             },
 
             CastBar = {
