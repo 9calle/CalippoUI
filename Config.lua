@@ -10,6 +10,7 @@ local RB = CUI.RB
 local MM = CUI.MM
 local CB = CUI.CB
 local GF = CUI.GF
+local Misc = CUI.Misc
 
 local AceGUI = LibStub("AceGUI-3.0")
 
@@ -419,11 +420,6 @@ local function CreateGeneralSettings(container)
             dbEntry.PlayerCastBar.Enabled = value
         end, 0.33)
 
-    -- CreateCheckBox(modulesGroup, "Nameplates (WIP)", dbEntry.Nameplates.Enabled,
-    --     function(self, event, value)
-    --         dbEntry.Nameplates.Enabled = value
-    --     end, 0.33)
-
     CreateCheckBox(modulesGroup, "Group Frames", dbEntry.GroupFrames.Enabled,
         function(self, event, value)
             dbEntry.GroupFrames.Enabled = value
@@ -442,6 +438,11 @@ local function CreateGeneralSettings(container)
     CreateCheckBox(modulesGroup, "Chat", dbEntry.Chat.Enabled,
         function(self, event, value)
             dbEntry.Chat.Enabled = value
+        end, 0.33)
+
+    CreateCheckBox(modulesGroup, "Misc", dbEntry.Miscellaneous.Enabled,
+        function(self, event, value)
+            dbEntry.Miscellaneous.Enabled = value
         end, 0.33)
 
     local reloadButton = AceGUI:Create("Button")
@@ -615,17 +616,29 @@ local function CreateUnitFrameGeneralPage(container)
         function(self, event, value)
             dbEntry.HealthBar.Texture = value
             UF.UpdateAllFrames()
-        end, 0.33)
+        end, 0.5)
 
     CreateDropDown(textureGroup, "Power", dbEntry.PowerBar.Texture, textures,
         function(self, event, value)
             dbEntry.PowerBar.Texture = value
             UF.UpdateAllFrames()
-        end, 0.33)
+        end, 0.5)
 
     CreateDropDown(textureGroup, "Shield", dbEntry.DamageAbsorbBar.Texture, textures,
         function(self, event, value)
             dbEntry.DamageAbsorbBar.Texture = value
+            UF.UpdateAllFrames()
+        end, 0.33)
+
+    CreateCheckBox(textureGroup, "Vert tiling", dbEntry.DamageAbsorbBar.VertTiling,
+        function(self, event, value)
+            dbEntry.DamageAbsorbBar.VertTiling = value
+            UF.UpdateAllFrames()
+        end, 0.33)
+
+    CreateCheckBox(textureGroup, "Horiz tiling", dbEntry.DamageAbsorbBar.HorizTiling,
+        function(self, event, value)
+            dbEntry.DamageAbsorbBar.HorizTiling = value
             UF.UpdateAllFrames()
         end, 0.33)
 
@@ -635,15 +648,27 @@ local function CreateUnitFrameGeneralPage(container)
             UF.UpdateAllFrames()
         end, 0.33)
 
+    CreateCheckBox(textureGroup, "Vert tiling", dbEntry.HealAbsorbBar.VertTiling,
+        function(self, event, value)
+            dbEntry.HealAbsorbBar.VertTiling = value
+            UF.UpdateAllFrames()
+        end, 0.33)
+
+    CreateCheckBox(textureGroup, "Horiz tiling", dbEntry.HealAbsorbBar.HorizTiling,
+        function(self, event, value)
+            dbEntry.HealAbsorbBar.HorizTiling = value
+            UF.UpdateAllFrames()
+        end, 0.33)
+
     CreateDropDown(textureGroup, "Cast bar", dbEntry.CastBar.Texture, textures,
         function(self, event, value)
             dbEntry.CastBar.Texture = value
             UF.UpdateAllFrames()
-        end, 0.33)
+        end, 0.5)
 
     local healthColorGroup = CreateInlineGroup(scrollFrame, "Health bar colors")
 
-    CreateCheckBox(healthColorGroup, "Toggle custom colors", dbEntry.HealthBar.CustomColor,
+    CreateCheckBox(healthColorGroup, "Custom colors", dbEntry.HealthBar.CustomColor,
         function(self, event, value)
             dbEntry.HealthBar.CustomColor = value
             UF.UpdateAllFrames()
@@ -713,7 +738,7 @@ local function CreateUnitFrameGeneralPage(container)
 
     local nameColorGroup = CreateInlineGroup(scrollFrame, "Text color")
 
-    CreateCheckBox(nameColorGroup, "Toggle custom color", dbEntry.Name.CustomColor,
+    CreateCheckBox(nameColorGroup, "Custom color", dbEntry.Name.CustomColor,
         function(self, event, value)
             dbEntry.Name.CustomColor = value
             UF.UpdateAllFrames()
@@ -1149,7 +1174,7 @@ local function CreateGroupFrameGeneralPage(container)
             dbEntry.HealthBar.Texture = value
             GF.UpdateFrame(raidFrame)
             GF.UpdateFrame(partyFrame)
-        end, 0.33)
+        end, 1)
 
     CreateDropDown(textureGroup, "Shield", dbEntry.DamageAbsorbBar.Texture, textures,
         function(self, event, value)
@@ -1158,9 +1183,37 @@ local function CreateGroupFrameGeneralPage(container)
             GF.UpdateFrame(partyFrame)
         end, 0.33)
 
+    CreateCheckBox(textureGroup, "Vert tiling", dbEntry.DamageAbsorbBar.VertTiling,
+        function(self, event, value)
+            dbEntry.DamageAbsorbBar.VertTiling = value
+            GF.UpdateFrame(raidFrame)
+            GF.UpdateFrame(partyFrame)
+        end, 0.33)
+
+    CreateCheckBox(textureGroup, "Horiz tiling", dbEntry.DamageAbsorbBar.HorizTiling,
+        function(self, event, value)
+            dbEntry.DamageAbsorbBar.HorizTiling = value
+            GF.UpdateFrame(raidFrame)
+            GF.UpdateFrame(partyFrame)
+        end, 0.33)
+
     CreateDropDown(textureGroup, "Heal absorb", dbEntry.HealAbsorbBar.Texture, textures,
         function(self, event, value)
             dbEntry.HealAbsorbBar.Texture = value
+            GF.UpdateFrame(raidFrame)
+            GF.UpdateFrame(partyFrame)
+        end, 0.33)
+
+    CreateCheckBox(textureGroup, "Vert tiling", dbEntry.HealAbsorbBar.VertTiling,
+        function(self, event, value)
+            dbEntry.HealAbsorbBar.VertTiling = value
+            GF.UpdateFrame(raidFrame)
+            GF.UpdateFrame(partyFrame)
+        end, 0.33)
+
+    CreateCheckBox(textureGroup, "Horiz tiling", dbEntry.HealAbsorbBar.HorizTiling,
+        function(self, event, value)
+            dbEntry.HealAbsorbBar.HorizTiling = value
             GF.UpdateFrame(raidFrame)
             GF.UpdateFrame(partyFrame)
         end, 0.33)
@@ -1773,6 +1826,59 @@ end
 
 ---------------------------------------------------------------------------------------------------------------------------------------
 
+local function CreateCursorRingPage(container)
+    local dbEntry = CUI.DB.profile.Miscellaneous.CursorRing
+
+    local scrollFrame = AceGUI:Create("ScrollFrame")
+    scrollFrame:SetLayout("List")
+    container:AddChild(scrollFrame)
+
+    local group = CreateInlineGroup(scrollFrame, "")
+
+    CreateCheckBox(group, "Toggle", dbEntry.Enabled,
+        function(self, event, value)
+            dbEntry.Enabled = value
+            Misc.UpdateCursorRing()
+        end, 1)
+
+    CreateColorPicker(group, "Color", dbEntry.Color,
+        function(self, event, r, g, b, a)
+            dbEntry.Color.r = r
+            dbEntry.Color.g = g
+            dbEntry.Color.b = b
+            dbEntry.Color.a = a
+
+            Misc.UpdateCursorRing()
+        end, 1, true)
+
+        CreateSlider(group, "Size", 1, 50, 1, dbEntry.Size,
+            function(self, event, value)
+                dbEntry.Size = value
+                Misc.UpdateCursorRing()
+            end, 1)
+
+    scrollFrame:DoLayout()
+end
+
+local function CreateMiscellaneousSettings(container)
+    local function SelectGroup(container, event, value)
+        container:ReleaseChildren()
+        if value == "CursorRing" then
+            CreateCursorRingPage(container)
+        end
+    end
+
+    local tabGroup = AceGUI:Create("TabGroup")
+    tabGroup:SetLayout("Fill")
+    tabGroup:SetTabs({{text="Cursor Ring", value="CursorRing"},})
+    tabGroup:SetCallback("OnGroupSelected", SelectGroup)
+    tabGroup:SelectTab("CursorRing")
+
+    container:AddChild(tabGroup)
+end
+
+---------------------------------------------------------------------------------------------------------------------------------------
+
 local function SetupMainTabs(frame)
     local function SelectGroup(container, event, group)
         container:ReleaseChildren()
@@ -1794,8 +1900,8 @@ local function SetupMainTabs(frame)
             CreatePlayerCastBarSettings(container)
         elseif group == "GroupFrames" then
             CreateGroupFrameSettings(container)
-        elseif group == "" then
-
+        elseif group == "Miscellaneous" then
+            CreateMiscellaneousSettings(container)
         end
     end
 
@@ -1828,6 +1934,9 @@ local function SetupMainTabs(frame)
     end
     if dbEntry.PlayerAuras.Enabled then
         table.insert(activeModules, {text="Player Auras", value="PlayerAuras"})
+    end
+    if dbEntry.Miscellaneous.Enabled then
+        table.insert(activeModules, {text="Misc", value="Miscellaneous"})
     end
 
     local tabGroup = AceGUI:Create("TabGroup")

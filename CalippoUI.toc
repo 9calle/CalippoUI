@@ -27,6 +27,7 @@ CastBar.lua
 Minimap.lua
 PlayerAuras.lua
 NamePlates.lua
+Miscellaneous.lua
 
 Config.lua
 

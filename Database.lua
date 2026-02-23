@@ -138,6 +138,8 @@ local defaults = {
 
             HealthBar = {
                 Texture = defaultTexture,
+                VertTiling = false,
+                HorizTiling = false,
 
                 CustomColor = false,
                 Color = {
@@ -167,6 +169,8 @@ local defaults = {
             },
             HealAbsorbBar = {
                 Texture = stripedTexture,
+                VertTiling = true,
+                HorizTiling = true,
 
                 Color = {
                     ["r"] = 1,
@@ -177,6 +181,8 @@ local defaults = {
             },
             DamageAbsorbBar = {
                 Texture = stripedTexture,
+                VertTiling = true,
+                HorizTiling = true,
 
                 Color = {
                     ["r"] = 0,
@@ -539,6 +545,8 @@ local defaults = {
 
             HealthBar = {
                 Texture = defaultTexture,
+                VertTiling = false,
+                HorizTiling = false,
 
                 CustomColor = false,
                 Color = {
@@ -574,6 +582,8 @@ local defaults = {
             },
             HealAbsorbBar = {
                 Texture = stripedTexture,
+                VertTiling = true,
+                HorizTiling = true,
 
                 Color = {
                     ["r"] = 1,
@@ -584,6 +594,8 @@ local defaults = {
             },
             DamageAbsorbBar = {
                 Texture = stripedTexture,
+                VertTiling = true,
+                HorizTiling = true,
 
                 Color = {
                     ["r"] = 0,
@@ -1075,7 +1087,23 @@ local defaults = {
         },
         AutoWhisper = {
             Enabled = false,
-        }
+        },
+        Miscellaneous = {
+            Enabled = true,
+
+            CursorRing = {
+                Enabled = true,
+
+                Size = 20,
+
+                Color = {
+                    ["r"] = 1,
+                    ["g"] = 0,
+                    ["b"] = 1,
+                    ["a"] = 1,
+                },
+            },
+        },
     }
 }
 

@@ -855,10 +855,28 @@ function GF.UpdateFrame(groupFramesContainer)
         frame:SetSize(dbEntry.Width, dbEntry.Height)
 
         frame.HealthBar:SetStatusBarTexture(dbEntryGF.HealthBar.Texture)
+        local healthBarTexture = frame.HealthBar:GetStatusBarTexture()
+        healthBarTexture:SetHorizTile(dbEntryGF.HealthBar.HorizTiling)
+        healthBarTexture:SetVertTile(dbEntryGF.HealthBar.VertTiling)
+
         frame.Background:SetTexture(dbEntryGF.HealthBar.Texture)
+        frame.Background:SetHorizTile(dbEntryGF.HealthBar.HorizTiling)
+        frame.Background:SetVertTile(dbEntryGF.HealthBar.VertTiling)
+
         frame.HealPredictionBar:SetStatusBarTexture(dbEntryGF.HealthBar.Texture)
-        frame.DamageAbsorbBar:SetStatusBarTexture(dbEntryGF.DamageAbsorbBar.Texture)
-        frame.HealAbsorbBar:SetStatusBarTexture(dbEntryGF.HealAbsorbBar.Texture)
+        local healPredictionTexture = frame.HealPredictionBar:GetStatusBarTexture()
+        healPredictionTexture:SetHorizTile(dbEntryGF.HealthBar.HorizTiling)
+        healPredictionTexture:SetVertTile(dbEntryGF.HealthBar.VertTiling)
+
+        local damageAbsorbTexture = frame.DamageAbsorbBar:GetStatusBarTexture()
+        damageAbsorbTexture:SetTexture(dbEntryGF.DamageAbsorbBar.Texture, "REPEAT", "REPEAT")
+        damageAbsorbTexture:SetHorizTile(dbEntryGF.DamageAbsorbBar.HorizTiling)
+        damageAbsorbTexture:SetVertTile(dbEntryGF.DamageAbsorbBar.VertTiling)
+
+        local healAbsorbTexture = frame.HealAbsorbBar:GetStatusBarTexture()
+        healAbsorbTexture:SetTexture(dbEntryGF.HealAbsorbBar.Texture, "REPEAT", "REPEAT")
+        healAbsorbTexture:SetHorizTile(dbEntryGF.HealAbsorbBar.HorizTiling)
+        healAbsorbTexture:SetVertTile(dbEntryGF.HealAbsorbBar.VertTiling)
 
         local dbEntryName = dbEntry.Name
         local unitName = frame.Overlay.UnitName
@@ -1034,20 +1052,12 @@ local function SetupGroupFrame(unit, groupType, frameName, parent, num)
     healAbsorbBar:SetAllPoints(frame)
     healAbsorbBar:SetStatusBarTexture("")
     healAbsorbBar:SetReverseFill(false)
-    local absorbTexture = healAbsorbBar:GetStatusBarTexture()
-    absorbTexture:SetTexture("", "REPEAT", "REPEAT")
-    absorbTexture:SetHorizTile(true)
-    absorbTexture:SetVertTile(true)
 
     local damageAbsorbBar = CreateFrame("StatusBar", nil, frame)
     damageAbsorbBar:SetParentKey("DamageAbsorbBar")
     damageAbsorbBar:SetAllPoints(frame)
     damageAbsorbBar:SetFrameLevel(healAbsorbBar:GetFrameLevel()+1)
     damageAbsorbBar:SetStatusBarTexture("")
-    local shieldTexture = damageAbsorbBar:GetStatusBarTexture()
-    shieldTexture:SetTexture("", "REPEAT", "REPEAT")
-    shieldTexture:SetHorizTile(true)
-    shieldTexture:SetVertTile(true)
 
     local overlayFrame = CreateFrame("Frame", nil, frame)
     overlayFrame:SetParentKey("Overlay")
