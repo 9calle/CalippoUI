@@ -2055,9 +2055,6 @@ local function SetupMainTabs(frame)
     if dbEntry.PlayerCastBar.Enabled then
         table.insert(activeModules, {text="Cast Bar", value="PlayerCastBar"})
     end
-    if dbEntry.Nameplates.Enabled then
-        table.insert(activeModules, {text="Nameplates", value="Nameplates"})
-    end
     if dbEntry.Minimap.Enabled then
         table.insert(activeModules, {text="Minimap", value="Minimap"})
     end

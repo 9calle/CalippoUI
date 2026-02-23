@@ -50,10 +50,6 @@ f:SetScript("OnEvent", function(self, event, isLogin, isReload)
             CUI.PA.Load()
         end
 
-        if dbEntry.Nameplates.Enabled then
-            CUI.NP.Load()
-        end
-
         if dbEntry.Miscellaneous.Enabled then
             CUI.Misc.Load()
         end

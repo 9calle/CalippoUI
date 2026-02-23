@@ -976,9 +976,6 @@ local defaults = {
             Font = defaultFont,
             Outline = "",
         },
-        Nameplates = {
-            Enabled = false,
-        },
         ResourceBars = {
             Enabled = true,
 
