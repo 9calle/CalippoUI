@@ -470,11 +470,17 @@ local function CreateActionBarFramePage(container, actionBar)
 
     local paddingGroup = CreateInlineGroup(scrollFrame, "Padding")
 
-    CreateSlider(paddingGroup, "Padding (Overrides padding from edit mode)", 0, 15, 0.1, dbEntry.Padding,
+    CreateCheckBox(paddingGroup, "Override edit mode padding", dbEntry.CustomPadding,
+        function(self, event, value)
+            dbEntry.CustomPadding = value
+            AB.UpdateBar(frame)
+        end, 0.5)
+
+    CreateSlider(paddingGroup, "Padding", 0, 50, 0.1, dbEntry.Padding,
         function(self, event, value)
             dbEntry.Padding = value
             AB.UpdateBar(frame)
-        end, 1)
+        end, 0.5)
 
     local anchorGroup = CreateInlineGroup(scrollFrame, "Anchor")
 

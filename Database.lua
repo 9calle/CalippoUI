@@ -46,6 +46,7 @@ local defaults = {
                 PosX = 0,
                 PosY = 0,
 
+                CustomPadding = false,
                 Padding = 2,
 
                 Keybind = {

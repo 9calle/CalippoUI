@@ -64,21 +64,23 @@ function AB.UpdateAlpha(frame, inCombat)
 end
 
 function AB.UpdateBar(bar)
-    local button = AB.ActionBars[bar]
     local dbEntry = CUI.DB.profile.ActionBars[bar:GetName()]
-
-    local scale = _G[bar:GetName().."ButtonContainer1"]:GetScale()
-    local width = _G[bar:GetName().."ButtonContainer1"]:GetWidth()
-    local padding = dbEntry.Padding
+    local button = AB.ActionBars[bar]
 
     if bar.numButtonsShowable == 0 then bar.numButtonsShowable = 10 end
 
-    if bar.isHorizontal then
-        bar:SetWidth(scale * ((math.ceil(bar.numButtonsShowable / bar.numRows) * (width + padding)) - padding))
-        bar:SetHeight(scale * ((width + padding) * bar.numRows - padding))
-    else
-        bar:SetHeight(scale * ((math.ceil(bar.numButtonsShowable / bar.numRows) * (width + padding)) - padding))
-        bar:SetWidth(scale * ((width + padding) * bar.numRows - padding))
+    if dbEntry.CustomPadding then
+        local scale = _G[bar:GetName().."ButtonContainer1"]:GetScale()
+        local width = _G[bar:GetName().."ButtonContainer1"]:GetWidth()
+        local padding = dbEntry.Padding
+
+        if bar.isHorizontal then
+            bar:SetWidth(scale * ((math.ceil(bar.numButtonsShowable / bar.numRows) * (width + padding)) - padding))
+            bar:SetHeight(scale * ((width + padding) * bar.numRows - padding))
+        else
+            bar:SetHeight(scale * ((math.ceil(bar.numButtonsShowable / bar.numRows) * (width + padding)) - padding))
+            bar:SetWidth(scale * ((width + padding) * bar.numRows - padding))
+        end
     end
 
     for i=1, 12 do
@@ -87,12 +89,14 @@ function AB.UpdateBar(bar)
 
         local container = _G[bar:GetName().."ButtonContainer"..i]
 
-        if bar.isHorizontal then
-            Util.PositionFromIndex(i-1, container, bar, "TOPLEFT", "TOPLEFT", "RIGHT", "DOWN",
-                container:GetWidth(), container:GetHeight(), dbEntry.Padding, 0, 0, math.ceil(bar.numButtonsShowable / bar.numRows))
-        else
-            Util.PositionFromIndex(i-1, container, bar, "TOPLEFT", "TOPLEFT", "RIGHT", "DOWN",
-                container:GetWidth(), container:GetHeight(), dbEntry.Padding, 0, 0, bar.numRows)
+        if dbEntry.CustomPadding then
+            if bar.isHorizontal then
+                Util.PositionFromIndex(i-1, container, bar, "TOPLEFT", "TOPLEFT", "RIGHT", "DOWN",
+                    container:GetWidth(), container:GetHeight(), dbEntry.Padding, 0, 0, math.ceil(bar.numButtonsShowable / bar.numRows))
+            else
+                Util.PositionFromIndex(i-1, container, bar, "TOPLEFT", "TOPLEFT", "RIGHT", "DOWN",
+                    container:GetWidth(), container:GetHeight(), dbEntry.Padding, 0, 0, bar.numRows)
+            end
         end
 
         local kb = dbEntry.Keybind
