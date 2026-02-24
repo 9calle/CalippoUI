@@ -249,7 +249,7 @@ end
 local function CreateTextGroup(container, dbEntry, func, frame, text, colorOption)
     local textGroup = CreateInlineGroup(container, text)
 
-    CreateCheckBox(textGroup, "Toggle "..text, dbEntry.Enabled,
+    CreateCheckBox(textGroup, "Show "..text, dbEntry.Enabled,
         function(self, event, value)
             dbEntry.Enabled = value
             func(frame)
@@ -451,13 +451,6 @@ local function CreateGeneralSettings(container)
     reloadButton:SetRelativeWidth(1)
     modulesGroup:AddChild(reloadButton)
 
-    local miscGroup = CreateInlineGroup(scrollFrame, "Misc")
-
-    CreateSlider(miscGroup, "Spell Queue Window", 0, 400, 1, C_CVar.GetCVar("SpellQueueWindow"),
-        function(self, event, value)
-            SetCVar("SpellQueueWindow", value)
-        end, 1)
-
     scrollFrame:DoLayout()
 end
 
@@ -485,7 +478,7 @@ local function CreateActionBarFramePage(container, actionBar)
 
     local anchorGroup = CreateInlineGroup(scrollFrame, "Anchor")
 
-    CreateCheckBox(anchorGroup, "Toggle Anchoring (Overrides edit mode placement)", dbEntry.ShouldAnchor,
+    CreateCheckBox(anchorGroup, "Override edit mode anchoring", dbEntry.ShouldAnchor,
         function(self, event, value)
             dbEntry.ShouldAnchor = value
             AB.UpdateBarAnchor(frame)
@@ -902,7 +895,7 @@ local function CreateUnitFramAuraSettings(container, unitFrame, type)
 
     local group = CreateInlineGroup(scrollFrame, type)
 
-    CreateCheckBox(group, "Toggle "..type, dbEntry.Enabled,
+    CreateCheckBox(group, "Show "..type, dbEntry.Enabled,
         function(self, event, value)
             dbEntry.Enabled = value
             frame.buffPool:ReleaseAll()
@@ -1047,15 +1040,15 @@ local function CreateUnitFrameCastBarPage(container, unitFrame)
         scrollFrame:SetLayout("List")
         container:AddChild(scrollFrame)
 
-        local toggleGroup = CreateInlineGroup(scrollFrame, "Toggle")
+        local toggleGroup = CreateInlineGroup(scrollFrame, "")
 
-        CreateCheckBox(toggleGroup, "Toggle Cast Bar", dbEntry.Enabled,
+        CreateCheckBox(toggleGroup, "Show Cast Bar", dbEntry.Enabled,
             function(self, event, value)
                 dbEntry.Enabled = value
                 UF.UpdateCastBarFrame(frame)
             end, 0.5)
 
-        CreateCheckBox(toggleGroup, "Toggle Icon", dbEntry.ShowIcon,
+        CreateCheckBox(toggleGroup, "Show Icon", dbEntry.ShowIcon,
             function(self, event, value)
                 dbEntry.ShowIcon = value
                 UF.UpdateCastBarFrame(frame)
@@ -1127,7 +1120,7 @@ local function CreateUnitFrameMiscPage(container, unitFrame)
     if dbEntry.LeaderIcon then
         local leaderGroup = CreateInlineGroup(scrollFrame, "Leader / Assist Icon")
 
-        CreateCheckBox(leaderGroup, "Toggle Leader / Assist Icon", dbEntry.LeaderIcon.Enabled,
+        CreateCheckBox(leaderGroup, "Show Leader / Assist Icon", dbEntry.LeaderIcon.Enabled,
             function(self, event, value)
                 dbEntry.LeaderIcon.Enabled = value
                 UF.UpdateFrame(frame)
@@ -1389,13 +1382,13 @@ local function CreateGroupFrameFramePage(container, groupFrame)
     local testGroup = CreateInlineGroup(scrollFrame, "Test frames")
 
     if groupFrame == "PartyFrame" then
-        CreateCheckBox(testGroup, "Toggle test frames", partyTestFrame,
+        CreateCheckBox(testGroup, "Show test frames", partyTestFrame,
             function(self, event, value)
                 partyTestFrame = value
                 GF.ToggleGroupTestFrames(groupFrame, partyTestFrame)
             end, 1)
     else
-        CreateCheckBox(testGroup, "Toggle test frames", raidTestFrame,
+        CreateCheckBox(testGroup, "Show test frames", raidTestFrame,
             function(self, event, value)
                 raidTestFrame = value
                 GF.ToggleGroupTestFrames(groupFrame, raidTestFrame)
@@ -1460,13 +1453,13 @@ local function CreateGroupFrameAuraPage(container, groupFrame)
         local group = CreateInlineGroup(scrollFrame, type)
 
         if type ~= "PrivateAuras" then
-            CreateCheckBox(group, "Toggle "..type, dbEntry.Enabled,
+            CreateCheckBox(group, "Show "..type, dbEntry.Enabled,
                 function(self, event, value)
                     dbEntry.Enabled = value
                     GF.UpdateAuras(frame)
                 end, 1)
         else
-            CreateCheckBox(group, "Toggle test frames", privateAuraTestFrame,
+            CreateCheckBox(group, "Show test frames", privateAuraTestFrame,
                 function(self, event, value)
                     privateAuraTestFrame = value
                     GF.UpdateAuras(frame, privateAuraTestFrame)
@@ -1586,7 +1579,7 @@ local function CreateGroupFrameMiscPage(container, groupFrame)
 
     local roleGroup = CreateInlineGroup(scrollFrame, "Role Icon")
 
-    CreateCheckBox(roleGroup, "Toggle Role Icon", dbEntry.RoleIcon.Enabled,
+    CreateCheckBox(roleGroup, "Show Role Icon", dbEntry.RoleIcon.Enabled,
         function(self, event, value)
             dbEntry.RoleIcon.Enabled = value
             GF.UpdateFrame(frame)
@@ -1758,7 +1751,7 @@ local function CreateSecondaryResourceBarPage(container)
 
     local toggleGroup = CreateInlineGroup(scrollFrame, "")
 
-    CreateCheckBox(toggleGroup, "Toggle", dbEntry.Enabled,
+    CreateCheckBox(toggleGroup, "Show Secondary Resource Bar", dbEntry.Enabled,
         function(self, event, value)
             dbEntry.Enabled = value
             RB.UpdateSecondaryPowerBar(frame)
@@ -1815,7 +1808,7 @@ local function CreatePersonalResourceBarPage(container)
 
     local toggleGroup = CreateInlineGroup(scrollFrame, "")
 
-    CreateCheckBox(toggleGroup, "Toggle", dbEntry.Enabled,
+    CreateCheckBox(toggleGroup, "Show Personal Resource Bar", dbEntry.Enabled,
         function(self, event, value)
             dbEntry.Enabled = value
             RB.UpdatePersonalBar(frame)
@@ -1964,7 +1957,7 @@ local function CreateCursorRingPage(container)
 
     local group = CreateInlineGroup(scrollFrame, "")
 
-    CreateCheckBox(group, "Toggle", dbEntry.Enabled,
+    CreateCheckBox(group, "Show Cursor Ring", dbEntry.Enabled,
         function(self, event, value)
             dbEntry.Enabled = value
             Misc.UpdateCursorRing()
@@ -1989,19 +1982,39 @@ local function CreateCursorRingPage(container)
     scrollFrame:DoLayout()
 end
 
+local function CreateCVarPage(container)
+    local dbEntry = CUI.DB.profile.Miscellaneous.CursorRing
+
+    local scrollFrame = AceGUI:Create("ScrollFrame")
+    scrollFrame:SetLayout("List")
+    container:AddChild(scrollFrame)
+
+    local group = CreateInlineGroup(scrollFrame, "")
+
+    CreateSlider(group, "Spell Queue Window", 0, 400, 1, C_CVar.GetCVar("SpellQueueWindow"),
+        function(self, event, value)
+            SetCVar("SpellQueueWindow", value)
+        end, 1)
+
+    scrollFrame:DoLayout()
+end
+
 local function CreateMiscellaneousSettings(container)
     local function SelectGroup(container, event, value)
         container:ReleaseChildren()
         if value == "CursorRing" then
             CreateCursorRingPage(container)
+        elseif value == "CVar" then
+            CreateCVarPage(container)
         end
     end
 
     local tabGroup = AceGUI:Create("TabGroup")
     tabGroup:SetLayout("Fill")
-    tabGroup:SetTabs({{text="Cursor Ring", value="CursorRing"},})
+    tabGroup:SetTabs({{text="CVar", value="CVar"},
+                    {text="Cursor Ring", value="CursorRing"},})
     tabGroup:SetCallback("OnGroupSelected", SelectGroup)
-    tabGroup:SelectTab("CursorRing")
+    tabGroup:SelectTab("CVar")
 
     container:AddChild(tabGroup)
 end
@@ -2083,7 +2096,6 @@ function Conf.Load()
     local dbEntry = CUI.DB.global.Config
     local frame = AceGUI:Create("Frame")
     frame:SetTitle("CalippoUI")
-    frame:SetStatusText("CalippoUI, bästa UIn i Midnight!")
     frame:SetCallback("OnClose", function(widget)
         AceGUI:Release(widget)
         dbEntry.Width, dbEntry.Height = frame.frame:GetSize()

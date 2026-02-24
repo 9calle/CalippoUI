@@ -53,7 +53,6 @@ f:SetScript("OnEvent", function(self, event, isLogin, isReload)
         if dbEntry.Miscellaneous.Enabled then
             CUI.Misc.Load()
         end
-        
     end
 end)
 
