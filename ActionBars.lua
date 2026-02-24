@@ -167,7 +167,7 @@ function AB.UpdateBar(bar)
         end)
 
         frame.icon:SetTexCoord(.08, .92, .08, .92)
-        if not frame.Borders then
+        if not frame.BackdropBorder then
             Util.AddBorder(frame)
         end
     end

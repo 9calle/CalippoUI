@@ -38,19 +38,8 @@ function CDM.UpdateStyle(viewer)
                 overlay:Hide()
             end
 
-            if not frame.Border then
-                local border = CreateFrame("Frame", nil, frame, "BackdropTemplate")
-                border:SetIgnoreParentScale(true)
-                border:SetScale(UIParent:GetScale())
-                border:SetParentKey("Border")
-                border:SetPoint("TOPLEFT", frame, "TOPLEFT", -1, 1)
-                border:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 1, -1)
-                border:SetBackdrop({
-                    edgeFile = "Interface/AddOns/CalippoUI/Media/DropShadowBorderWhite.tga",
-                    edgeSize = PixelUtil.GetNearestPixelSize(1, UIParent:GetEffectiveScale(), 1) * 3,
-                    bgFile = nil
-                })
-                border:SetBackdropBorderColor(0, 0, 0, 1)
+            if not frame.BackdropBorder then
+                Util.AddBorder(frame)
             end
         end
 

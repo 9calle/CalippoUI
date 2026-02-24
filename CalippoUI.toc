@@ -4,7 +4,6 @@
 ## SavedVariables: CalippoDB
 ## IconTexture: Interface\AddOns\CalippoUI\Media\Icon.tga
 
-
 Libs\LibStub\LibStub.lua
 Libs\CallbackHandler-1.0\CallbackHandler-1.0.lua
 Libs\AceGUI-3.0\AceGUI-3.0.xml

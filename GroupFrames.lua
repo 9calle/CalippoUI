@@ -763,16 +763,38 @@ local function UpdateBorderColor(frame)
     end
 end
 
+local function UpdateRaidMarker(frame)
+    local dbEntry = CUI.DB.profile.GroupFrames[frame.name].RaidMarker
+    local raidMarker = frame.Overlay.RaidMarker
+
+    if dbEntry.Enabled then
+        local index = GetRaidTargetIndex(frame.unit)
+        if index then
+            raidMarker:Show()
+            raidMarker:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
+            if raidMarker.SetSpriteSheetCell then
+                raidMarker:SetSpriteSheetCell(index, 4, 4, 64, 64)
+            end
+        else
+            raidMarker:Hide()
+        end
+    else
+        raidMarker:Hide()
+    end
+end
+
 local function UpdateAll(frame)
     UpdateMaxHealth(frame)
 
-    UpdateInRange(frame)
-    UpdateInPhase(frame)
-    UpdateIsDead(frame)
-    UpdateConnection(frame)
-    UpdateReadyCheck(frame)
+    UpdateRaidMarker(frame)
     UpdateRole(frame)
     UpdateName(frame)
+    UpdateIsDead(frame)
+    UpdateInRange(frame)
+
+    UpdateInPhase(frame)
+    UpdateConnection(frame)
+    UpdateReadyCheck(frame)
     UpdateSummon(frame)
     UpdateRess(frame)
     UpdateAFK(frame)
@@ -910,9 +932,18 @@ function GF.UpdateFrame(groupFramesContainer)
 
         frame.Overlay.DispelGradient:SetHeight(dbEntry.DispelGradient.Height)
 
-        UpdateNameColor(frame)
-        UpdateHealthColor(frame)
-        UpdateAbsorbColor(frame)
+        if dbEntry.RaidMarker.Enabled then
+            local raidMarker = frame.Overlay.RaidMarker
+            local dbEntryRM = dbEntry.RaidMarker
+            frame:RegisterEvent("RAID_TARGET_UPDATE")
+            raidMarker:ClearAllPoints()
+            raidMarker:SetPoint(dbEntryRM.AnchorPoint, frame.Overlay, dbEntryRM.AnchorRelativePoint, dbEntryRM.PosX, dbEntryRM.PosY)
+            raidMarker:SetSize(dbEntryRM.Size, dbEntryRM.Size)
+        else
+            frame:UnregisterEvent("RAID_TARGET_UPDATE")
+        end
+
+        UpdateAll(frame)
     end
 
     Util.CheckAnchorFrame(groupFramesContainer, dbEntry)
@@ -1111,6 +1142,9 @@ local function SetupGroupFrame(unit, groupType, frameName, parent, num)
     local unitRole = overlayFrame:CreateTexture(nil, "OVERLAY")
     unitRole:SetParentKey("RoleIcon")
 
+    local raidMarker = overlayFrame:CreateTexture(nil, "OVERLAY")
+    raidMarker:SetParentKey("RaidMarker")
+
     SetupPrivateAnchors(frame)
 
     local clickFrame = CreateFrame("Button", nil, overlayFrame, "CUI_UnitFrameTemplate")
@@ -1174,9 +1208,9 @@ local function SetupGroupFrame(unit, groupType, frameName, parent, num)
         elseif event == "UNIT_IN_RANGE_UPDATE" then
             UpdateInRange(self)
         elseif event == "UNIT_THREAT_SITUATION_UPDATE" or event == "UNIT_THREAT_LIST_UPDATE" then
-            UpdateBorderColor(frame)
+            UpdateBorderColor(self)
         elseif event  == "PLAYER_TARGET_CHANGED" then
-            UpdateBorderColor(frame)
+            UpdateBorderColor(self)
         elseif event == "PLAYER_REGEN_ENABLED" then
             UpdateAuras(self)
         elseif event == "PLAYER_REGEN_DISABLED" then
@@ -1201,6 +1235,8 @@ local function SetupGroupFrame(unit, groupType, frameName, parent, num)
         elseif event == "INCOMING_SUMMON_CHANGED" then
             UpdateSummon(self)
             UpdateCenterIcon(self)
+        elseif event == "RAID_TARGET_UPDATE" then
+            UpdateRaidMarker(self)
         end
     end)
 

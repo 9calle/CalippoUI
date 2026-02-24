@@ -288,6 +288,17 @@ local defaults = {
                     PosY = 2,
                 },
 
+                RaidMarker = {
+                    Enabled = false,
+
+                    Size = 20,
+
+                    AnchorPoint = "CENTER",
+                    AnchorRelativePoint = "CENTER",
+                    PosX = 0,
+                    PosY = 0,
+                },
+
                 Buffs = {
                     Enabled = true,
 
@@ -696,6 +707,17 @@ local defaults = {
                 DispelGradient = {
                     Enabled = true,
                     Height = 25,
+                },
+
+                RaidMarker = {
+                    Enabled = false,
+
+                    Size = 20,
+
+                    AnchorPoint = "CENTER",
+                    AnchorRelativePoint = "CENTER",
+                    PosX = 0,
+                    PosY = 0,
                 },
 
                 Buffs = {

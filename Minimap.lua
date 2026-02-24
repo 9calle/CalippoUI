@@ -60,7 +60,7 @@ local function SetupMinimap()
     GameTimeFrame:SetAlpha(0)
 
     Minimap:SetMaskTexture("Interface\\ChatFrame\\ChatFrameBackground")
-    if not Minimap.Borders then
+    if not Minimap.BackdropBorder then
         Util.AddBorder(Minimap)
     end
 

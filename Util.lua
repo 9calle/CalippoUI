@@ -6,8 +6,8 @@ local Util = CUI.Util
 ---------------------------------------------------------------------------------------------------
 
 function Util.AddBorder(frame, useLines)
-    frame.Borders = {}
     if useLines then
+        frame.Borders = {}
         local pixel = PixelUtil.GetNearestPixelSize(1, UIParent:GetEffectiveScale(), 1)
 
         for i=1, 4 do
@@ -38,6 +38,8 @@ function Util.AddBorder(frame, useLines)
 
         local offset = 1
         local backdrop = CreateFrame("Frame", nil, frame, "BackdropTemplate")
+        backdrop:SetIgnoreParentScale(true)
+        backdrop:SetScale(UIParent:GetScale())
         backdrop:SetParentKey("BackdropBorder")
         backdrop:SetPoint("TOPLEFT", frame, "TOPLEFT", -offset, offset)
         backdrop:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", offset, -offset)

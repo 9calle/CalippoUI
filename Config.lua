@@ -1141,6 +1141,22 @@ local function CreateUnitFrameMiscPage(container, unitFrame)
         CreateAnchorGroupWithoutFrame(leaderGroup, dbEntry.LeaderIcon, UF.UpdateFrame, frame)
     end
 
+    local raidMarkerGroup = CreateInlineGroup(scrollFrame, "Raid Marker")
+
+    CreateCheckBox(raidMarkerGroup, "Show Raid Marker", dbEntry.RaidMarker.Enabled,
+        function(self, event, value)
+            dbEntry.RaidMarker.Enabled = value
+            UF.UpdateFrame(frame)
+        end, 0.5)
+
+    CreateSlider(raidMarkerGroup, "Size", 1, 50, 1, dbEntry.RaidMarker.Size,
+        function(self, event, value)
+            dbEntry.RaidMarker.Size = value
+            UF.UpdateFrame(frame)
+        end, 0.5)
+
+    CreateAnchorGroupWithoutFrame(raidMarkerGroup, dbEntry.RaidMarker, UF.UpdateFrame, frame)
+
     scrollFrame:DoLayout()
 end
 
@@ -1598,6 +1614,22 @@ local function CreateGroupFrameMiscPage(container, groupFrame)
         end, 0.5)
 
     CreateAnchorGroupWithoutFrame(roleGroup, dbEntry.RoleIcon, GF.UpdateFrame, frame)
+
+    local raidMarkerGroup = CreateInlineGroup(scrollFrame, "Raid Marker")
+
+    CreateCheckBox(raidMarkerGroup, "Show Raid Marker", dbEntry.RaidMarker.Enabled,
+        function(self, event, value)
+            dbEntry.RaidMarker.Enabled = value
+            GF.UpdateFrame(frame)
+        end, 0.5)
+
+    CreateSlider(raidMarkerGroup, "Size", 1, 50, 1, dbEntry.RaidMarker.Size,
+        function(self, event, value)
+            dbEntry.RaidMarker.Size = value
+            GF.UpdateFrame(frame)
+        end, 0.5)
+
+    CreateAnchorGroupWithoutFrame(raidMarkerGroup, dbEntry.RaidMarker, GF.UpdateFrame, frame)
 
     scrollFrame:DoLayout()
 end

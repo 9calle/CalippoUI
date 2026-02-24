@@ -596,6 +596,26 @@ local function UpdateLeaderAssist(frame)
     end
 end
 
+local function UpdateRaidMarker(frame)
+    local dbEntry = CUI.DB.profile.UnitFrames[frame.name].RaidMarker
+    local raidMarker = frame.Overlay.RaidMarker
+
+    if dbEntry.Enabled then
+        local index = GetRaidTargetIndex(frame.unit)
+        if index then
+            raidMarker:Show()
+            raidMarker:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
+            if raidMarker.SetSpriteSheetCell then
+                raidMarker:SetSpriteSheetCell(index, 4, 4, 64, 64)
+            end
+        else
+            raidMarker:Hide()
+        end
+    else
+        raidMarker:Hide()
+    end
+end
+
 local function UpdateAll(frame)
     UpdateMaxHealth(frame)
     UpdateMaxPower(frame)
@@ -603,6 +623,7 @@ local function UpdateAll(frame)
     UpdateLeaderAssist(frame)
     UpdateHealPrediction(frame)
     UpdateIsDead(frame)
+    UpdateRaidMarker(frame)
 
     UpdateHealthColor(frame)
     UpdateAbsorbColor(frame)
@@ -686,20 +707,36 @@ function UF.UpdateFrame(frame)
         frame:UnregisterEvent("UNIT_MAXPOWER")
     end
 
-    UpdatePowerColor(frame)
-
     local leaderIcon = frame.Overlay.LeaderIcon
     if leaderIcon then
         local dbEntryLead = dbEntry.LeaderIcon
         if dbEntryLead.Enabled then
-            UpdateLeaderAssist(frame)
+            frame:RegisterEvent("PARTY_LEADER_CHANGED")
+            frame:RegisterEvent("GROUP_FORMED")
+            frame:RegisterEvent("GROUP_LEFT")
             leaderIcon:ClearAllPoints()
             leaderIcon:SetPoint(dbEntryLead.AnchorPoint, frame.Overlay, dbEntryLead.AnchorRelativePoint, dbEntryLead.PosX, dbEntryLead.PosY)
             leaderIcon:SetSize(dbEntryLead.Size, dbEntryLead.Size)
         else
+            frame:UnregisterEvent("PARTY_LEADER_CHANGED")
+            frame:UnregisterEvent("GROUP_FORMED")
+            frame:UnregisterEvent("GROUP_LEFT")
             leaderIcon:Hide()
         end
     end
+
+    if dbEntry.RaidMarker.Enabled then
+        local raidMarker = frame.Overlay.RaidMarker
+        local dbEntryRM = dbEntry.RaidMarker
+        frame:RegisterEvent("RAID_TARGET_UPDATE")
+        raidMarker:ClearAllPoints()
+        raidMarker:SetPoint(dbEntryRM.AnchorPoint, frame.Overlay, dbEntryRM.AnchorRelativePoint, dbEntryRM.PosX, dbEntryRM.PosY)
+        raidMarker:SetSize(dbEntryRM.Size, dbEntryRM.Size)
+    else
+        frame:UnregisterEvent("RAID_TARGET_UPDATE")
+    end
+
+    UpdateAll(frame)
 end
 
 -------------------------------------------------------------------------------------------------
@@ -925,16 +962,12 @@ function SetupUnitFrame(frameName, unit, number)
     healAbsorbBar:SetAllPoints(healthBar)
     healAbsorbBar:SetStatusBarTexture("")
     healAbsorbBar:SetReverseFill(false)
-    -- local absorbTexture = healAbsorbBar:GetStatusBarTexture()
-    -- absorbTexture:SetTexture("Interface/AddOns/CalippoUI/Media/Striped.tga", "REPEAT", "REPEAT")
 
     local damageAbsorbBar = CreateFrame("StatusBar", nil, frame)
     damageAbsorbBar:SetParentKey("DamageAbsorbBar")
     damageAbsorbBar:SetAllPoints(healthBar)
     damageAbsorbBar:SetFrameLevel(healAbsorbBar:GetFrameLevel()+1)
     damageAbsorbBar:SetStatusBarTexture("")
-    -- local shieldTexture = damageAbsorbBar:GetStatusBarTexture()
-    -- shieldTexture:SetTexture("Interface/AddOns/CalippoUI/Media/Striped.tga", "REPEAT", "REPEAT")
 
     local overlayFrame = CreateFrame("Frame", nil, frame)
     overlayFrame:SetParentKey("Overlay")
@@ -963,6 +996,9 @@ function SetupUnitFrame(frameName, unit, number)
         leaderFrame:Hide()
     end
 
+    local raidMarker = overlayFrame:CreateTexture(nil, "OVERLAY")
+    raidMarker:SetParentKey("RaidMarker")
+
     frame:RegisterUnitEvent("UNIT_AURA", unit)
     frame:RegisterUnitEvent("UNIT_HEALTH", unit)
     frame:RegisterUnitEvent("UNIT_MAXHEALTH", unit)
@@ -972,12 +1008,18 @@ function SetupUnitFrame(frameName, unit, number)
     frame:RegisterUnitEvent("UNIT_DISPLAYPOWER", unit)
     frame:RegisterEvent("PLAYER_REGEN_ENABLED")
     frame:RegisterEvent("PLAYER_REGEN_DISABLED")
-    frame:RegisterEvent("PARTY_LEADER_CHANGED")
-    frame:RegisterEvent("GROUP_FORMED")
-    frame:RegisterEvent("GROUP_LEFT")
     frame:HookScript("OnEvent", function(self, event, ...)
+        if event == "PLAYER_TARGET_CHANGED" or event == "PLAYER_FOCUS_CHANGED" then
+            if not UnitExists(self.unit) then return end
+            UpdateAll(self)
+            if EditModeManagerFrame:IsShown() then return end
+            UF.UpdateAuras(self)
+        end
+
+        if not self:IsShown() then return end
+
         if event == "UNIT_AURA" then
-            local unit, updateInfo = ...
+            local _, updateInfo = ...
             UF.UpdateAuras(self, updateInfo)
         elseif event == "UNIT_HEALTH" then
             UpdateHealth(self)
@@ -995,11 +1037,6 @@ function SetupUnitFrame(frameName, unit, number)
             UpdateHealAbsorb(self)
         elseif event == "UNIT_HEAL_PREDICTION" then
             UpdateHealPrediction(self)
-        elseif event == "PLAYER_TARGET_CHANGED" or event == "PLAYER_FOCUS_CHANGED" then
-            if not UnitExists(self.unit) then return end
-            UpdateAll(self)
-            if EditModeManagerFrame:IsShown() then return end
-            UF.UpdateAuras(self)
         elseif event == "PLAYER_REGEN_ENABLED" then
             UF.UpdateAlpha(self)
         elseif event == "PLAYER_REGEN_DISABLED" then
@@ -1007,8 +1044,10 @@ function SetupUnitFrame(frameName, unit, number)
         elseif event == "PARTY_LEADER_CHANGED" or event == "GROUP_FORMED" or event == "GROUP_LEFT" then
             UpdateLeaderAssist(self)
         elseif event == "UNIT_DISPLAYPOWER" then
-            UpdateMaxPower(frame)
-            UpdatePowerColor(frame)
+            UpdateMaxPower(self)
+            UpdatePowerColor(self)
+        elseif event == "RAID_TARGET_UPDATE" then
+            UpdateRaidMarker(self)
         end
     end)
 
@@ -1017,7 +1056,6 @@ function SetupUnitFrame(frameName, unit, number)
     UF.UpdateAuras(frame)
     UF.UpdateFrame(frame)
     UF.UpdateTexts(frame)
-    UpdateAll(frame)
 
     RegisterUnitWatch(frame, false)
 end
