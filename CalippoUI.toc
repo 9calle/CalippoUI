@@ -20,7 +20,6 @@ UnitFrames.lua
 GroupFrames.lua
 ActionBars.lua
 Chat.lua
-TradeAutoWhisper.lua
 CooldownManager.lua
 ResourceBars.lua
 CastBar.lua

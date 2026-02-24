@@ -1133,9 +1133,6 @@ local defaults = {
                 },
             },
         },
-        AutoWhisper = {
-            Enabled = false,
-        },
         Miscellaneous = {
             Enabled = true,
 
