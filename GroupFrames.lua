@@ -488,6 +488,47 @@ end
 
 ---------------------------------------------------------------------------------------------------------------------------------
 
+local function UpdateCenterIcon(frame)
+    local centerTexture = frame.Overlay.CenterTexture
+
+    if frame.disconnected then
+    centerTexture:SetSize(50, 50)
+    centerTexture:SetTexture("Interface/AddOns/CalippoUI/Media/Disconnect-Icon.blp")
+    elseif frame.readyCheck then
+        centerTexture:SetSize(20, 20)
+        if frame.readyCheck == "ready" then
+            centerTexture:SetTexture("Interface/AddOns/CalippoUI/Media/readycheck-ready.tga")
+        elseif frame.readyCheck == "waiting" then
+            centerTexture:SetTexture("Interface/AddOns/CalippoUI/Media/readycheck-waiting.tga")
+        elseif frame.readyCheck == "notready" then
+            centerTexture:SetTexture("Interface/AddOns/CalippoUI/Media/readycheck-notready.tga")
+        end
+    elseif frame.summon then
+        centerTexture:SetSize(30, 30)
+        if frame.summon == "pending" then
+            centerTexture:SetTexture("Interface/AddOns/CalippoUI/Media/Raid-Icon-SummonPending.tga")
+        elseif frame.summon == "accepted" then
+            centerTexture:SetTexture("Interface/AddOns/CalippoUI/Media/Raid-Icon-SummonAccepted.tga")
+        elseif frame.summon == "declined" then
+            centerTexture:SetTexture("Interface/AddOns/CalippoUI/Media/Raid-Icon-SummonDeclined.tga")
+        end
+    elseif frame.ress then
+        centerTexture:SetSize(20, 20)
+        centerTexture:SetTexture("Interface/AddOns/CalippoUI/Media/Raid-Icon-Rez.blp")
+    elseif frame.afk then
+        centerTexture:SetSize(25, 25)
+        centerTexture:SetAtlas("questlog-questtypeicon-clockorange")
+    elseif frame.phase then
+        centerTexture:SetSize(30, 30)
+        centerTexture:SetAtlas("Dungeon")
+    else
+        centerTexture:Hide()
+        return
+    end
+
+    centerTexture:Show()
+end
+
 local function UpdateNameColor(frame)
     local dbEntry = CUI.DB.profile.GroupFrames.Name
 
@@ -704,6 +745,7 @@ local function UpdateAFK(frame)
 
     if issecretvalue(isAFK) then
         frame.afk = false
+        UpdateCenterIcon(frame)
         return
     end
 
@@ -712,47 +754,6 @@ local function UpdateAFK(frame)
     else
         frame.afk = false
     end
-end
-
-local function UpdateCenterIcon(frame)
-    local centerTexture = frame.Overlay.CenterTexture
-
-    if frame.disconnected then
-    centerTexture:SetSize(50, 50)
-    centerTexture:SetTexture("Interface/AddOns/CalippoUI/Media/Disconnect-Icon.blp")
-    elseif frame.readyCheck then
-        centerTexture:SetSize(20, 20)
-        if frame.readyCheck == "ready" then
-            centerTexture:SetTexture("Interface/AddOns/CalippoUI/Media/readycheck-ready.tga")
-        elseif frame.readyCheck == "waiting" then
-            centerTexture:SetTexture("Interface/AddOns/CalippoUI/Media/readycheck-waiting.tga")
-        elseif frame.readyCheck == "notready" then
-            centerTexture:SetTexture("Interface/AddOns/CalippoUI/Media/readycheck-notready.tga")
-        end
-    elseif frame.summon then
-        centerTexture:SetSize(30, 30)
-        if frame.summon == "pending" then
-            centerTexture:SetTexture("Interface/AddOns/CalippoUI/Media/Raid-Icon-SummonPending.tga")
-        elseif frame.summon == "accepted" then
-            centerTexture:SetTexture("Interface/AddOns/CalippoUI/Media/Raid-Icon-SummonAccepted.tga")
-        elseif frame.summon == "declined" then
-            centerTexture:SetTexture("Interface/AddOns/CalippoUI/Media/Raid-Icon-SummonDeclined.tga")
-        end
-    elseif frame.ress then
-        centerTexture:SetSize(20, 20)
-        centerTexture:SetTexture("Interface/AddOns/CalippoUI/Media/Raid-Icon-Rez.blp")
-    elseif frame.afk then
-        centerTexture:SetSize(25, 25)
-        centerTexture:SetAtlas("questlog-questtypeicon-clockorange")
-    elseif frame.phase then
-        centerTexture:SetSize(30, 30)
-        centerTexture:SetAtlas("Dungeon")
-    else
-        centerTexture:Hide()
-        return
-    end
-
-    centerTexture:Show()
 end
 
 local function UpdateBorderColor(frame)
@@ -826,8 +827,6 @@ local function UpdateMaxPower(frame)
 end
 
 local function UpdateAll(frame)
-    UpdateMaxHealth(frame)
-
     UpdatePowerVisibility(frame)
     UpdateMaxPower(frame)
 
@@ -850,6 +849,8 @@ local function UpdateAll(frame)
     UpdateBorderColor(frame)
 
     UpdateCenterIcon(frame)
+
+    UpdateMaxHealth(frame)
 end
 
 local function UpdateUnitEvents(frame, unit)
@@ -1034,7 +1035,11 @@ local function SortyByRole(a, b)
             local _, aC = UnitClass(a.unit)
             local _, bC = UnitClass(b.unit)
             if aC and bC then
-                return classPriority[aC] > classPriority[bC]
+                if classPriority[aC] == classPriority[bC] then
+                    return a.num < b.num
+                else
+                    return classPriority[aC] > classPriority[bC]
+                end
             else
                 return UnitName(a.unit) > UnitName(b.unit)
             end
@@ -1280,8 +1285,12 @@ local function SetupGroupFrame(unit, groupType, frameName, parent, num)
             UpdateBorderColor(self)
         elseif event == "PLAYER_REGEN_ENABLED" then
             UpdateAuras(self)
+            UpdateAFK(self)
+            UpdateCenterIcon(self)
         elseif event == "PLAYER_REGEN_DISABLED" then
             UpdateAuras(self)
+            UpdateAFK(self)
+            UpdateCenterIcon(self)
         elseif event == "PLAYER_FLAGS_CHANGED" then
             UpdateAFK(self)
             UpdateCenterIcon(self)

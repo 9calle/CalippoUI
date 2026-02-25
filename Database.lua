@@ -672,7 +672,7 @@ local defaults = {
                 SortByRole = true,
 
                 PowerBar = {
-                    ShowManaForHealer = true,
+                    ShowManaForHealer = false,
 
                     Height = 5,
                 },
