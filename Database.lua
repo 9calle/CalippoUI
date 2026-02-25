@@ -289,9 +289,9 @@ local defaults = {
                 },
 
                 RaidMarker = {
-                    Enabled = false,
+                    Enabled = true,
 
-                    Size = 20,
+                    Size = 15,
 
                     AnchorPoint = "CENTER",
                     AnchorRelativePoint = "CENTER",
@@ -423,7 +423,7 @@ local defaults = {
 
                 LeaderIcon = {
                     Enabled = true,
-                    Size = 16,
+                    Size = 15,
 
                     AnchorPoint = "TOPLEFT",
                     AnchorRelativePoint = "TOPLEFT",
@@ -670,6 +670,12 @@ local defaults = {
                 Padding = 2,
 
                 SortByRole = true,
+
+                PowerBar = {
+                    ShowManaForHealer = true,
+
+                    Height = 5,
+                },
 
                 Name = {
                     Enabled = true,
@@ -957,6 +963,14 @@ local defaults = {
             Width = 200,
             Height = 10,
 
+            Texture = defaultTexture,
+
+            AnchorFrame = "UIParent",
+            AnchorPoint = "CENTER",
+            AnchorRelativePoint = "CENTER",
+            PosX = 0,
+            PosY = -300,
+
             CustomColor = false,
             Color = {
                 ["r"] = 0,
@@ -973,13 +987,34 @@ local defaults = {
                 ["a"] = 1
             },
 
-            Texture = defaultTexture,
+            ShowIcon = true,
 
-            AnchorFrame = "UIParent",
-            AnchorPoint = "CENTER",
-            AnchorRelativePoint = "CENTER",
-            PosX = 0,
-            PosY = -300,
+            Name = {
+                Enabled = true,
+
+                Font = defaultFont,
+                Outline = "",
+                Size = 10,
+                Width = 150,
+
+                AnchorPoint = "LEFT",
+                AnchorRelativePoint = "LEFT",
+                PosX = 3,
+                PosY = 0,
+            },
+
+            Time = {
+                Enabled = true,
+
+                Font = defaultFont,
+                Outline = "",
+                Size = 10,
+
+                AnchorPoint = "RIGHT",
+                AnchorRelativePoint = "RIGHT",
+                PosX = -3,
+                PosY = 0,
+            },
         },
         PlayerAuras = {
             Enabled = true,

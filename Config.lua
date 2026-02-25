@@ -1417,12 +1417,24 @@ local function CreateGroupFrameFramePage(container, groupFrame)
             end, 1)
     end
 
-    local sortGroup = CreateInlineGroup(scrollFrame, "Sorting")
-    CreateCheckBox(sortGroup, "Sort by role", dbEntry.SortByRole,
+    local generalGroup = CreateInlineGroup(scrollFrame, "General")
+    CreateCheckBox(generalGroup, "Sort by role", dbEntry.SortByRole,
         function(self, event, value)
             dbEntry.SortByRole = value
             GF.SortGroupFrames(frame)
         end, 1)
+
+    CreateCheckBox(generalGroup, "Show mana for healers", dbEntry.PowerBar.ShowManaForHealer,
+        function(self, event, value)
+            dbEntry.PowerBar.ShowManaForHealer = value
+            GF.UpdateFrame(frame)
+        end, 0.5)
+
+    CreateSlider(generalGroup, "Mana bar height", 1, 50, 1, dbEntry.PowerBar.Height,
+        function(self, event, value)
+            dbEntry.PowerBar.Height = value
+            GF.UpdateFrame(frame)
+        end, 0.5)
 
     local sizeGroup = CreateSizeGroup(scrollFrame, dbEntry, GF.UpdateFrame, frame)
 
@@ -1941,7 +1953,6 @@ local function CreatePlayerCastBarSettings(container)
             dbEntry.MatchWidth = value
             CB.UpdateFrame(frame)
         end, 1)
-
     
     local colorGroup = CreateInlineGroup(scrollFrame, "Colors")
 

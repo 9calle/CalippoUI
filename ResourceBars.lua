@@ -550,6 +550,7 @@ function RB.UpdateSecondaryPowerBar(frame)
         frame:RegisterUnitEvent("UNIT_POWER_FREQUENT", "player")
         frame:RegisterUnitEvent("UNIT_MAXPOWER", "player")
         frame:RegisterUnitEvent("UNIT_DISPLAYPOWER", "player")
+        frame:RegisterEvent("ACTIVE_PLAYER_SPECIALIZATION_CHANGED")
         frame:RegisterEvent("PLAYER_REGEN_DISABLED")
         frame:RegisterEvent("PLAYER_REGEN_ENABLED")
 
@@ -671,6 +672,8 @@ local function SetupSecondaryPowerBar()
             RB.UpdateAlpha(self, true)
         elseif event == "PLAYER_REGEN_ENABLED" then
             RB.UpdateAlpha(self)
+        elseif event == "ACTIVE_PLAYER_SPECIALIZATION_CHANGED" then
+            UpdateSecondaryPowerFrame(self)
         end
     end)
 

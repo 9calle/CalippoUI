@@ -521,9 +521,13 @@ local function UpdateHealthColor(frame)
         if dbEntry.HealthBar.CustomBackgroundColor then
             local bc = dbEntry.HealthBar.BackgroundColor
             frame.Background:SetVertexColor(bc.r, bc.g, bc.b, bc.a)
+            frame.PowerBar.Background:SetColorTexture(bc.r, bc.g, bc.b, bc.a)
         else
             local v = 0.2
             frame.Background:SetVertexColor(r*v, g*v, b*v)
+
+            local pC = PowerBarColor["MAELSTROM"]
+            frame.PowerBar.Background:SetColorTexture(pC.r*v, pC.g*v, pC.b*v, pC.a)
         end
 
         if dbEntry.HealthBar.CustomHealPredictionColor then
@@ -783,8 +787,49 @@ local function UpdateRaidMarker(frame)
     end
 end
 
+local function UpdatePowerVisibility(frame)
+    local dbEntry = CUI.DB.profile.GroupFrames[frame.name].PowerBar
+
+    if dbEntry.ShowManaForHealer then
+        local role = UnitGroupRolesAssigned(frame.unit)
+        if role == "HEALER" then
+            frame.PowerBar:Show()
+            frame.HealthBar:SetPoint("BOTTOMRIGHT", frame.PowerBar, "TOPRIGHT")
+
+            frame:RegisterUnitEvent("UNIT_POWER_FREQUENT", frame.unit)
+            frame:RegisterUnitEvent("UNIT_MAXPOWER", frame.unit)
+        else
+            frame.HealthBar:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT")
+            frame.PowerBar:Hide()
+
+            frame:UnregisterEvent("UNIT_POWER_FREQUENT")
+            frame:UnregisterEvent("UNIT_MAXPOWER")
+        end
+    else
+        frame.HealthBar:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT")
+        frame.PowerBar:Hide()
+
+        frame:UnregisterEvent("UNIT_POWER_FREQUENT")
+        frame:UnregisterEvent("UNIT_MAXPOWER")
+    end
+end
+
+local function UpdatePower(frame)
+    frame.PowerBar:SetValue(UnitPower(frame.unit, 0))
+end
+
+local function UpdateMaxPower(frame)
+    local unit = frame.unit
+
+    frame.PowerBar:SetMinMaxValues(0, UnitPowerMax(unit, 0))
+    frame.PowerBar:SetValue(UnitPower(unit, 0))
+end
+
 local function UpdateAll(frame)
     UpdateMaxHealth(frame)
+
+    UpdatePowerVisibility(frame)
+    UpdateMaxPower(frame)
 
     UpdateRaidMarker(frame)
     UpdateRole(frame)
@@ -943,6 +988,8 @@ function GF.UpdateFrame(groupFramesContainer)
             frame:UnregisterEvent("RAID_TARGET_UPDATE")
         end
 
+        frame.PowerBar:SetHeight(dbEntry.PowerBar.Height)
+
         UpdateAll(frame)
     end
 
@@ -1066,34 +1113,50 @@ local function SetupGroupFrame(unit, groupType, frameName, parent, num)
     frame.phase = nil
     frame.afk = nil
 
+    local powerBar = CreateFrame("StatusBar", nil, frame)
+    powerBar:SetParentKey("PowerBar")
+    powerBar:SetPoint("BOTTOMLEFT")
+    powerBar:SetPoint("BOTTOMRIGHT")
+    powerBar:SetHeight(10)
+    powerBar:SetStatusBarTexture(dbEntryGF.HealthBar.Texture)
+    local pC = PowerBarColor["MAELSTROM"]
+    powerBar:SetStatusBarColor(pC.r, pC.g, pC.b, pC.a)
+    Util.AddBorder(powerBar)
+    powerBar:Hide()
+
+    local powerBackground = powerBar:CreateTexture(nil, "BACKGROUND")
+    powerBackground:SetParentKey("Background")
+    powerBackground:SetAllPoints(powerBar)
+
     local healthBar = CreateFrame("StatusBar", nil, frame)
     healthBar:SetParentKey("HealthBar")
-    healthBar:SetAllPoints(frame)
+    healthBar:SetPoint("TOPLEFT")
+    healthBar:SetPoint("BOTTOMRIGHT")
     healthBar:SetStatusBarTexture("")
 
     local background = frame:CreateTexture(nil, "BACKGROUND")
     background:SetParentKey("Background")
     background:SetTexture(dbEntryGF.HealthBar.Texture)
-    background:SetPoint("TOPLEFT", healthBar:GetStatusBarTexture(), "TOPRIGHT")
-    background:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT")
+    background:SetPoint("BOTTOMLEFT", healthBar:GetStatusBarTexture(), "BOTTOMRIGHT")
+    background:SetPoint("TOPRIGHT", frame, "TOPRIGHT")
 
     local healPredictionBar = CreateFrame("StatusBar", nil, frame)
     healPredictionBar:SetParentKey("HealPredictionBar")
-    healPredictionBar:SetPoint("TOPLEFT", healthBar:GetStatusBarTexture(), "TOPRIGHT")
-    healPredictionBar:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT")
+    healPredictionBar:SetPoint("BOTTOMLEFT", healthBar:GetStatusBarTexture(), "BOTTOMRIGHT")
+    healPredictionBar:SetPoint("TOPRIGHT", frame, "TOPRIGHT")
     healPredictionBar:SetFrameLevel(healthBar:GetFrameLevel()+1)
     healPredictionBar:SetStatusBarTexture("")
 
     local healAbsorbBar = CreateFrame("StatusBar", nil, frame)
     healAbsorbBar:SetParentKey("HealAbsorbBar")
     healAbsorbBar:SetFrameLevel(healPredictionBar:GetFrameLevel()+1)
-    healAbsorbBar:SetAllPoints(frame)
+    healAbsorbBar:SetAllPoints(healthBar)
     healAbsorbBar:SetStatusBarTexture("")
     healAbsorbBar:SetReverseFill(false)
 
     local damageAbsorbBar = CreateFrame("StatusBar", nil, frame)
     damageAbsorbBar:SetParentKey("DamageAbsorbBar")
-    damageAbsorbBar:SetAllPoints(frame)
+    damageAbsorbBar:SetAllPoints(healthBar)
     damageAbsorbBar:SetFrameLevel(healAbsorbBar:GetFrameLevel()+1)
     damageAbsorbBar:SetStatusBarTexture("")
 
@@ -1205,6 +1268,10 @@ local function SetupGroupFrame(unit, groupType, frameName, parent, num)
             UpdateHealAbsorb(self)
         elseif event == "UNIT_HEAL_PREDICTION" then
             UpdateHealPrediction(self)
+        elseif event == "UNIT_POWER_FREQUENT" then
+            UpdatePower(self)
+        elseif event == "UNIT_MAXPOWER" then
+            UpdateMaxPower(self)
         elseif event == "UNIT_IN_RANGE_UPDATE" then
             UpdateInRange(self)
         elseif event == "UNIT_THREAT_SITUATION_UPDATE" or event == "UNIT_THREAT_LIST_UPDATE" then
