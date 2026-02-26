@@ -1251,7 +1251,7 @@ local function SetupGroupFrame(unit, groupType, frameName, parent, num)
     frame:RegisterEvent("GROUP_ROSTER_UPDATE")
     frame:SetScript("OnEvent", function(self, event, ...)
         if event == "GROUP_ROSTER_UPDATE" then
-            if UnitExists(self.unit) and IsInGroup() then
+            if UnitExists(self.unit) then
                 UpdateAll(self)
             end
         end

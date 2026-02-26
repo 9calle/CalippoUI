@@ -118,7 +118,7 @@ local function CreateColorPicker(container, label, value, func, width, alpha)
 end
 
 local tooltip = CreateFrame("Frame", "CUI_ConfigAnchorTooltip", UIParent, "BackdropTemplate")
-tooltip:SetSize(250, 200)
+tooltip:SetSize(250, 180)
 tooltip:SetBackdrop({
     bgFile = "Interface/Tooltips/UI-Tooltip-Background",
     edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
@@ -1536,7 +1536,7 @@ local function CreateGroupFrameAuraPage(container, groupFrame)
                     GF.UpdateAuras(frame)
                 end, 1)
         else
-            CreateCheckBox(group, "Show test frames", privateAuraTestFrame,
+            CreateCheckBox(group, "Show test frames (reload needed to apply settings)", privateAuraTestFrame,
                 function(self, event, value)
                     privateAuraTestFrame = value
                     GF.UpdateAuras(frame, privateAuraTestFrame)
