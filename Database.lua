@@ -1027,12 +1027,16 @@ local defaults = {
 
             Alpha = 1,
             CombatAlpha = 1,
+
+            Font = defaultFont,
+            Outline = "",
         },
         Chat = {
             Enabled = true,
 
             Font = defaultFont,
             Outline = "",
+            Size = 12,
         },
         ResourceBars = {
             Enabled = true,

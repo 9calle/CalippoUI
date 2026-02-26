@@ -11,6 +11,7 @@ local MM = CUI.MM
 local CB = CUI.CB
 local GF = CUI.GF
 local Misc = CUI.Misc
+local Chat = CUI.Chat
 
 local AceGUI = LibStub("AceGUI-3.0")
 
@@ -1948,6 +1949,20 @@ local function CreateMinimapSettings(container)
 
     CreateAlphaGroup(scrollFrame, dbEntry, MM.UpdateAlpha, MinimapCluster)
 
+    local textGroup = CreateInlineGroup(scrollFrame, "Text")
+
+    CreateDropDown(textGroup, "Font", dbEntry.Font, fonts,
+        function(self, event, value)
+            dbEntry.Font = value
+            MM.UpdateTexts()
+        end, 0.5)
+
+    CreateDropDown(textGroup, "Outline", dbEntry.Outline, outlines,
+        function(self, event, value)
+            dbEntry.Outline = value
+            MM.UpdateTexts()
+        end, 0.5)
+
     scrollFrame:DoLayout()
 end
 
@@ -2034,6 +2049,38 @@ local function CreatePlayerCastBarSettings(container)
     CreateTextureGroup(scrollFrame, dbEntry, CB.UpdateFrame, frame)
 
     CreateAnchorGroup(scrollFrame, dbEntry, CB.UpdateFrame, frame)
+
+    scrollFrame:DoLayout()
+end
+
+---------------------------------------------------------------------------------------------------------------------------------------
+
+local function CreateChatSettings(container)
+    local dbEntry = CUI.DB.profile.Chat
+
+    local scrollFrame = AceGUI:Create("ScrollFrame")
+    scrollFrame:SetLayout("List")
+    container:AddChild(scrollFrame)
+
+    local textGroup = CreateInlineGroup(scrollFrame, "Text")
+
+    CreateSlider(textGroup, "Font Size", 1, 50, 1, dbEntry.Size, 
+        function(self, event, value)
+            dbEntry.Size = value
+            Chat.StyleAllChatBoxes()
+        end, 1)
+
+    CreateDropDown(textGroup, "Font", dbEntry.Font, fonts,
+        function(self, event, value)
+            dbEntry.Font = value
+            Chat.StyleAllChatBoxes()
+        end, 0.5)
+
+    CreateDropDown(textGroup, "Outline", dbEntry.Outline, outlines,
+        function(self, event, value)
+            dbEntry.Outline = value
+            Chat.StyleAllChatBoxes()
+        end, 0.5)
 
     scrollFrame:DoLayout()
 end
@@ -2136,6 +2183,8 @@ local function SetupMainTabs(frame)
             CreateGroupFrameSettings(container)
         elseif group == "Miscellaneous" then
             CreateMiscellaneousSettings(container)
+        elseif group == "Chat" then
+            CreateChatSettings(container)
         end
     end
 
@@ -2160,11 +2209,14 @@ local function SetupMainTabs(frame)
     if dbEntry.PlayerCastBar.Enabled then
         table.insert(activeModules, {text="Cast Bar", value="PlayerCastBar"})
     end
+    if dbEntry.PlayerAuras.Enabled then
+        table.insert(activeModules, {text="Player Auras", value="PlayerAuras"})
+    end
     if dbEntry.Minimap.Enabled then
         table.insert(activeModules, {text="Minimap", value="Minimap"})
     end
-    if dbEntry.PlayerAuras.Enabled then
-        table.insert(activeModules, {text="Player Auras", value="PlayerAuras"})
+    if dbEntry.Chat.Enabled then
+        table.insert(activeModules, {text="Chat", value="Chat"})
     end
     if dbEntry.Miscellaneous.Enabled then
         table.insert(activeModules, {text="Misc", value="Miscellaneous"})

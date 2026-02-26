@@ -18,6 +18,19 @@ end
 
 ---------------------------------------------------------------------------------------------------
 
+function MM.UpdateTexts()
+    local dbEntry = CUI.DB.profile.Minimap
+
+    local clockText = TimeManagerClockButton:GetRegions()
+    clockText:SetFont(dbEntry.Font, 12, dbEntry.Outline)
+
+    FramerateFrame.Label:SetFont(dbEntry.Font, 12, dbEntry.Outline)
+    FramerateFrame.FramerateText:SetFont(dbEntry.Font, 12, dbEntry.Outline)
+
+    local zoneText = MinimapCluster.ZoneTextButton:GetRegions()
+    zoneText:SetFont(dbEntry.Font, 12, dbEntry.Outline)
+end
+
 local function SetupMinimap()
     MinimapBackdrop:Hide()
     MinimapCompassTexture:Hide()
@@ -36,7 +49,6 @@ local function SetupMinimap()
     MinimapCluster.ZoneTextButton:SetFrameLevel(10)
     MinimapCluster.ZoneTextButton:SetPoint("TOP", Minimap, "TOP", 0, -5)
     local zoneText = MinimapCluster.ZoneTextButton:GetRegions()
-    zoneText:SetFont("Interface/AddOns/CalippoUI/Fonts/FiraSans-Medium.ttf", 12, "")
     zoneText:SetJustifyH("CENTER")
 
     MinimapCluster.MinimapContainer:SetAllPoints(MinimapCluster)
@@ -51,9 +63,6 @@ local function SetupMinimap()
     TimeManagerClockButton:SetPoint("BOTTOMLEFT", Minimap, "BOTTOMLEFT", -3, 13)
 
     AddonCompartmentFrame:Hide()
-
-    local clockText = TimeManagerClockButton:GetRegions()
-    clockText:SetFont("Interface/AddOns/CalippoUI/Fonts/FiraSans-Medium.ttf", 12, "")
 
     GameTimeFrame:ClearAllPoints()
     GameTimeFrame:SetPoint("BOTTOM", Minimap, "BOTTOM", 10, 0)
@@ -93,8 +102,6 @@ local function SetupMinimap()
     ObjectiveTrackerFrame.Header.Text:Hide()
 
     FramerateFrame:Show()
-    FramerateFrame.Label:SetFont("Interface/AddOns/CalippoUI/Fonts/FiraSans-Medium.ttf", 12, "")
-    FramerateFrame.FramerateText:SetFont("Interface/AddOns/CalippoUI/Fonts/FiraSans-Medium.ttf", 12, "")
     FramerateFrame:ClearAllPoints()
     FramerateFrame:SetParent(Minimap)
     FramerateFrame:SetPoint("BOTTOMLEFT", Minimap, "BOTTOMLEFT", 5, 3)
@@ -115,6 +122,7 @@ end
 
 function MM.Load()
     SetupMinimap()
+    MM.UpdateTexts()
 
     EditModeManagerFrame:HookScript("OnHide", function(self)
         SetupMinimap()

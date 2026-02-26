@@ -3,7 +3,11 @@ local addonName, CUI = ...
 CUI.Chat = {}
 local Chat = CUI.Chat
 
+---------------------------------------------------------------------------------------------------
+
 local function StyleChatBox(i)
+    local dbEntry = CUI.DB.profile.Chat
+
     _G["ChatFrame"..i.."EditBoxLeft"]:Hide()
     _G["ChatFrame"..i.."EditBoxRight"]:Hide()
     _G["ChatFrame"..i.."EditBoxMid"]:Hide()
@@ -13,9 +17,9 @@ local function StyleChatBox(i)
     _G["ChatFrame"..i.."EditBoxFocusMid"]:SetTexture(nil)
 
     _G["ChatFrame"..i.."ButtonFrame"]:Hide()
-    _G["ChatFrame"..i]:SetFont("Interface\\AddOns\\CalippoUI\\Fonts\\FiraSans-Medium.ttf", 12, "")
-    _G["ChatFrame"..i.."EditBox"]:SetFont("Interface\\AddOns\\CalippoUI\\Fonts\\FiraSans-Medium.ttf", 12, "")
-    _G["ChatFrame"..i.."EditBoxHeader"]:SetFont("Interface\\AddOns\\CalippoUI\\Fonts\\FiraSans-Medium.ttf", 12, "")
+    _G["ChatFrame"..i]:SetFont(dbEntry.Font, dbEntry.Size, dbEntry.Outline)
+    _G["ChatFrame"..i.."EditBox"]:SetFont(dbEntry.Font, dbEntry.Size, dbEntry.Outline)
+    _G["ChatFrame"..i.."EditBoxHeader"]:SetFont(dbEntry.Font, dbEntry.Size, dbEntry.Outline)
 
     local chatTab = _G["ChatFrame"..i.."Tab"]
     chatTab.HighlightLeft:SetTexture(nil)
@@ -28,6 +32,12 @@ local function StyleChatBox(i)
     chatTab.Middle:Hide()
     chatTab.Right:Hide()
     chatTab.noMouseAlpha = 0
+end
+
+function Chat.StyleAllChatBoxes()
+    for i = 1, NUM_CHAT_WINDOWS do
+        StyleChatBox(i)
+	end
 end
 
 function Chat.Load()
@@ -58,9 +68,7 @@ function Chat.Load()
 	-- CHAT_FRAME_TAB_SELECTED_NOMOUSE_ALPHA = 0
     -- CHAT_FRAME_DEFAULT_FONT_SIZE = 12
 
-    for i = 1, NUM_CHAT_WINDOWS do
-        StyleChatBox(i)
-	end
+    Chat.StyleAllChatBoxes()
 
     FCF_FadeOutChatFrame(ChatFrame1)
 end
