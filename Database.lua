@@ -406,11 +406,11 @@ local defaults = {
                 Width = 174,
                 Height = 52,
 
-                AnchorFrame = "CUI_PowerBar",
+                AnchorFrame = "EssentialCooldownViewer",
                 AnchorPoint = "TOPRIGHT",
                 AnchorRelativePoint = "TOPLEFT",
                 PosX = -2,
-                PosY = 0,
+                PosY = 17,
 
                 Name = {
                     PosX = 5,
@@ -451,11 +451,11 @@ local defaults = {
                 Width = 174,
                 Height = 52,
 
-                AnchorFrame = "CUI_PowerBar",
+                AnchorFrame = "EssentialCooldownViewer",
                 AnchorPoint = "TOPLEFT",
                 AnchorRelativePoint = "TOPRIGHT",
                 PosX = 2,
-                PosY = 0,
+                PosY = 17,
 
                 LeaderIcon = {
                     Enabled = true,
