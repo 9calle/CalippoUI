@@ -117,10 +117,51 @@ local function CreateColorPicker(container, label, value, func, width, alpha)
     container:AddChild(colorPicker)
 end
 
+local tooltip = CreateFrame("Frame", "CUI_ConfigAnchorTooltip", UIParent, "BackdropTemplate")
+tooltip:SetSize(250, 200)
+tooltip:SetBackdrop({
+    bgFile = "Interface/Tooltips/UI-Tooltip-Background",
+    edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
+    edgeSize = 16,
+    insets = { left = 4, right = 4, top = 4, bottom = 4 },
+})
+tooltip:SetBackdropColor(0, 0, 0, 0.8)
+tooltip:SetFrameStrata("TOOLTIP")
+tooltip:Hide()
+
+local textFrame = tooltip:CreateFontString(nil, "OVERLAY")
+textFrame:SetFont("Interface/AddOns/CalippoUI/Fonts/FiraSans-Medium.ttf", 12, "")
+textFrame:SetPoint("TOPLEFT", tooltip, "TOPLEFT", 10, -10)
+textFrame:SetPoint("BOTTOMRIGHT", tooltip, "BOTTOMRIGHT", -10, 10)
+textFrame:SetWordWrap(true)
+textFrame:SetNonSpaceWrap(true)
+textFrame:SetJustifyH("LEFT")
+textFrame:SetJustifyV("TOP")
+textFrame:SetText("The anchor frame can be changed to any named frame. Use /fstack and hover over a frame to see its name.\n\nSome common frames that might be useful are: UIParent (covers the whole screen) and EssentialCooldownViewer (the main cdm frame).\n\nIf you dont see the frame it might be anchored to a frame that is not shown or it is off screen due to position (x/y) or anchor points.")
+
+local function CreateAnchorHelper(container)
+    local anchorHelper = AceGUI:Create("Icon")
+    anchorHelper:SetImage("Interface/AddOns/CalippoUI/Media/ActiveQuestIcon.blp")
+    anchorHelper:SetImageSize(20, 20)
+    anchorHelper:SetCallback("OnEnter", function()
+        CUI_ConfigAnchorTooltip:Show()
+        local x, y = GetCursorPosition()
+        local s = UIParent:GetEffectiveScale()
+        CUI_ConfigAnchorTooltip:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", x/s, y/s)
+    end)
+    anchorHelper:SetCallback("OnLeave", function()
+        CUI_ConfigAnchorTooltip:Hide()
+    end)
+    anchorHelper:SetRelativeWidth(0.05)
+    container:AddChild(anchorHelper)
+end
+
 ---------------------------------------------------------------------------------------------------------------------------------------
 
 local function CreateAnchorGroup(container, dbEntry, func, frame)
     local anchorGroup = CreateInlineGroup(container, "Anchor")
+
+    CreateAnchorHelper(anchorGroup)
 
     CreateEditBox(anchorGroup, "Anchor Frame", dbEntry.AnchorFrame,
         function(self, event, value)
@@ -132,13 +173,13 @@ local function CreateAnchorGroup(container, dbEntry, func, frame)
                 print("Frame does not exist!")
                 self:SetText(dbEntry.AnchorFrame)
             end
-        end, 0.33)
+        end, 0.30)
 
     CreateDropDown(anchorGroup, "Anchor Point", dbEntry.AnchorPoint, anchorPoints,
         function(self, event, value)
             dbEntry.AnchorPoint = value
             func(frame)
-        end, 0.33)
+        end, 0.30)
         
     CreateDropDown(anchorGroup, "Relative Anchor Point", dbEntry.AnchorRelativePoint, anchorPoints,
         function(self, event, value)
@@ -488,7 +529,9 @@ local function CreateActionBarFramePage(container, actionBar)
         function(self, event, value)
             dbEntry.ShouldAnchor = value
             AB.UpdateBarAnchor(frame)
-        end, 0.5)
+        end, 0.45)
+
+    CreateAnchorHelper(anchorGroup)
 
     CreateEditBox(anchorGroup, "Anchor Frame", dbEntry.AnchorFrame,
         function(self, event, value)
@@ -500,7 +543,7 @@ local function CreateActionBarFramePage(container, actionBar)
                 print("Frame does not exist!")
                 self:SetText(dbEntry.AnchorFrame)
             end
-        end, 0.5)
+        end, 0.45)
 
     CreateDropDown(anchorGroup, "Anchor Point", dbEntry.AnchorPoint, anchorPoints,
         function(self, event, value)
