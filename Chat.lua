@@ -33,6 +33,9 @@ end
 function Chat.Load()
     local frame = CreateFrame("Frame")
     frame:RegisterEvent("CHAT_MSG_WHISPER")
+    frame:RegisterEvent("CHAT_MSG_WHISPER_INFORM")
+    frame:RegisterEvent("CHAT_MSG_BN_WHISPER")
+    frame:RegisterEvent("CHAT_MSG_BN_WHISPER_INFORM")
     frame:SetScript("OnEvent", function()
         for i=NUM_CHAT_WINDOWS+1, NUM_CHAT_WINDOWS+10 do
             local chatTab = _G["ChatFrame"..i.."Tab"]

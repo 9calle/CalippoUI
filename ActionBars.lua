@@ -63,41 +63,46 @@ function AB.UpdateAlpha(frame, inCombat)
     end
 end
 
+local function PositionActionBarFrames(bar)
+    local dbEntry = CUI.DB.profile.ActionBars[bar:GetName()]
+
+    if not dbEntry.CustomPadding then return end
+
+    if bar.numButtonsShowable == 0 then bar.numButtonsShowable = 10 end
+
+    local scale = _G[bar:GetName().."ButtonContainer1"]:GetScale()
+    local width = _G[bar:GetName().."ButtonContainer1"]:GetWidth()
+    local padding = dbEntry.Padding
+
+    if bar.isHorizontal then
+        bar:SetWidth(scale * ((math.ceil(bar.numButtonsShowable / bar.numRows) * (width + padding)) - padding))
+        bar:SetHeight(scale * ((width + padding) * bar.numRows - padding))
+    else
+        bar:SetHeight(scale * ((math.ceil(bar.numButtonsShowable / bar.numRows) * (width + padding)) - padding))
+        bar:SetWidth(scale * ((width + padding) * bar.numRows - padding))
+    end
+
+    for i=1, 12 do
+        local container = _G[bar:GetName().."ButtonContainer"..i]
+        if not container then return end
+
+        if bar.isHorizontal then
+            Util.PositionFromIndex(i-1, container, bar, "TOPLEFT", "TOPLEFT", "RIGHT", "DOWN",
+                container:GetWidth(), container:GetHeight(), dbEntry.Padding, 0, 0, math.ceil(bar.numButtonsShowable / bar.numRows))
+        else
+            Util.PositionFromIndex(i-1, container, bar, "TOPLEFT", "TOPLEFT", "RIGHT", "DOWN",
+                container:GetWidth(), container:GetHeight(), dbEntry.Padding, 0, 0, bar.numRows)
+        end
+    end
+end
+
 function AB.UpdateBar(bar)
     local dbEntry = CUI.DB.profile.ActionBars[bar:GetName()]
     local button = AB.ActionBars[bar]
 
-    if bar.numButtonsShowable == 0 then bar.numButtonsShowable = 10 end
-
-    if dbEntry.CustomPadding then
-        local scale = _G[bar:GetName().."ButtonContainer1"]:GetScale()
-        local width = _G[bar:GetName().."ButtonContainer1"]:GetWidth()
-        local padding = dbEntry.Padding
-
-        if bar.isHorizontal then
-            bar:SetWidth(scale * ((math.ceil(bar.numButtonsShowable / bar.numRows) * (width + padding)) - padding))
-            bar:SetHeight(scale * ((width + padding) * bar.numRows - padding))
-        else
-            bar:SetHeight(scale * ((math.ceil(bar.numButtonsShowable / bar.numRows) * (width + padding)) - padding))
-            bar:SetWidth(scale * ((width + padding) * bar.numRows - padding))
-        end
-    end
-
     for i=1, 12 do
         local frame = _G[button..i]
         if not frame then break end
-
-        local container = _G[bar:GetName().."ButtonContainer"..i]
-
-        if dbEntry.CustomPadding then
-            if bar.isHorizontal then
-                Util.PositionFromIndex(i-1, container, bar, "TOPLEFT", "TOPLEFT", "RIGHT", "DOWN",
-                    container:GetWidth(), container:GetHeight(), dbEntry.Padding, 0, 0, math.ceil(bar.numButtonsShowable / bar.numRows))
-            else
-                Util.PositionFromIndex(i-1, container, bar, "TOPLEFT", "TOPLEFT", "RIGHT", "DOWN",
-                    container:GetWidth(), container:GetHeight(), dbEntry.Padding, 0, 0, bar.numRows)
-            end
-        end
 
         local kb = dbEntry.Keybind
         if kb.Enabled then
@@ -182,6 +187,7 @@ function AB.UpdateBarAnchor(bar)
         if not InCombatLockdown() then
             bar:ClearAllPoints()
             bar:SetPoint(dbEntry.AnchorPoint, dbEntry.AnchorFrame, dbEntry.AnchorRelativePoint, dbEntry.PosX, dbEntry.PosY)
+            PositionActionBarFrames(bar)
         end
     end
 end
