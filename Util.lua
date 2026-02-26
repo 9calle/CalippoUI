@@ -5,6 +5,20 @@ local Util = CUI.Util
 
 ---------------------------------------------------------------------------------------------------
 
+local pairs, ipairs = pairs, ipairs
+local string_format = string.format
+local UnitClass = UnitClass
+local UnitReaction = UnitReaction
+local UnitIsPlayer = UnitIsPlayer
+local UnitHealthPercent = UnitHealthPercent
+local UnitPowerType = UnitPowerType
+local C_ClassColor_GetClassColor = C_ClassColor.GetClassColor
+local math_floor = math.floor
+local table_insert = table.insert
+local securecallfunction = securecallfunction
+
+---------------------------------------------------------------------------------------------------
+
 function Util.AddBorder(frame, useLines)
     if useLines then
         frame.Borders = {}
@@ -73,7 +87,7 @@ function Util.GetUnitColor(unit, prioClass)
 
     local _, class = UnitClass(unit)
     if class and (prioClass or UnitIsPlayer(unit)) then
-        local color = C_ClassColor.GetClassColor(class)
+        local color = C_ClassColor_GetClassColor(class)
         r, g, b = color.r, color.g, color.b
     else
         local reaction = UnitReaction(unit, "player")
@@ -105,7 +119,7 @@ function Util.GetUnitPowerColor(unit)
 end
 
 function Util.UnitHealthPercent(unit)
-    return string.format("%0.0f", UnitHealthPercent(unit, true, CurveConstants.ScaleTo100)).."%"
+    return string_format("%0.0f", UnitHealthPercent(unit, true, CurveConstants.ScaleTo100)).."%"
 end
 
 local frameFadeManager = CreateFrame("Frame")
@@ -133,13 +147,13 @@ function Util.FadeFrame(frame, inOut, endAlpha, fadeTime)
 	if securecallfunction(UIFrameFadeContains, frame) then
 		return
 	end
-	tinsert(FADEFRAMES, frame)
+	table.insert(FADEFRAMES, frame)
 	frameFadeManager:SetScript("OnUpdate", UIFrameFade_OnUpdate)
 end
 
 function Util.PositionFromIndex(index, frame, anchorFrame, point, relativePoint, dirH, dirV, frameWidth, frameHeight, padding, offsetX, offsetY, rowLength)
     local x, y
-    local level = math.floor(index/rowLength)
+    local level = math_floor(index/rowLength)
 
     if dirH == "LEFT" then
         x = -(index*(frameWidth+padding))+(level*rowLength*(frameWidth+padding))+offsetX

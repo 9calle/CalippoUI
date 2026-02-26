@@ -7,6 +7,30 @@ local Hide = CUI.Hide
 
 ---------------------------------------------------------------------------------------------------
 
+local pairs, ipairs = pairs, ipairs
+local C_UnitAuras_GetAuraDispelTypeColor = C_UnitAuras.GetAuraDispelTypeColor
+local Util_PositionFromIndex = Util.PositionFromIndex
+local C_StringUtil_TruncateWhenZero = C_StringUtil.TruncateWhenZero
+local CreateColor = CreateColor
+local table_wipe = table.wipe
+local AuraUtil_ForEachAura = AuraUtil.ForEachAura
+local C_UnitAuras_IsAuraFilteredOutByInstanceID = C_UnitAuras.IsAuraFilteredOutByInstanceID
+local UnitGetTotalAbsorbs = UnitGetTotalAbsorbs
+local UnitGetDetailedHealPrediction = UnitGetDetailedHealPrediction
+local UnitHealthMissing = UnitHealthMissing
+local UnitHealth = UnitHealth
+local UnitHealthMax = UnitHealthMax
+local UnitIsDeadOrGhost = UnitIsDeadOrGhost
+local UnitPower = UnitPower
+local UnitPowerMax = UnitPowerMax
+local UnitExists = UnitExists
+local UnitName = UnitName
+local UnitIsFriend = UnitIsFriend
+local C_UnitAuras_GetAuraDataByAuraInstanceID = C_UnitAuras.GetAuraDataByAuraInstanceID
+local AbbreviateNumbers = AbbreviateNumbers
+
+---------------------------------------------------------------------------------------------------
+
 function HideBlizzard()
     Hide.UnregisterChildren(PlayerFrame)
     Hide.HideFrame(PlayerFrame)
@@ -301,14 +325,14 @@ local function IterateAuras(frame, auraTable, pool, type)
             stacksFrame:ClearAllPoints()
             stacksFrame:SetPoint(stacksAP, auraFrame.Overlay, stacksARP, stacksPX, stacksPY)
             stacksFrame:SetFont(stacksFont, stacksSize, stacksOutline)
-            stacksFrame:SetText(C_StringUtil.TruncateWhenZero(aura.applications))
+            stacksFrame:SetText(C_StringUtil_TruncateWhenZero(aura.applications))
         else
             stacksFrame:Hide()
         end
 
         auraFrame.Cooldown:SetCooldownFromExpirationTime(aura.expirationTime, aura.duration)
 
-        Util.PositionFromIndex(index, auraFrame, frame, anchorPoint, anchorRelativePoint, dirH, dirV, size, size, padding, posX, posY, rowLength)
+        Util_PositionFromIndex(index, auraFrame, frame, anchorPoint, anchorRelativePoint, dirH, dirV, size, size, padding, posX, posY, rowLength)
 
         index = index + 1
 	end
@@ -317,7 +341,7 @@ end
 local function ProcessAura(unit, aura)
     if not aura then return end
 
-    local color = C_UnitAuras.GetAuraDispelTypeColor(unit, aura.auraInstanceID, dispelColorCurve)
+    local color = C_UnitAuras_GetAuraDispelTypeColor(unit, aura.auraInstanceID, dispelColorCurve)
 
     if color then
         aura.borderColor = color
@@ -329,8 +353,8 @@ end
 local function AddAllAuras(frame)
     local dbEntry = CUI.DB.profile.UnitFrames[frame.name]
     local unit = frame.unit
-    table.wipe(frame.buffs)
-    table.wipe(frame.debuffs)
+    table_wipe(frame.buffs)
+    table_wipe(frame.debuffs)
 
     local function AddBuff(aura)
         ProcessAura(unit, aura)
@@ -343,14 +367,14 @@ local function AddAllAuras(frame)
 	end
 
     if dbEntry.Buffs.Enabled then
-	    AuraUtil.ForEachAura(unit, buffFilter, nil, AddBuff, true)
+	    AuraUtil_ForEachAura(unit, buffFilter, nil, AddBuff, true)
     end
 
     if dbEntry.Debuffs.Enabled then
         if UnitIsFriend("player", unit) then
-            AuraUtil.ForEachAura(unit, debuffFilter, nil, AddDebuff, true)
+            AuraUtil_ForEachAura(unit, debuffFilter, nil, AddDebuff, true)
         else
-            AuraUtil.ForEachAura(unit, debuffFilterPlayerOnly, nil, AddDebuff, true)
+            AuraUtil_ForEachAura(unit, debuffFilterPlayerOnly, nil, AddDebuff, true)
         end
     end
 end
@@ -373,19 +397,19 @@ function UF.UpdateAuras(frame, updateInfo)
         if updateInfo.addedAuras then
             for i=1, #updateInfo.addedAuras do
                 local aura = updateInfo.addedAuras[i]
-                if buffsEnabled and not C_UnitAuras.IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, buffFilter) then
+                if buffsEnabled and not C_UnitAuras_IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, buffFilter) then
                     ProcessAura(unit, aura)
                     frame.buffs[aura.auraInstanceID] = aura
                     buffsChanged = true
                 elseif debuffsEnabled then
                     if UnitIsFriend("player", unit) then
-                        if not C_UnitAuras.IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, debuffFilter) then
+                        if not C_UnitAuras_IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, debuffFilter) then
                             ProcessAura(unit, aura)
                             frame.debuffs[aura.auraInstanceID] = aura
                             debuffsChanged = true
                         end
                     else
-                        if not C_UnitAuras.IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, debuffFilterPlayerOnly) then
+                        if not C_UnitAuras_IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, debuffFilterPlayerOnly) then
                             ProcessAura(unit, aura)
                             frame.debuffs[aura.auraInstanceID] = aura
                             debuffsChanged = true
@@ -399,12 +423,12 @@ function UF.UpdateAuras(frame, updateInfo)
             for i=1, #updateInfo.updatedAuraInstanceIDs do
                 local id = updateInfo.updatedAuraInstanceIDs[i]
 				if frame.buffs[id] then
-					local newAura = C_UnitAuras.GetAuraDataByAuraInstanceID(unit, id)
+					local newAura = C_UnitAuras_GetAuraDataByAuraInstanceID(unit, id)
                     ProcessAura(unit, newAura)
                     frame.buffs[id] = newAura
                     buffsChanged = true
                 elseif frame.debuffs[id] then
-                    local newAura = C_UnitAuras.GetAuraDataByAuraInstanceID(unit, id)
+                    local newAura = C_UnitAuras_GetAuraDataByAuraInstanceID(unit, id)
                     ProcessAura(unit, newAura)
                     frame.debuffs[id] = newAura
                     debuffsChanged = true

@@ -3,6 +3,8 @@ local addonName, CUI = ...
 CUI.Misc = {}
 local Misc = CUI.Misc
 
+local GetCursorPosition = GetCursorPosition
+
 function Misc.UpdateCursorRing()
     local dbEntry = CUI.DB.profile.Miscellaneous.CursorRing
 
@@ -27,11 +29,6 @@ local function SetupCursorRing()
     t:SetAllPoints(f)
 
     Misc.UpdateCursorRing()
-
-    -- local ticker = C_Timer.NewTicker(0.01, function()
-    --     local x, y = GetCursorPosition()
-    --     f:SetPoint("CENTER", UIParent, "BOTTOMLEFT", x, y)
-    -- end)
 
     f:SetScript("OnUpdate", function(self)
         local x, y = GetCursorPosition()

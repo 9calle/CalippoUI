@@ -7,6 +7,23 @@ local Util = CUI.Util
 
 ---------------------------------------------------------------------------------------------------
 
+local table_sort = table.sort
+local GetRuneCooldown = GetRuneCooldown
+local UnitPower = UnitPower
+local UnitPowerMax = UnitPowerMax
+local UnitPowerPercent = UnitPowerPercent
+local AbbreviateNumbers = AbbreviateNumbers
+local UnitPowerType = UnitPowerType
+local Util_GetUnitPowerColor = Util.GetUnitPowerColor
+local GetPowerRegenForPowerType = GetPowerRegenForPowerType
+local UnitStagger = UnitStagger
+local UnitHealthMax = UnitHealthMax
+local math_floor = math.floor
+local GetUnitChargedPowerPoints = GetUnitChargedPowerPoints
+local C_UnitAuras_GetPlayerAuraBySpellID = C_UnitAuras.GetPlayerAuraBySpellID
+
+---------------------------------------------------------------------------------------------------
+
 function RB.UpdateAlpha(frame, inCombat)
     local frameName = frame:GetName()
     local dbEntry = CUI.DB.profile.ResourceBars
@@ -60,9 +77,6 @@ local function UpdatePower(frame)
 end
 
 local function UpdateMaxPower(frame)
-    local _, powerType = UnitPowerType("player")
-    frame.powerType = powerType
-
     frame:SetMinMaxValues(0, UnitPowerMax("player"))
     UpdatePower(frame)
 end
@@ -70,7 +84,7 @@ end
 local function UpdatePowerColor(frame)
     local dbEntry = CUI.DB.profile.ResourceBars.PrimaryResourceBar
 
-    local r, g, b = Util.GetUnitPowerColor("player")
+    local r, g, b = Util_GetUnitPowerColor("player")
     frame:SetStatusBarColor(r, g, b)
 
     if dbEntry.CustomBackgroundColor then
@@ -148,7 +162,7 @@ local runeOrder = {
 }
 
 local function UpdateRunes(frame)
-    table.sort(runeOrder, SortRunes)
+    table_sort(runeOrder, SortRunes)
 
     local color = frame.Power.Color
     local altColor = frame.Power.AltColor
@@ -207,7 +221,7 @@ end
 
 local function UpdateSoulShards(frame)
     local power = UnitPower("player", frame.Power.Value, true)
-    local wholeShards = math.floor(power/10)
+    local wholeShards = math_floor(power/10)
     local partsOfShard = power % 10
 
     local color = frame.Power.Color
@@ -274,7 +288,7 @@ local function UpdateRogueComboPoints(frame)
 end
 
 local function UpdateMalestromWeapon(frame)
-    local msw = C_UnitAuras.GetPlayerAuraBySpellID(344179)
+    local msw = C_UnitAuras_GetPlayerAuraBySpellID(344179)
 
     if msw then
         local apps = msw.applications

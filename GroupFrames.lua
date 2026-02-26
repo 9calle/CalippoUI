@@ -7,6 +7,31 @@ local Hide = CUI.Hide
 
 ---------------------------------------------------------------------------------------------------------------------------------
 
+local pairs, ipairs = pairs, ipairs
+local C_UnitAuras_GetAuraDispelTypeColor = C_UnitAuras.GetAuraDispelTypeColor
+local Util_PositionFromIndex = Util.PositionFromIndex
+local C_StringUtil_TruncateWhenZero = C_StringUtil.TruncateWhenZero
+local CreateColor = CreateColor
+local table_wipe = table.wipe
+local AuraUtil_ForEachAura = AuraUtil.ForEachAura
+local C_UnitAuras_IsAuraFilteredOutByInstanceID = C_UnitAuras.IsAuraFilteredOutByInstanceID
+local UnitGetTotalAbsorbs = UnitGetTotalAbsorbs
+local UnitGetDetailedHealPrediction = UnitGetDetailedHealPrediction
+local UnitHealthMissing = UnitHealthMissing
+local UnitHealth = UnitHealth
+local UnitHealthMax = UnitHealthMax
+local UnitAffectingCombat = UnitAffectingCombat
+local UnitInRange = UnitInRange
+local UnitIsDeadOrGhost = UnitIsDeadOrGhost
+local UnitThreatSituation = UnitThreatSituation
+local UnitPower = UnitPower
+local UnitPowerMax = UnitPowerMax
+local UnitClass = UnitClass
+local UnitExists = UnitExists
+local UnitName = UnitName
+
+---------------------------------------------------------------------------------------------------------------------------------
+
 local function HideBlizzard()
     Hide.HideBlizzardParty()
     Hide.HideBlizzardRaid()
@@ -69,7 +94,7 @@ local playerDispellableFilter = "HARMFUL|RAID_PLAYER_DISPELLABLE"
 
 local function UpdateDispel(frame)
     for id, aura in pairs(frame.dispels) do
-        local dispelColor = C_UnitAuras.GetAuraDispelTypeColor(frame.unit, aura.auraInstanceID, dispelColorCurveGradient)
+        local dispelColor = C_UnitAuras_GetAuraDispelTypeColor(frame.unit, aura.auraInstanceID, dispelColorCurveGradient)
         if dispelColor then
             frame.Overlay.DispelGradient:SetColorTexture(dispelColor.r, dispelColor.g, dispelColor.b, dispelColor.a)
             frame.Overlay.DispelGradient:Show()
@@ -120,7 +145,7 @@ local function IterateAuras(frame, auraTable, pool, type)
 
         if type == "Debuffs" then
             -- local c = aura.borderColor
-            local color = C_UnitAuras.GetAuraDispelTypeColor(frame.unit, id, dispelColorCurve)
+            local color = C_UnitAuras_GetAuraDispelTypeColor(frame.unit, id, dispelColorCurve)
             if color then
                 auraFrame.Overlay.Backdrop:SetBackdropBorderColor(color.r, color.g, color.b, color.a)
             else
@@ -139,14 +164,14 @@ local function IterateAuras(frame, auraTable, pool, type)
             stacksFrame:ClearAllPoints()
             stacksFrame:SetPoint(stacksAP, auraFrame.Overlay, stacksARP, stacksPX, stacksPY)
             stacksFrame:SetFont(stacksFont, stacksSize, stacksOutline)
-            stacksFrame:SetText(C_StringUtil.TruncateWhenZero(aura.applications))
+            stacksFrame:SetText(C_StringUtil_TruncateWhenZero(aura.applications))
         else
             stacksFrame:Hide()
         end
 
         auraFrame.Cooldown:SetCooldownFromExpirationTime(aura.expirationTime, aura.duration)
 
-        Util.PositionFromIndex(index, auraFrame, frame, anchorPoint, anchorRelativePoint, dirH, dirV, size, size, padding, posX, posY, rowLength)
+        Util_PositionFromIndex(index, auraFrame, frame, anchorPoint, anchorRelativePoint, dirH, dirV, size, size, padding, posX, posY, rowLength)
 
         index = index + 1
 	end)
@@ -155,7 +180,7 @@ end
 local function ProcessAura(unit, aura)
     if not aura then return end
 
-    local color = C_UnitAuras.GetAuraDispelTypeColor(unit, aura.auraInstanceID, dispelColorCurve)
+    local color = C_UnitAuras_GetAuraDispelTypeColor(unit, aura.auraInstanceID, dispelColorCurve)
 
     if color then
         aura.borderColor = color
@@ -170,7 +195,7 @@ local function AddAllAuras(frame)
     -- table.wipe(frame.buffs)
     -- table.wipe(frame.debuffs)
     -- table.wipe(frame.defensives)
-    table.wipe(frame.dispels)
+    table_wipe(frame.dispels)
 
     -- local function AddBuff(aura)
     --     ProcessAura(unit, aura)
@@ -191,7 +216,7 @@ local function AddAllAuras(frame)
         frame.dispels[aura.auraInstanceID] = aura
     end
 
-    AuraUtil.ForEachAura(unit, playerDispellableFilter, nil, AddDispel, true)
+    AuraUtil_ForEachAura(unit, playerDispellableFilter, nil, AddDispel, true)
 
     -- if dbEntry.Buffs.Enabled then
     --     if UnitAffectingCombat("player") then
@@ -292,7 +317,7 @@ local function UpdateAuras(frame, updateInfo)
 
                 -- TODO : Optimera?
 
-                if not C_UnitAuras.IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, playerDispellableFilter) then
+                if not C_UnitAuras_IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, playerDispellableFilter) then
                     frame.dispels[aura.auraInstanceID] = aura
                     dispelChanged = true
                 end
@@ -421,7 +446,7 @@ local function UpdatePrivateAuraAnchors(frame, showTest)
     for i=1, 6 do
         local container = frame.Overlay["PrivateAuraContainer"..i]
         container:SetSize(size, size)
-        Util.PositionFromIndex(i-1, container, frame.Overlay, anchorPoint, anchorRelativePoint, dirH, dirV, size, size, padding, posX, posY, rowLength)
+        Util_PositionFromIndex(i-1, container, frame.Overlay, anchorPoint, anchorRelativePoint, dirH, dirV, size, size, padding, posX, posY, rowLength)
 
         if showTest == true then
             container.TestTexture:Show()
@@ -455,7 +480,7 @@ local function SetupPrivateAnchors(frame)
         local container = CreateFrame("Frame", nil, frame.Overlay)
         container:SetParentKey("PrivateAuraContainer"..i)
         container:SetSize(size, size)
-        Util.PositionFromIndex(i-1, container, frame.Overlay, anchorPoint, anchorRelativePoint, dirH, dirV, size, size, padding, posX, posY, rowLength)
+        Util_PositionFromIndex(i-1, container, frame.Overlay, anchorPoint, anchorRelativePoint, dirH, dirV, size, size, padding, posX, posY, rowLength)
 
         local texture = container:CreateTexture(nil, "OVERLAY")
         texture:SetParentKey("TestTexture")
@@ -1084,7 +1109,7 @@ function GF.SortGroupFrames(groupFramesContainer)
 
     for i=1, #groupFramesContainer.frames do
         local frame = groupFramesContainer.frames[i]
-        Util.PositionFromIndex(i-1, frame, groupFramesContainer, "TOPLEFT", "TOPLEFT", dirH, dirV, width, height, padding, 0, 0, rL)
+        Util_PositionFromIndex(i-1, frame, groupFramesContainer, "TOPLEFT", "TOPLEFT", dirH, dirV, width, height, padding, 0, 0, rL)
     end
 end
 

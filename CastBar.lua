@@ -7,6 +7,11 @@ local Hide = CUI.Hide
 
 ---------------------------------------------------------------------------------------------------
 
+local UnitChannelDuration = UnitChannelDuration
+local UnitCastingDuration = UnitCastingDuration
+
+---------------------------------------------------------------------------------------------------
+
 local function HideBlizzard()
     Hide.UnregisterChildren(PlayerCastingBarFrame)
     Hide.HideFrame(PlayerCastingBarFrame)
