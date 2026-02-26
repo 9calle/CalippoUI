@@ -1991,6 +1991,20 @@ local function CreatePlayerAuraSettings(container)
             PA.UpdateAlpha(DebuffFrame)
         end, 0.5)
 
+    local textGroup = CreateInlineGroup(scrollFrame, "Text")
+
+    CreateDropDown(textGroup, "Font", dbEntry.Font, fonts,
+        function(self, event, value)
+            dbEntry.Font = value
+            PA.StyleBuffsAndDebuffs()
+        end, 0.5)
+
+    CreateDropDown(textGroup, "Outline", dbEntry.Outline, outlines,
+        function(self, event, value)
+            dbEntry.Outline = value
+            PA.StyleBuffsAndDebuffs()
+        end, 0.5)
+
     scrollFrame:DoLayout()
 end
 

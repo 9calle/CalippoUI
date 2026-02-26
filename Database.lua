@@ -1021,6 +1021,9 @@ local defaults = {
 
             Alpha = 1,
             CombatAlpha = 1,
+
+            Font = defaultFont,
+            Outline = "",
         },
         Minimap = {
             Enabled = true,

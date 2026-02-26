@@ -19,6 +19,8 @@ end
 ---------------------------------------------------------------------------------------------------
 
 local function StyleFrame(frame)
+    local dbEntry = CUI.DB.profile.PlayerAuras
+
     frame.Icon:SetTexCoord(.08, .92, .08, .92)
 
     if not frame.Overlay then
@@ -28,10 +30,10 @@ local function StyleFrame(frame)
         Util.AddBorder(overlay, true)
     end
 
-    frame.Count:SetFont("Interface/AddOns/CalippoUI/Fonts/FiraSans-Medium.ttf", 12, "Outline")
+    frame.Count:SetFont(dbEntry.Font, 12, dbEntry.Outline)
     frame.Count:SetPoint("BOTTOMRIGHT", frame.Icon, "BOTTOMRIGHT")
 
-    frame.Duration:SetFont("Interface/AddOns/CalippoUI/Fonts/FiraSans-Medium.ttf", 12, "")
+    frame.Duration:SetFont(dbEntry.Font, 12, dbEntry.Outline)
 
     if frame.DebuffBorder then
         frame.DebuffBorder:Hide()
@@ -52,7 +54,7 @@ local function AddCombatAlpha(frame)
     PA.UpdateAlpha(frame)
 end
 
-local function StyleBuffsAndDebuffs()
+function PA.StyleBuffsAndDebuffs()
     for _, frame in pairs({BuffFrame.AuraContainer:GetChildren()}) do
         StyleFrame(frame)
     end
@@ -77,7 +79,7 @@ function PA.Load()
     AddCombatAlpha(BuffFrame)
     AddCombatAlpha(DebuffFrame)
 
-    StyleBuffsAndDebuffs()
+    PA.StyleBuffsAndDebuffs()
 
     hooksecurefunc(DebuffFrame, "Update", function()
         StyleDebuffs()
