@@ -66,7 +66,7 @@ end
 local function PositionActionBarFrames(bar)
     local dbEntry = CUI.DB.profile.ActionBars[bar:GetName()]
 
-    if not dbEntry.CustomPadding then return end
+    if InCombatLockdown() or not dbEntry.CustomPadding then return end
 
     if bar.numButtonsShowable == 0 then bar.numButtonsShowable = 10 end
 
