@@ -68,17 +68,18 @@ local function PositionActionBarFrames(bar)
 
     if InCombatLockdown() or not dbEntry.CustomPadding then return end
 
-    if bar.numButtonsShowable == 0 then bar.numButtonsShowable = 10 end
+    local numShowable = bar.numButtonsShowable
+    if numShowable == 0 then numShowable = 10 end
 
     local scale = _G[bar:GetName().."ButtonContainer1"]:GetScale()
     local width = _G[bar:GetName().."ButtonContainer1"]:GetWidth()
     local padding = dbEntry.Padding
 
     if bar.isHorizontal then
-        bar:SetWidth(scale * ((math.ceil(bar.numButtonsShowable / bar.numRows) * (width + padding)) - padding))
+        bar:SetWidth(scale * ((math.ceil(numShowable / bar.numRows) * (width + padding)) - padding))
         bar:SetHeight(scale * ((width + padding) * bar.numRows - padding))
     else
-        bar:SetHeight(scale * ((math.ceil(bar.numButtonsShowable / bar.numRows) * (width + padding)) - padding))
+        bar:SetHeight(scale * ((math.ceil(numShowable / bar.numRows) * (width + padding)) - padding))
         bar:SetWidth(scale * ((width + padding) * bar.numRows - padding))
     end
 
@@ -88,7 +89,7 @@ local function PositionActionBarFrames(bar)
 
         if bar.isHorizontal then
             Util.PositionFromIndex(i-1, container, bar, "TOPLEFT", "TOPLEFT", "RIGHT", "DOWN",
-                container:GetWidth(), container:GetHeight(), dbEntry.Padding, 0, 0, math.ceil(bar.numButtonsShowable / bar.numRows))
+                container:GetWidth(), container:GetHeight(), dbEntry.Padding, 0, 0, math.ceil(numShowable / bar.numRows))
         else
             Util.PositionFromIndex(i-1, container, bar, "TOPLEFT", "TOPLEFT", "RIGHT", "DOWN",
                 container:GetWidth(), container:GetHeight(), dbEntry.Padding, 0, 0, bar.numRows)
@@ -99,6 +100,9 @@ end
 function AB.UpdateBar(bar)
     local dbEntry = CUI.DB.profile.ActionBars[bar:GetName()]
     local button = AB.ActionBars[bar]
+
+    bar:SetMovable(true)
+    bar:SetUserPlaced(true)
 
     for i=1, 12 do
         local frame = _G[button..i]
@@ -194,6 +198,14 @@ end
 
 ---------------------------------------------------------------------------------------------------
 
+local function StyleButtons()
+    for bar, _ in pairs(AB.ActionBars) do
+        AB.UpdateBar(bar)
+        AB.UpdateBarAnchor(bar)
+    end
+end
+
+
 local function AddHooks()
     for bar, button in pairs(AB.ActionBars) do
         for i=1, 12 do
@@ -218,14 +230,11 @@ local function AddHooks()
         end)
 
         AB.UpdateAlpha(bar)
-        hooksecurefunc(bar, "SetPoint", function(self)
-            local dbEntry = CUI.DB.profile.ActionBars[bar:GetName()]
-            local point, anchorFrame = bar:GetPoint()
-            if dbEntry.ShouldAnchor and (point ~= dbEntry.AnchorPoint or anchorFrame:GetName() ~= dbEntry.AnchorFrame) then
-                AB.UpdateBarAnchor(self)
-            end
-        end)
     end
+
+    EditModeManagerFrame:HookScript("OnHide", function(self)
+        StyleButtons()
+    end)
 
     MicroMenu:HookScript("OnEnter", function() Util.FadeFrame(MicroMenu, "IN", 1, 0.3) end)
     MicroMenu:HookScript("OnLeave", function() AB.UpdateAlpha(MicroMenu) end)
@@ -260,13 +269,6 @@ local function StyleXPBar()
             frame.OverlayFrame.Text:SetFont("Interface/AddOns/CalippoUI/Fonts/FiraSans-Medium.ttf", 10, "")
             frame.OverlayFrame.Text:SetPoint("CENTER", MainStatusTrackingBarContainer, "CENTER", 0, -1)
         end
-    end
-end
-
-local function StyleButtons()
-    for bar, _ in pairs(AB.ActionBars) do
-        AB.UpdateBar(bar)
-        AB.UpdateBarAnchor(bar)
     end
 end
 
