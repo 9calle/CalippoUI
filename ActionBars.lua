@@ -68,9 +68,15 @@ function AB.UpdateBarAnchor(bar)
 
     if InCombatLockdown() then return end
 
-    if dbEntry.ShouldAnchor then
+    local point, anchorFrame = bar:GetPoint()
+    if dbEntry.ShouldAnchor and (point ~= dbEntry.AnchorPoint or anchorFrame:GetName() ~= dbEntry.AnchorFrame) then
         Util.CheckAnchorFrame(bar, dbEntry)
 
+        bar.layoutIndex = nil
+        bar:SetParent(UIParent)
+        bar:SetMovable(true)
+        bar:SetUserPlaced(true)
+        bar:SetAttribute("ignoreFramePositionManager", true)
         bar:ClearAllPoints()
         bar:SetPoint(dbEntry.AnchorPoint, dbEntry.AnchorFrame, dbEntry.AnchorRelativePoint, dbEntry.PosX, dbEntry.PosY)
     end
@@ -96,6 +102,8 @@ function AB.UpdateBarAnchor(bar)
         local container = _G[bar:GetName().."ButtonContainer"..i]
         if not container then return end
 
+        container:ClearAllPoints()
+
         if bar.isHorizontal then
             Util.PositionFromIndex(i-1, container, bar, "TOPLEFT", "TOPLEFT", "RIGHT", "DOWN",
                 container:GetWidth(), container:GetHeight(), dbEntry.Padding, 0, 0, math.ceil(numShowable / bar.numRows))
@@ -109,9 +117,6 @@ end
 function AB.UpdateBar(bar)
     local dbEntry = CUI.DB.profile.ActionBars[bar:GetName()]
     local button = AB.ActionBars[bar]
-
-    bar:SetMovable(true)
-    bar:SetUserPlaced(true)
 
     for i=1, 12 do
         local frame = _G[button..i]
@@ -216,13 +221,18 @@ local function AddHooks()
         bar:RegisterEvent("PLAYER_REGEN_ENABLED")
         bar:RegisterEvent("PLAYER_REGEN_DISABLED")
         bar:RegisterEvent("PLAYER_ENTERING_WORLD")
+        bar:RegisterEvent("TRAIT_CONFIG_UPDATED")
+        bar:RegisterEvent("ACTIVE_PLAYER_SPECIALIZATION_CHANGED")
+        bar:RegisterEvent("PLAYER_PVP_TALENT_UPDATE")
         bar:HookScript("OnEvent", function(self, event)
             if event == "PLAYER_REGEN_ENABLED" then
                 AB.UpdateAlpha(self)
             elseif event == "PLAYER_REGEN_DISABLED" then
                 AB.UpdateAlpha(self, true)
-            elseif event == "PLAYER_ENTERING_WORLD" then
-                AB.UpdateBarAnchor(self)
+            elseif event == "PLAYER_ENTERING_WORLD" or event == "TRAIT_CONFIG_UPDATED" or event == "ACTIVE_PLAYER_SPECIALIZATION_CHANGED" or event == "PLAYER_PVP_TALENT_UPDATE" then
+                C_Timer.After(0.1, function()
+                    AB.UpdateBarAnchor(self)
+                end)
             end
         end)
 
