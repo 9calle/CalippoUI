@@ -215,11 +215,14 @@ local function AddHooks()
 
         bar:RegisterEvent("PLAYER_REGEN_ENABLED")
         bar:RegisterEvent("PLAYER_REGEN_DISABLED")
+        bar:RegisterEvent("PLAYER_ENTERING_WORLD")
         bar:HookScript("OnEvent", function(self, event)
             if event == "PLAYER_REGEN_ENABLED" then
                 AB.UpdateAlpha(self)
             elseif event == "PLAYER_REGEN_DISABLED" then
                 AB.UpdateAlpha(self, true)
+            elseif event == "PLAYER_ENTERING_WORLD" then
+                AB.UpdateBarAnchor(self)
             end
         end)
 
