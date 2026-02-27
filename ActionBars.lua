@@ -63,10 +63,19 @@ function AB.UpdateAlpha(frame, inCombat)
     end
 end
 
-local function PositionActionBarFrames(bar)
+function AB.UpdateBarAnchor(bar)
     local dbEntry = CUI.DB.profile.ActionBars[bar:GetName()]
 
-    if InCombatLockdown() or not dbEntry.CustomPadding then return end
+    if InCombatLockdown() then return end
+
+    if dbEntry.ShouldAnchor then
+        Util.CheckAnchorFrame(bar, dbEntry)
+
+        bar:ClearAllPoints()
+        bar:SetPoint(dbEntry.AnchorPoint, dbEntry.AnchorFrame, dbEntry.AnchorRelativePoint, dbEntry.PosX, dbEntry.PosY)
+    end
+
+    if not dbEntry.CustomPadding then return end
 
     local numShowable = bar.numButtonsShowable
     if numShowable == 0 then numShowable = 10 end
@@ -182,20 +191,6 @@ function AB.UpdateBar(bar)
     end
 end
 
-function AB.UpdateBarAnchor(bar)
-    local dbEntry = CUI.DB.profile.ActionBars[bar:GetName()]
-
-    if dbEntry.ShouldAnchor then
-        Util.CheckAnchorFrame(bar, dbEntry)
-
-        if not InCombatLockdown() then
-            bar:ClearAllPoints()
-            bar:SetPoint(dbEntry.AnchorPoint, dbEntry.AnchorFrame, dbEntry.AnchorRelativePoint, dbEntry.PosX, dbEntry.PosY)
-            PositionActionBarFrames(bar)
-        end
-    end
-end
-
 ---------------------------------------------------------------------------------------------------
 
 local function StyleButtons()
@@ -204,7 +199,6 @@ local function StyleButtons()
         AB.UpdateBarAnchor(bar)
     end
 end
-
 
 local function AddHooks()
     for bar, button in pairs(AB.ActionBars) do
