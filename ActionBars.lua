@@ -284,6 +284,8 @@ end
 function AB.Load()
     HideBlizzard()
 
+    MainMenuBarVehicleLeaveButton:SetParent(UIParent)
+
     AddHooks()
     StyleButtons()
 
