@@ -36,6 +36,20 @@ local function SetupCursorRing()
     end)
 end
 
+local function SetupFastLoot()
+    local f = CreateFrame("Frame")
+    f:RegisterEvent("LOOT_READY")
+
+    f:SetScript("OnEvent", function()
+        for i=1, GetNumLootItems() do
+            LootSlot(i)
+        end
+
+        CloseLoot()
+    end)
+end
+
 function Misc.Load()
     SetupCursorRing()
+    SetupFastLoot()
 end
