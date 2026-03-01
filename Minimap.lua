@@ -3,6 +3,7 @@ local addonName, CUI = ...
 CUI.MM = {}
 local MM = CUI.MM
 local Util = CUI.Util
+local Conf = CUI.Conf
 
 ---------------------------------------------------------------------------------------------------
 
@@ -115,6 +116,13 @@ local function SetupMinimap()
     hooksecurefunc(QueueStatusButton, "UpdatePosition", function(self)
         self:ClearAllPoints()
         self:SetPoint("CENTER", Minimap, "BOTTOMLEFT")
+    end)
+
+    local configButton = CreateFrame("Button", nil, Minimap)
+    configButton:SetSize(40, 20)
+    configButton:SetPoint("BOTTOMLEFT")
+    configButton:SetScript("OnClick", function()
+        Conf.Load()
     end)
 end
 

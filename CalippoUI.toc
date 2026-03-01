@@ -22,10 +22,10 @@ Chat.lua
 CooldownManager.lua
 ResourceBars.lua
 CastBar.lua
-Minimap.lua
 PlayerAuras.lua
 Miscellaneous.lua
 
 Config.lua
+Minimap.lua
 
 OnLoad.lua
