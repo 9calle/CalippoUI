@@ -1201,6 +1201,11 @@ local defaults = {
         Miscellaneous = {
             Enabled = true,
 
+            General = {
+                AutoQuestGossip = false,
+                AutoRepairVendor = true,
+            },
+
             CursorRing = {
                 Enabled = true,
 

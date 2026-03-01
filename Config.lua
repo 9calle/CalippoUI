@@ -2135,19 +2135,31 @@ local function CreateCursorRingPage(container)
     scrollFrame:DoLayout()
 end
 
-local function CreateCVarPage(container)
-    local dbEntry = CUI.DB.profile.Miscellaneous.CursorRing
+local function CreateGeneralPage(container)
+    local dbEntry = CUI.DB.profile.Miscellaneous.General
 
     local scrollFrame = AceGUI:Create("ScrollFrame")
     scrollFrame:SetLayout("List")
     container:AddChild(scrollFrame)
 
-    local group = CreateInlineGroup(scrollFrame, "")
+    local cvarGroup = CreateInlineGroup(scrollFrame, "CVars")
 
-    CreateSlider(group, "Spell Queue Window", 0, 400, 1, C_CVar.GetCVar("SpellQueueWindow"),
+    CreateSlider(cvarGroup, "Spell Queue Window", 0, 400, 1, C_CVar.GetCVar("SpellQueueWindow"),
         function(self, event, value)
             SetCVar("SpellQueueWindow", value)
         end, 1)
+
+    local miscGroup = CreateInlineGroup(scrollFrame, "Stuffs")
+
+    CreateCheckBox(miscGroup, "Auto accept/turn-in quests", dbEntry.AutoQuestGossip,
+        function(self, event, value)
+            dbEntry.AutoQuestGossip = value
+        end, 0.5)
+
+    CreateCheckBox(miscGroup, "Auto repair/vendor trash", dbEntry.AutoRepairVendor,
+        function(self, event, value)
+            dbEntry.AutoRepairVendor = value
+        end, 0.5)
 
     scrollFrame:DoLayout()
 end
@@ -2157,17 +2169,17 @@ local function CreateMiscellaneousSettings(container)
         container:ReleaseChildren()
         if value == "CursorRing" then
             CreateCursorRingPage(container)
-        elseif value == "CVar" then
-            CreateCVarPage(container)
+        elseif value == "General" then
+            CreateGeneralPage(container)
         end
     end
 
     local tabGroup = AceGUI:Create("TabGroup")
     tabGroup:SetLayout("Fill")
-    tabGroup:SetTabs({{text="CVar", value="CVar"},
+    tabGroup:SetTabs({{text="General", value="General"},
                     {text="Cursor Ring", value="CursorRing"},})
     tabGroup:SetCallback("OnGroupSelected", SelectGroup)
-    tabGroup:SelectTab("CVar")
+    tabGroup:SelectTab("General")
 
     container:AddChild(tabGroup)
 end

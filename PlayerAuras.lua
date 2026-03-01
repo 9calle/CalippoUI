@@ -31,7 +31,7 @@ local function StyleFrame(frame)
     end
 
     frame.Count:SetFont(dbEntry.Font, 12, dbEntry.Outline)
-    frame.Count:SetPoint("BOTTOMRIGHT", frame.Icon, "BOTTOMRIGHT")
+    frame.Count:SetPoint("BOTTOMRIGHT", frame.Icon, "BOTTOMRIGHT", -1, 0)
 
     frame.Duration:SetFont(dbEntry.Font, 12, dbEntry.Outline)
 
