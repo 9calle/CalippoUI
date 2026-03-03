@@ -189,7 +189,7 @@ function AB.UpdateBar(bar)
             self:Hide()
         end)
 
-        if CUI.DB.global then
+        if CUI.DB.global.ZoomIcons then
             frame.icon:SetTexCoord(.08, .92, .08, .92)
         end
 
