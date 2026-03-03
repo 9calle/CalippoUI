@@ -21,7 +21,9 @@ end
 local function StyleFrame(frame)
     local dbEntry = CUI.DB.profile.PlayerAuras
 
-    frame.Icon:SetTexCoord(.08, .92, .08, .92)
+    if CUI.DB.global.ZoomIcons then
+        frame.Icon:SetTexCoord(.08, .92, .08, .92)
+    end
 
     if not frame.Overlay then
         local overlay = CreateFrame("Frame", nil, frame)

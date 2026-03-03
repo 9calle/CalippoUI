@@ -297,6 +297,8 @@ local function IterateAuras(frame, auraTable, pool, type)
     local stacksOutline = dbEntry.Stacks.Outline
     local stacksSize = dbEntry.Stacks.Size
 
+    local zoomIcons = CUI.DB.global.ZoomIcons
+
     pool:ReleaseAll()
 
     local index = 0
@@ -317,7 +319,9 @@ local function IterateAuras(frame, auraTable, pool, type)
         auraFrame.Overlay.Backdrop:SetBackdropBorderColor(c.r, c.g, c.b, c.a)
 
         auraFrame.Icon:SetTexture(aura.icon)
-        auraFrame.Icon:SetTexCoord(.08, .92, .08, .92)
+        if zoomIcons then
+            auraFrame.Icon:SetTexCoord(.08, .92, .08, .92)
+        end
 
         local stacksFrame = auraFrame.Overlay.Count
         if stacksEnabled then
@@ -850,7 +854,9 @@ function SetupCastBar(unitFrame)
     local icon = iconContainer:CreateTexture(nil, "ARTWORK")
     icon:SetParentKey("Icon")
     icon:SetAllPoints(iconContainer)
-    icon:SetTexCoord(.08, .92, .08, .92)
+    if CUI.DB.global.ZoomIcons then
+        icon:SetTexCoord(.08, .92, .08, .92)
+    end
 
     local castBar = CreateFrame("Statusbar", nil, castBarContainer)
     castBar:SetParentKey("Bar")

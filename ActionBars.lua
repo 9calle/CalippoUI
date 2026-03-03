@@ -189,7 +189,10 @@ function AB.UpdateBar(bar)
             self:Hide()
         end)
 
-        frame.icon:SetTexCoord(.08, .92, .08, .92)
+        if CUI.DB.global then
+            frame.icon:SetTexCoord(.08, .92, .08, .92)
+        end
+
         if not frame.BackdropBorder then
             Util.AddBorder(frame)
         end

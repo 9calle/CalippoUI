@@ -493,6 +493,13 @@ local function CreateGeneralSettings(container)
     reloadButton:SetRelativeWidth(1)
     modulesGroup:AddChild(reloadButton)
 
+    local group = CreateInlineGroup(scrollFrame, "")
+
+    CreateCheckBox(group, "Zoom icons (reload to apply)", CUI.DB.global.ZoomIcons,
+        function(self, event, value)
+            CUI.DB.global.ZoomIcons = value
+        end, 0.33)
+
     scrollFrame:DoLayout()
 end
 

@@ -30,6 +30,8 @@ local defaults = {
             PosX = 0,
             PosY = 0,
         },
+
+        ZoomIcons = true,
     },
     profile = {
         ActionBars = {

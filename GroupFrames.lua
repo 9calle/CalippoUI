@@ -127,6 +127,8 @@ local function IterateAuras(frame, auraTable, pool, type)
     local stacksOutline = dbEntry.Stacks.Outline
     local stacksSize = dbEntry.Stacks.Size
 
+    local zoomIcons = CUI.DB.global.ZoomIcons
+
     pool:ReleaseAll()
 
     index = 0
@@ -156,7 +158,10 @@ local function IterateAuras(frame, auraTable, pool, type)
         end
 
         auraFrame.Icon:SetTexture(aura.icon)
-        auraFrame.Icon:SetTexCoord(.08, .92, .08, .92)
+
+        if zoomIcons then
+            auraFrame.Icon:SetTexCoord(.08, .92, .08, .92)
+        end
 
         local stacksFrame = auraFrame.Overlay.Count
         if stacksEnabled then

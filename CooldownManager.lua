@@ -28,7 +28,9 @@ function CDM.UpdateStyle(viewer)
 
     for _, frame in ipairs({viewer:GetChildren()}) do
         if frame.Icon then
-            frame.Icon:SetTexCoord(.08, .92, .08, .92)
+            if CUI.DB.global.ZoomIcons then
+                frame.Icon:SetTexCoord(.08, .92, .08, .92)
+            end
 
             local mask = frame.Icon:GetMaskTexture(1)
             if mask then
