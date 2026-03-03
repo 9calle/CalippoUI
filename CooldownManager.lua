@@ -30,6 +30,8 @@ function CDM.UpdateStyle(viewer)
         if frame.Icon then
             if CUI.DB.global.ZoomIcons then
                 frame.Icon:SetTexCoord(.08, .92, .08, .92)
+            else
+                frame.Icon:SetTexCoord(.01, .99, .01, .99)
             end
 
             local mask = frame.Icon:GetMaskTexture(1)

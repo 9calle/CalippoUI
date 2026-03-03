@@ -321,6 +321,8 @@ local function IterateAuras(frame, auraTable, pool, type)
         auraFrame.Icon:SetTexture(aura.icon)
         if zoomIcons then
             auraFrame.Icon:SetTexCoord(.08, .92, .08, .92)
+        else
+            auraFrame.Icon:SetTexCoord(.01, .99, .01, .99)
         end
 
         local stacksFrame = auraFrame.Overlay.Count
@@ -856,6 +858,8 @@ function SetupCastBar(unitFrame)
     icon:SetAllPoints(iconContainer)
     if CUI.DB.global.ZoomIcons then
         icon:SetTexCoord(.08, .92, .08, .92)
+    else
+        icon:SetTexCoord(.01, .99, .01, .99)
     end
 
     local castBar = CreateFrame("Statusbar", nil, castBarContainer)

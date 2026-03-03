@@ -191,6 +191,8 @@ function AB.UpdateBar(bar)
 
         if CUI.DB.global.ZoomIcons then
             frame.icon:SetTexCoord(.08, .92, .08, .92)
+        else
+            frame.icon:SetTexCoord(.01, .99, .01, .99)
         end
 
         if not frame.BackdropBorder then

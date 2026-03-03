@@ -161,6 +161,8 @@ local function IterateAuras(frame, auraTable, pool, type)
 
         if zoomIcons then
             auraFrame.Icon:SetTexCoord(.08, .92, .08, .92)
+        else
+            auraFrame.Icon:SetTexCoord(.01, .99, .01, .99)
         end
 
         local stacksFrame = auraFrame.Overlay.Count

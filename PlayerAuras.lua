@@ -23,6 +23,8 @@ local function StyleFrame(frame)
 
     if CUI.DB.global.ZoomIcons then
         frame.Icon:SetTexCoord(.08, .92, .08, .92)
+    else
+        frame.Icon:SetTexCoord(.01, .99, .01, .99)
     end
 
     if not frame.Overlay then
