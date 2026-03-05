@@ -893,7 +893,7 @@ function SetupCastBar(unitFrame)
             or event == "UNIT_SPELLCAST_CHANNEL_STOP"
             or event == "UNIT_SPELLCAST_INTERRUPTED"
             or event == "UNIT_SPELLCAST_EMPOWER_STOP" then
-            self.Ticker:Cancel()
+            if self.Ticker then self.Ticker:Cancel() end
             self:Hide()
         elseif event == "PLAYER_FOCUS_CHANGED" or event == "PLAYER_TARGET_CHANGED" then
             if self.Ticker then self.Ticker:Cancel() end
