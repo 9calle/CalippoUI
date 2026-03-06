@@ -3,7 +3,6 @@ local addonName, CUI = ...
 CUI.MM = {}
 local MM = CUI.MM
 local Util = CUI.Util
-local Conf = CUI.Conf
 
 ---------------------------------------------------------------------------------------------------
 
@@ -122,7 +121,7 @@ local function SetupMinimap()
     configButton:SetSize(40, 20)
     configButton:SetPoint("BOTTOMLEFT")
     configButton:SetScript("OnClick", function()
-        Conf.Load()
+        CUI.Conf.Load()
     end)
 end
 

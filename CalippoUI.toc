@@ -24,8 +24,8 @@ ResourceBars.lua
 CastBar.lua
 PlayerAuras.lua
 Miscellaneous.lua
+Minimap.lua
 
 Config.lua
-Minimap.lua
 
 OnLoad.lua

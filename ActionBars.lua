@@ -71,24 +71,22 @@ function AB.UpdateBarAnchor(bar)
     local point, anchorFrame = bar:GetPoint()
     if dbEntry.ShouldAnchor and (point ~= dbEntry.AnchorPoint or anchorFrame:GetName() ~= dbEntry.AnchorFrame) then
         Util.CheckAnchorFrame(bar, dbEntry)
-
-        bar.layoutIndex = nil
-        bar:SetParent(UIParent)
-        bar:SetMovable(true)
-        bar:SetUserPlaced(true)
-        bar:SetAttribute("ignoreFramePositionManager", true)
         bar:ClearAllPoints()
         bar:SetPoint(dbEntry.AnchorPoint, dbEntry.AnchorFrame, dbEntry.AnchorRelativePoint, dbEntry.PosX, dbEntry.PosY)
     end
 
-    if not dbEntry.CustomPadding then return end
-
     local numShowable = bar.numButtonsShowable
     if numShowable == 0 then numShowable = 10 end
-
+    
     local scale = _G[bar:GetName().."ButtonContainer1"]:GetScale()
     local width = _G[bar:GetName().."ButtonContainer1"]:GetWidth()
-    local padding = dbEntry.Padding
+
+    local padding
+    if dbEntry.CustomPadding then
+        padding = dbEntry.Padding
+    else
+        padding = bar.buttonPadding
+    end
 
     if bar.isHorizontal then
         bar:SetWidth(scale * ((math.ceil(numShowable / bar.numRows) * (width + padding)) - padding))
@@ -106,10 +104,10 @@ function AB.UpdateBarAnchor(bar)
 
         if bar.isHorizontal then
             Util.PositionFromIndex(i-1, container, bar, "TOPLEFT", "TOPLEFT", "RIGHT", "DOWN",
-                container:GetWidth(), container:GetHeight(), dbEntry.Padding, 0, 0, math.ceil(numShowable / bar.numRows))
+                container:GetWidth(), container:GetHeight(), padding, 0, 0, math.ceil(numShowable / bar.numRows))
         else
             Util.PositionFromIndex(i-1, container, bar, "TOPLEFT", "TOPLEFT", "RIGHT", "DOWN",
-                container:GetWidth(), container:GetHeight(), dbEntry.Padding, 0, 0, bar.numRows)
+                container:GetWidth(), container:GetHeight(), padding, 0, 0, bar.numRows)
         end
     end
 end
