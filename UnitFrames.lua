@@ -960,6 +960,7 @@ function SetupUnitFrame(frameName, unit, number)
         frame:HookScript("OnShow", function(self)
             if EditModeManagerFrame:IsShown() then return end
             UpdateAll(self)
+            UF.UpdateAuras(self)
         end)
     end
 
