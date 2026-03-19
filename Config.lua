@@ -2108,6 +2108,86 @@ end
 
 ---------------------------------------------------------------------------------------------------------------------------------------
 
+local playerPrivateAuraTest = false
+
+local function CreatePrivateAuraPage(container)
+    local dbEntry = CUI.DB.profile.Miscellaneous.PrivateAuras
+
+    local scrollFrame = AceGUI:Create("ScrollFrame")
+    scrollFrame:SetLayout("List")
+    container:AddChild(scrollFrame)
+
+    local group = CreateInlineGroup(scrollFrame, "")
+
+    CreateCheckBox(group, "Show test frames (reload needed to apply settings)", playerPrivateAuraTest,
+        function(self, event, value)
+            playerPrivateAuraTest = value
+            Misc.UpdatePrivateAuraAnchors(playerPrivateAuraTest)
+        end, 1)
+
+    CreateSlider(group, "Size", 1, 50, 1, dbEntry.Size,
+        function(self, event, value)
+            dbEntry.Size = value
+            Misc.UpdatePrivateAuraAnchors(playerPrivateAuraTest)
+        end, 0.5)
+
+    CreateSlider(group, "Padding", 0, 20, 1, dbEntry.Padding,
+        function(self, event, value)
+            dbEntry.Padding = value
+            Misc.UpdatePrivateAuraAnchors(playerPrivateAuraTest)
+        end, 0.5)
+
+    CreateSlider(group, "Row length", 1, 20, 1, dbEntry.RowLength,
+        function(self, event, value)
+            dbEntry.RowLength = value
+            Misc.UpdatePrivateAuraAnchors(playerPrivateAuraTest)
+        end, 0.5)
+
+    CreateSlider(group, "Max Shown", 1, 30, 1, dbEntry.MaxShown,
+        function(self, event, value)
+            dbEntry.MaxShown = value
+            Misc.UpdatePrivateAuraAnchors(playerPrivateAuraTest)
+        end, 0.5)
+
+    CreateDropDown(group, "Horizontal Growth Direction", dbEntry.DirH, directionsHorizontal,
+        function(self, event, value)
+            dbEntry.DirH = value
+            Misc.UpdatePrivateAuraAnchors(playerPrivateAuraTest)
+        end, 0.5)
+
+    CreateDropDown(group, "Vertical Growth Direction", dbEntry.DirV, directionsVertical,
+        function(self, event, value)
+            dbEntry.DirV = value
+            Misc.UpdatePrivateAuraAnchors(playerPrivateAuraTest)
+        end, 0.5)
+
+    CreateDropDown(group, "Anchor Point", dbEntry.AnchorPoint, anchorPoints,
+        function(self, event, value)
+            dbEntry.AnchorPoint = value
+            Misc.UpdatePrivateAuraAnchors(playerPrivateAuraTest)
+        end, 0.5)
+
+    CreateDropDown(group, "Relative Anchor Point", dbEntry.AnchorRelativePoint, anchorPoints,
+        function(self, event, value)
+            dbEntry.AnchorRelativePoint = value
+            Misc.UpdatePrivateAuraAnchors(playerPrivateAuraTest)
+        end, 0.5)
+
+    CreateSlider(group, "Position X", -500, 500, 0.1, dbEntry.PosX,
+        function(self, event, value)
+            dbEntry.PosX = value
+            Misc.UpdatePrivateAuraAnchors(playerPrivateAuraTest)
+        end, 0.5)
+
+    CreateSlider(group, "Position Y", -500, 500, 0.1, dbEntry.PosY,
+        function(self, event, value)
+            dbEntry.PosY = value
+            Misc.UpdatePrivateAuraAnchors(playerPrivateAuraTest)
+        end, 0.5)
+
+    scrollFrame:DoLayout()
+end
+
 local function CreateCursorRingPage(container)
     local dbEntry = CUI.DB.profile.Miscellaneous.CursorRing
 
@@ -2178,13 +2258,16 @@ local function CreateMiscellaneousSettings(container)
             CreateCursorRingPage(container)
         elseif value == "General" then
             CreateGeneralPage(container)
+        elseif value == "PrivateAuras" then
+            CreatePrivateAuraPage(container)
         end
     end
 
     local tabGroup = AceGUI:Create("TabGroup")
     tabGroup:SetLayout("Fill")
     tabGroup:SetTabs({{text="General", value="General"},
-                    {text="Cursor Ring", value="CursorRing"},})
+                    {text="Cursor Ring", value="CursorRing"},
+                    {text="Private Auras", value="PrivateAuras"},})
     tabGroup:SetCallback("OnGroupSelected", SelectGroup)
     tabGroup:SelectTab("General")
 

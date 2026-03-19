@@ -171,9 +171,84 @@ end
 
 ---------------------------------------------------------------------------------------------------------------------------------
 
+function Misc.UpdatePrivateAuraAnchors(show)
+    local dbEntry = CUI.DB.profile.Miscellaneous.PrivateAuras
+    local anchorPoint = dbEntry.AnchorPoint
+    local anchorRelativePoint = dbEntry.AnchorRelativePoint
+    local dirH = dbEntry.DirH
+    local dirV = dbEntry.DirV
+    local size = dbEntry.Size
+    local padding = dbEntry.Padding
+    local posX = dbEntry.PosX
+    local posY = dbEntry.PosY
+    local rowLength = dbEntry.RowLength
+
+    for i=1, 6 do
+        local container = _G["CUI_PrivateAura"..i]
+        container:SetSize(size, size)
+        CUI.Util.PositionFromIndex(i-1, container, UIParent, anchorPoint, anchorRelativePoint, dirH, dirV, size, size, padding, posX, posY, rowLength)
+
+        container.TestTexture:SetShown(show)
+    end
+end
+
+local function SetupPrivateAnchors()
+    local dbEntry = CUI.DB.profile.Miscellaneous.PrivateAuras
+    if not dbEntry.Enabled then return end
+
+    local anchorPoint = dbEntry.AnchorPoint
+    local anchorRelativePoint = dbEntry.AnchorRelativePoint
+    local dirH = dbEntry.DirH
+    local dirV = dbEntry.DirV
+    local size = dbEntry.Size
+    local padding = dbEntry.Padding
+    local posX = dbEntry.PosX
+    local posY = dbEntry.PosY
+    local rowLength = dbEntry.RowLength
+
+    for i=1, 6 do
+        local container = CreateFrame("Frame", "CUI_PrivateAura"..i, UIParent)
+        container:SetSize(size, size)
+        CUI.Util.PositionFromIndex(i-1, container, UIParent, anchorPoint, anchorRelativePoint, dirH, dirV, size, size, padding, posX, posY, rowLength)
+
+        local texture = container:CreateTexture(nil, "OVERLAY")
+        texture:SetParentKey("TestTexture")
+        texture:SetAllPoints(container)
+        texture:SetColorTexture(0, 0, 0, 1)
+        texture:Hide()
+
+        C_UnitAuras.AddPrivateAuraAnchor({
+            unitToken = "player",
+            auraIndex = i,
+            parent = container,
+            showCountdownFrame = true,
+            showCountdownNumbers = true,
+            iconInfo = {
+                iconWidth = size,
+                iconHeight = size,
+                borderScale = 1,
+                iconAnchor = {
+                    point = "CENTER",
+                    relativeTo = container,
+                    relativePoint = "CENTER",
+                    offsetX = 0,
+                    offsetY = 0,
+                },
+            },
+        })
+    end
+end
+
+local function SetupPrivateAuras()
+
+end
+
+---------------------------------------------------------------------------------------------------------------------------------
+
 function Misc.Load()
     SetupCursorRing()
     SetupFastLoot()
     SetupAutoQuestGossip()
     SetupAutoRepairSell()
+    SetupPrivateAnchors()
 end
