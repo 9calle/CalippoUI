@@ -192,7 +192,7 @@ function Misc.UpdatePrivateAuraAnchors(show)
     end
 end
 
-local function SetupPrivateAnchors()
+local function SetupPrivateAuras()
     local dbEntry = CUI.DB.profile.Miscellaneous.PrivateAuras
     if not dbEntry.Enabled then return end
 
@@ -239,10 +239,6 @@ local function SetupPrivateAnchors()
     end
 end
 
-local function SetupPrivateAuras()
-
-end
-
 ---------------------------------------------------------------------------------------------------------------------------------
 
 function Misc.Load()
@@ -250,5 +246,5 @@ function Misc.Load()
     SetupFastLoot()
     SetupAutoQuestGossip()
     SetupAutoRepairSell()
-    SetupPrivateAnchors()
+    SetupPrivateAuras()
 end
