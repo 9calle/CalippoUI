@@ -304,7 +304,7 @@ local function SetupTradeAutoWhisper()
                             end
                         end
 
-                        whisper = whisper..", pay what you want! Use max rank mats and send to this char."
+                        whisper = whisper..". Pay what you want, use max rank mats and send to this char."
 
                         C_ChatInfo.SendChatMessage(whisper, "WHISPER", nil, playerName)
                     end
