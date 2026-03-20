@@ -1248,6 +1248,10 @@ local defaults = {
                     PosY = 0,
                 },
             },
+
+            TradeAutoWhisper = {
+                Enabled = false,
+            },
         },
     }
 }

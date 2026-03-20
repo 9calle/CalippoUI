@@ -493,12 +493,19 @@ local function CreateGeneralSettings(container)
     reloadButton:SetRelativeWidth(1)
     modulesGroup:AddChild(reloadButton)
 
-    local group = CreateInlineGroup(scrollFrame, "")
+    local zoomGroup = CreateInlineGroup(scrollFrame, "")
 
-    CreateCheckBox(group, "Zoom icons (reload to apply)", CUI.DB.global.ZoomIcons,
+    CreateCheckBox(zoomGroup, "Zoom icons (reload to apply)", CUI.DB.global.ZoomIcons,
         function(self, event, value)
             CUI.DB.global.ZoomIcons = value
         end, 0.33)
+
+    local tawGroup = CreateInlineGroup(scrollFrame, "")
+
+    CreateCheckBox(tawGroup, "Trade auto whisper", CUI.DB.profile.Miscellaneous.TradeAutoWhisper.Enabled,
+        function(self, event, value)
+            CUI.DB.profile.Miscellaneous.TradeAutoWhisper.Enabled = value
+        end, 1)
 
     scrollFrame:DoLayout()
 end
