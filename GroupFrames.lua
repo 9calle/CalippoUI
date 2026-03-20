@@ -504,7 +504,7 @@ local function SetupPrivateAnchors(frame)
             iconInfo = {
                 iconWidth = size,
                 iconHeight = size,
-                borderScale = 1,
+                borderScale = size/20,
                 iconAnchor = {
                     point = "CENTER",
                     relativeTo = container,

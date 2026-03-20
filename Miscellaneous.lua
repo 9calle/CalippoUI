@@ -205,7 +205,7 @@ local function SetupPrivateAuras()
     local posX = dbEntry.PosX
     local posY = dbEntry.PosY
     local rowLength = dbEntry.RowLength
-
+    
     for i=1, 6 do
         local container = CreateFrame("Frame", "CUI_PrivateAura"..i, UIParent)
         container:SetSize(size, size)
@@ -226,7 +226,7 @@ local function SetupPrivateAuras()
             iconInfo = {
                 iconWidth = size,
                 iconHeight = size,
-                borderScale = 1,
+                borderScale = size/20,
                 iconAnchor = {
                     point = "CENTER",
                     relativeTo = container,

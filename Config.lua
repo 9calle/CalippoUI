@@ -2119,6 +2119,11 @@ local function CreatePrivateAuraPage(container)
 
     local group = CreateInlineGroup(scrollFrame, "")
 
+    CreateCheckBox(group, "Toggle Private Auras", dbEntry.Enabled,
+        function(self, event, value)
+            dbEntry.Enabled = value
+        end, 1)
+
     CreateCheckBox(group, "Show test frames (reload needed to apply settings)", playerPrivateAuraTest,
         function(self, event, value)
             playerPrivateAuraTest = value
