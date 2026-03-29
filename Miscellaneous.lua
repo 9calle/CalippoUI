@@ -251,6 +251,8 @@ local canCraft = {
     "Magister's Ritual Knife",
     "Spellbreaker's Blade",
     "Spellbreaker's Warglaive",
+    "Farstrider's Chopper",
+    "Magister's Cleaver",
 }
 
 local function SetupTradeAutoWhisper()
@@ -258,12 +260,14 @@ local function SetupTradeAutoWhisper()
     f:RegisterEvent("CHAT_MSG_CHANNEL")
     f:RegisterEvent("CHAT_MSG_SYSTEM")
     f:SetScript("OnEvent", function(self, event, message, playerName)
-        if UnitName("player") ~= "Doombøm" or IsInGroup() or not CUI.DB.profile.Miscellaneous.TradeAutoWhisper.Enabled or issecretvalue(message) then return end
+        if issecretvalue(message) then return end
 
         if message == "You have received a new Personal Crafting Order." then
             PlaySoundFile("Interface/AddOns/CalippoUI/Media/kaching.ogg", "Master")
             return
         end
+
+        if UnitName("player") ~= "Doombøm" or IsInGroup() or not CUI.DB.profile.Miscellaneous.TradeAutoWhisper.Enabled then return end
 
         if message then
             local looking = false

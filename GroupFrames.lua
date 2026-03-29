@@ -176,7 +176,9 @@ local function IterateAuras(frame, auraTable, pool, type)
             stacksFrame:Hide()
         end
 
-        auraFrame.Cooldown:SetCooldownFromExpirationTime(aura.expirationTime, aura.duration)
+        local durationObject = C_UnitAuras.GetAuraDuration(frame.unit, id)
+        if not durationObject then return end
+        auraFrame.Cooldown:SetCooldownFromDurationObject(durationObject)
 
         Util_PositionFromIndex(index, auraFrame, frame, anchorPoint, anchorRelativePoint, dirH, dirV, size, size, padding, posX, posY, rowLength)
 

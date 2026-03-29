@@ -17,9 +17,9 @@ local function StyleChatBox(i)
     _G["ChatFrame"..i.."EditBoxFocusMid"]:SetTexture(nil)
 
     _G["ChatFrame"..i.."ButtonFrame"]:Hide()
-    _G["ChatFrame"..i]:SetFont(dbEntry.Font, dbEntry.Size, dbEntry.Outline)
-    _G["ChatFrame"..i.."EditBox"]:SetFont(dbEntry.Font, dbEntry.Size, dbEntry.Outline)
-    _G["ChatFrame"..i.."EditBoxHeader"]:SetFont(dbEntry.Font, dbEntry.Size, dbEntry.Outline)
+    -- _G["ChatFrame"..i]:SetFont(dbEntry.Font, dbEntry.Size, dbEntry.Outline)
+    -- _G["ChatFrame"..i.."EditBox"]:SetFont(dbEntry.Font, dbEntry.Size, dbEntry.Outline)
+    -- _G["ChatFrame"..i.."EditBoxHeader"]:SetFont(dbEntry.Font, dbEntry.Size, dbEntry.Outline)
 
     local chatTab = _G["ChatFrame"..i.."Tab"]
     chatTab.HighlightLeft:SetTexture(nil)
@@ -31,7 +31,7 @@ local function StyleChatBox(i)
     chatTab.Left:Hide()
     chatTab.Middle:Hide()
     chatTab.Right:Hide()
-    chatTab.noMouseAlpha = 0
+    -- chatTab.noMouseAlpha = 0
 end
 
 function Chat.StyleAllChatBoxes()
@@ -58,10 +58,10 @@ function Chat.Load()
 
     QuickJoinToastButton:Hide()
 
-	CHAT_TAB_SHOW_DELAY = 0
-	CHAT_TAB_HIDE_DELAY = 0
-	CHAT_FRAME_FADE_TIME = 0.2
-	CHAT_FRAME_FADE_OUT_TIME = 0.2
+	-- CHAT_TAB_SHOW_DELAY = 0
+	-- CHAT_TAB_HIDE_DELAY = 0
+	-- CHAT_FRAME_FADE_TIME = 0.2
+	-- CHAT_FRAME_FADE_OUT_TIME = 0.2
 
 	-- CHAT_FRAME_BUTTON_FRAME_MIN_ALPHA = 0
 	-- CHAT_FRAME_TAB_NORMAL_NOMOUSE_ALPHA = 0
