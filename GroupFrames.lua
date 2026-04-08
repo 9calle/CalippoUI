@@ -1045,19 +1045,19 @@ local rolePriority = {
 }
 
 local classPriority = {
-    WARRIOR      = 1,
-    PALADIN      = 2,
-    HUNTER       = 3,
+    PRIEST       = 1,
+    MAGE         = 2,
+    WARLOCK      = 3,
     ROGUE        = 4,
-    PRIEST       = 5,
-    DEATHKNIGHT  = 6,
-    SHAMAN       = 7,
-    MAGE         = 8,
-    WARLOCK      = 9,
-    MONK         = 10,
-    DRUID        = 11,
-    DEMONHUNTER  = 12,
-    EVOKER       = 13,
+    DRUID        = 5,
+    MONK         = 6,
+    DEMONHUNTER  = 7,
+    HUNTER       = 8,
+    SHAMAN       = 9,
+    EVOKER       = 10,
+    WARRIOR      = 11,
+    PALADIN      = 12,
+    DEATHKNIGHT  = 13,
 }
 
 local function SortyByRole(a, b)

@@ -593,6 +593,18 @@ local function UpdateMaxPower(frame)
 end
 
 local function UpdateName(frame)
+    if IsInRaid() and UnitIsPlayer(frame.unit) then
+        for i=1, GetNumGroupMembers() do
+            local name, _, groupNum = GetRaidRosterInfo(i)
+
+            local cleanName = string.match(name, "[^-%s]+")
+            if cleanName == UnitName(frame.unit) then
+                frame.Overlay.UnitName:SetText(groupNum..". "..cleanName)
+                return
+            end
+        end
+    end
+
     frame.Overlay.UnitName:SetText(UnitName(frame.unit))
 end
 
@@ -956,6 +968,8 @@ function SetupUnitFrame(frameName, unit, number)
 
     if unit == "target" then
         frame:RegisterEvent("PLAYER_TARGET_CHANGED")
+    elseif unit == "player" then
+        frame:RegisterEvent("GROUP_ROSTER_UPDATE")
     elseif unit == "focus" then
         frame:RegisterEvent("PLAYER_FOCUS_CHANGED")
     elseif unit == "pet" or frameName == "BossFrame" then
@@ -1078,6 +1092,8 @@ function SetupUnitFrame(frameName, unit, number)
             UF.UpdateAlpha(self)
         elseif event == "PLAYER_REGEN_DISABLED" then
             UF.UpdateAlpha(self, true)
+        elseif event == "GROUP_ROSTER_UPDATE" then
+            UpdateName(self)
         elseif event == "PARTY_LEADER_CHANGED" or event == "GROUP_FORMED" or event == "GROUP_LEFT" then
             UpdateLeaderAssist(self)
         elseif event == "UNIT_DISPLAYPOWER" then

@@ -25,10 +25,24 @@ end
 
 local function SetupCursorRing()
     local f = CreateFrame("Frame", "CUI_CursorRing")
+    f:SetPoint("CENTER", UIParent, "BOTTOMLEFT")
+    f:SetSize(20, 20)
+
     local t = f:CreateTexture()
     t:SetParentKey("Texture")
-    t:SetTexture("Interface/AddOns/CalippoUI/Media/Ring.blp")
+    t:SetTexture("Interface/AddOns/CalippoUI/Media/Circle.blp")
     t:SetAllPoints(f)
+    -- t:SetPoint("TOPLEFT", f, "TOPLEFT", 5, -5)
+    -- t:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -5, 5)
+
+    local m = f:CreateMaskTexture()
+    m:SetParentKey("Mask")
+    -- m:SetPoint("TOPLEFT", f, "TOPLEFT", 5, -5)
+    -- m:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -5, 5)
+    m:SetAllPoints(f)
+    m:SetTexture("Interface/AddOns/CalippoUI/Media/Circle.blp", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
+
+    t:AddMaskTexture(m)
 
     Misc.UpdateCursorRing()
 
@@ -244,15 +258,17 @@ end
 local canCraft = {
     "Martyr's Bindings",
     "Martyr's Waistwrap",
+    "Adherent's Silken Shroud",
 
     "Blood Knight's Warblade",
     "Farstrider's Mercy",
+    "Farstrider's Chopper",
     "Magister's Mana Sword",
     "Magister's Ritual Knife",
+    "Magister's Cleaver",
     "Spellbreaker's Blade",
     "Spellbreaker's Warglaive",
-    "Farstrider's Chopper",
-    "Magister's Cleaver",
+    "Bloomforged Claw",
 }
 
 local function SetupTradeAutoWhisper()
