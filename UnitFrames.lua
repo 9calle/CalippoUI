@@ -597,10 +597,12 @@ local function UpdateName(frame)
         for i=1, GetNumGroupMembers() do
             local name, _, groupNum = GetRaidRosterInfo(i)
 
-            local cleanName = string.match(name, "[^-%s]+")
-            if cleanName == UnitName(frame.unit) then
-                frame.Overlay.UnitName:SetText(groupNum..". "..cleanName)
-                return
+            if name then
+                local cleanName = string.match(name, "[^-%s]+")
+                if cleanName == UnitName(frame.unit) then
+                    frame.Overlay.UnitName:SetText(groupNum..". "..cleanName)
+                    return
+                end
             end
         end
     end
