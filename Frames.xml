@@ -70,7 +70,11 @@
                 if not InCombatLockdown() then
                     GameTooltip_SetDefaultAnchor(GameTooltip, self)
                     GameTooltip:SetUnit(self.unit)
-                    GameTooltip:Show() 
+                    GameTooltip:Show()
+
+                    if RaiderIO then
+                        RaiderIO.ShowProfile(GameTooltip, self.unit)
+                    end
                 end
             </OnEnter>
             <OnLeave>

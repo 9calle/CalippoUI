@@ -30,19 +30,8 @@ local function SetupCursorRing()
 
     local t = f:CreateTexture()
     t:SetParentKey("Texture")
-    t:SetTexture("Interface/AddOns/CalippoUI/Media/Circle.blp")
+    t:SetTexture("Interface/AddOns/CalippoUI/Media/Ring.tga")
     t:SetAllPoints(f)
-    -- t:SetPoint("TOPLEFT", f, "TOPLEFT", 5, -5)
-    -- t:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -5, 5)
-
-    local m = f:CreateMaskTexture()
-    m:SetParentKey("Mask")
-    -- m:SetPoint("TOPLEFT", f, "TOPLEFT", 5, -5)
-    -- m:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -5, 5)
-    m:SetAllPoints(f)
-    m:SetTexture("Interface/AddOns/CalippoUI/Media/Circle.blp", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
-
-    t:AddMaskTexture(m)
 
     Misc.UpdateCursorRing()
 
@@ -237,6 +226,7 @@ local function SetupPrivateAuras()
             parent = container,
             showCountdownFrame = true,
             showCountdownNumbers = true,
+            isContainer = false,
             iconInfo = {
                 iconWidth = size,
                 iconHeight = size,
@@ -336,6 +326,99 @@ end
 
 ---------------------------------------------------------------------------------------------------------------------------------
 
+local function UpdateGroupFinderScore(frame, profile, shouldOffset)
+    if not frame.CUI_Score then
+        local scoreFrame = frame:CreateFontString(nil, "OVERLAY")
+        if shouldOffset then
+            scoreFrame:SetPoint("CENTER", 0, -18)
+        else
+            scoreFrame:SetPoint("CENTER", 50, 0)
+        end
+        scoreFrame:SetFont("Interface/AddOns/CalippoUI/Fonts/FiraSans-Medium.ttf", 12, "")
+        frame.CUI_Score = scoreFrame
+
+        local mainScoreFrame = frame:CreateFontString(nil, "OVERLAY")
+        mainScoreFrame:SetPoint("LEFT", scoreFrame, "RIGHT", 3, 0)
+        mainScoreFrame:SetFont("Interface/AddOns/CalippoUI/Fonts/FiraSans-Medium.ttf", 12, "")
+        frame.CUI_MainScore = mainScoreFrame
+
+        local raidProgress = frame:CreateFontString(nil, "OVERLAY")
+        raidProgress:SetPoint("LEFT", mainScoreFrame, "RIGHT", 0, 0)
+        raidProgress:SetFont("Interface/AddOns/CalippoUI/Fonts/FiraSans-Medium.ttf", 12, "")
+        raidProgress:SetTextColor(0.64, 0.21, 0.93)
+        frame.CUI_RaidProg = raidProgress
+
+        local mainRaidProgress = frame:CreateFontString(nil, "OVERLAY")
+        mainRaidProgress:SetPoint("LEFT", raidProgress, "RIGHT", 3, 0)
+        mainRaidProgress:SetFont("Interface/AddOns/CalippoUI/Fonts/FiraSans-Medium.ttf", 12, "")
+        mainRaidProgress:SetTextColor(0.64, 0.21, 0.93)
+        frame.CUI_MainRaidProg = mainRaidProgress
+    end
+    
+    if profile and profile.mythicKeystoneProfile then
+        local score = profile.mythicKeystoneProfile.currentScore
+        local r, g, b = RaiderIO.GetScoreColor(score)
+        frame.CUI_Score:SetText(score)
+        frame.CUI_Score:SetTextColor(r, g, b)
+
+        if profile.mythicKeystoneProfile.mainCurrentScore and profile.mythicKeystoneProfile.mainCurrentScore ~= 0 then
+            local mainScore = profile.mythicKeystoneProfile.mainCurrentScore
+            r, g, b = RaiderIO.GetScoreColor(mainScore)
+
+            frame.CUI_MainScore:SetText("("..mainScore..") ")
+            frame.CUI_MainScore:SetTextColor(r, g, b)
+        else
+            frame.CUI_MainScore:SetText("")
+        end
+    end
+
+    if profile and profile.raidProfile then
+        for i, raid in ipairs(profile.raidProfile.progress) do
+            if raid.difficulty == 3 then
+                frame.CUI_RaidProg:SetText("| "..raid.progressCount)
+                break
+            else
+                frame.CUI_RaidProg:SetText("")
+            end
+        end
+    end
+end
+
+local function SetupGroupFinder()
+    hooksecurefunc("LFGListApplicationViewer_UpdateApplicant", function(self, applicantID)
+        if InCombatLockdown() then return end
+
+        local applicantInfo = C_LFGList.GetApplicantInfo(applicantID)
+        local name = C_LFGList.GetApplicantMemberInfo(applicantID, applicantInfo.numMembers)
+
+        if self.Member1 and self.Member1.Rating then
+            self.Member1.Rating:Hide()
+        end
+
+        if not RaiderIO then return end
+        local profile = RaiderIO.GetProfile(name)
+
+        if profile then
+            UpdateGroupFinderScore(self, profile)
+        end
+    end)
+
+    hooksecurefunc("LFGListSearchEntry_Update", function(self)
+        if InCombatLockdown() then return end
+
+        local searchResultData = C_LFGList.GetSearchResultInfo(self.resultID)
+
+        if not RaiderIO then return end
+        local profile = RaiderIO.GetProfile(searchResultData.leaderName)
+        
+        if profile then
+            UpdateGroupFinderScore(self, profile, true)
+        end
+    end)
+end
+
+---------------------------------------------------------------------------------------------------------------------------------
+
 function Misc.Load()
     SetupCursorRing()
     SetupFastLoot()
@@ -343,4 +426,5 @@ function Misc.Load()
     SetupAutoRepairSell()
     SetupPrivateAuras()
     SetupTradeAutoWhisper()
+    SetupGroupFinder()
 end
