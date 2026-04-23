@@ -207,16 +207,21 @@ local function AddAllAuras(frame)
     table_wipe(frame.dispels)
 
     local function AddBuff(aura)
+        -- TODO : Ta bort?
+        if C_UnitAuras.IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, buffFilter) then return end
         ProcessAura(unit, aura)
 		frame.buffs[aura.auraInstanceID] = aura
 	end
 
     local function AddDebuff(aura)
+        -- TODO : Ta bort?
+        if C_UnitAuras.IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, debuffFilter) then return end
         ProcessAura(unit, aura)
         frame.debuffs[aura.auraInstanceID] = aura
 	end
 
     local function AddDefensive(aura)
+        -- TODO : Ta bort?
         if C_UnitAuras.IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, defensiveFilter) then return end
         ProcessAura(unit, aura)
         frame.defensives[aura.auraInstanceID] = aura
