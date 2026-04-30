@@ -49,8 +49,7 @@ function Chat.Load()
     frame:SetScript("OnEvent", function()
         for i=NUM_CHAT_WINDOWS+1, NUM_CHAT_WINDOWS+10 do
             local chatTab = _G["ChatFrame"..i.."Tab"]
-            if chatTab and not chatTab.Styled then
-                chatTab.Styled = true
+            if chatTab then
                 StyleChatBox(i)
             end
         end

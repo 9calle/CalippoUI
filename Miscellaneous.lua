@@ -81,7 +81,7 @@ local function SetupAutoQuestGossip()
         local options = C_GossipInfo.GetOptions()
         if options then
             for _, option in ipairs(options) do
-                if option.gossipOptionID and option.flags == 1 then
+                if option.gossipOptionID and (option.flags == 1 or C_ChallengeMode.IsChallengeModeActive()) then
                     C_GossipInfo.SelectOption(option.gossipOptionID)
                     return
                 end
@@ -127,7 +127,7 @@ local function SetupAutoQuestGossip()
     f:RegisterEvent("QUEST_PROGRESS")
     f:RegisterEvent("QUEST_COMPLETE")
     f:SetScript("OnEvent", function(self, event)
-        if not dbEntry.AutoQuestGossip then return end
+        if not dbEntry.AutoQuestGossip and not C_ChallengeMode.IsChallengeModeActive() then return end
 
         if event == "GOSSIP_SHOW" then
             HandleGossip()
@@ -251,6 +251,7 @@ local canCraft = {
     "Adherent's Silken Shroud",
 
     "Blood Knight's Warblade",
+    "Blood Knight's Impetus",
     "Farstrider's Mercy",
     "Farstrider's Chopper",
     "Magister's Mana Sword",
@@ -334,23 +335,23 @@ local function UpdateGroupFinderScore(frame, profile, shouldOffset)
         else
             scoreFrame:SetPoint("CENTER", 50, 0)
         end
-        scoreFrame:SetFont("Interface/AddOns/CalippoUI/Fonts/FiraSans-Medium.ttf", 12, "")
+        scoreFrame:SetFont("Interface/AddOns/CalippoUI/Fonts/FiraSans-Medium.ttf", 11, "")
         frame.CUI_Score = scoreFrame
 
         local mainScoreFrame = frame:CreateFontString(nil, "OVERLAY")
         mainScoreFrame:SetPoint("LEFT", scoreFrame, "RIGHT", 3, 0)
-        mainScoreFrame:SetFont("Interface/AddOns/CalippoUI/Fonts/FiraSans-Medium.ttf", 12, "")
+        mainScoreFrame:SetFont("Interface/AddOns/CalippoUI/Fonts/FiraSans-Medium.ttf", 11, "")
         frame.CUI_MainScore = mainScoreFrame
 
         local raidProgress = frame:CreateFontString(nil, "OVERLAY")
         raidProgress:SetPoint("LEFT", mainScoreFrame, "RIGHT", 0, 0)
-        raidProgress:SetFont("Interface/AddOns/CalippoUI/Fonts/FiraSans-Medium.ttf", 12, "")
+        raidProgress:SetFont("Interface/AddOns/CalippoUI/Fonts/FiraSans-Medium.ttf", 11, "")
         raidProgress:SetTextColor(0.64, 0.21, 0.93)
         frame.CUI_RaidProg = raidProgress
 
         local mainRaidProgress = frame:CreateFontString(nil, "OVERLAY")
         mainRaidProgress:SetPoint("LEFT", raidProgress, "RIGHT", 3, 0)
-        mainRaidProgress:SetFont("Interface/AddOns/CalippoUI/Fonts/FiraSans-Medium.ttf", 12, "")
+        mainRaidProgress:SetFont("Interface/AddOns/CalippoUI/Fonts/FiraSans-Medium.ttf", 11, "")
         mainRaidProgress:SetTextColor(0.64, 0.21, 0.93)
         frame.CUI_MainRaidProg = mainRaidProgress
     end
@@ -393,6 +394,11 @@ local function SetupGroupFinder()
 
         if self.Member1 and self.Member1.Rating then
             self.Member1.Rating:Hide()
+        end
+
+        if self.InviteButton then
+            self.InviteButton:SetWidth(20)
+            self.InviteButton.Text:SetText("Inv")
         end
 
         if not RaiderIO then return end

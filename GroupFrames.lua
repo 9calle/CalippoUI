@@ -87,10 +87,11 @@ end
 
 local buffFilter = "PLAYER|HELPFUL|RAID"
 local buffFilterInCombat = "PLAYER|HELPFUL|RAID_IN_COMBAT"
-local debuffFilter = "HARMFUL|RAID"
-local debuffFilterInCombat = "HARMFUL|RAID_IN_COMBAT"
+-- TODO : Temp lösning
+local debuffFilter = "HARMFUL" -- "HARMFUL|RAID"
+local debuffFilterInCombat = "HARMFUL" -- "HARMFUL|RAID_IN_COMBAT"
 local defensiveFilter = "HELPFUL|BIG_DEFENSIVE"
-local playerDispellableFilter = "HARMFUL|RAID_PLAYER_DISPELLABLE"
+local playerDispellableFilter = "HARMFUL" -- "HARMFUL|RAID_PLAYER_DISPELLABLE"
 
 local function UpdateDispel(frame)
     for id, aura in pairs(frame.dispels) do
@@ -200,31 +201,29 @@ end
 
 local function AddAllAuras(frame)
     local dbEntry = CUI.DB.profile.GroupFrames[frame.name]
+    local inCombat = UnitAffectingCombat("player")
     local unit = frame.unit
-    table.wipe(frame.buffs)
-    table.wipe(frame.debuffs)
-    table.wipe(frame.defensives)
+    table_wipe(frame.buffs)
+    table_wipe(frame.debuffs)
+    table_wipe(frame.defensives)
     table_wipe(frame.dispels)
 
     local function AddBuff(aura)
-        -- TODO : Ta bort?
-        if C_UnitAuras.IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, buffFilter) then return end
         ProcessAura(unit, aura)
-		frame.buffs[aura.auraInstanceID] = aura
+        frame.buffs[aura.auraInstanceID] = aura
 	end
 
     local function AddDebuff(aura)
-        -- TODO : Ta bort?
-        if C_UnitAuras.IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, debuffFilter) then return end
         ProcessAura(unit, aura)
         frame.debuffs[aura.auraInstanceID] = aura
 	end
 
     local function AddDefensive(aura)
         -- TODO : Ta bort?
-        if C_UnitAuras.IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, defensiveFilter) then return end
-        ProcessAura(unit, aura)
-        frame.defensives[aura.auraInstanceID] = aura
+        if not C_UnitAuras_IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, defensiveFilter) then
+            ProcessAura(unit, aura)
+            frame.defensives[aura.auraInstanceID] = aura
+        end
     end
 
     local function AddDispel(aura)
@@ -234,7 +233,7 @@ local function AddAllAuras(frame)
     AuraUtil_ForEachAura(unit, playerDispellableFilter, nil, AddDispel, true)
 
     if dbEntry.Buffs.Enabled then
-        if UnitAffectingCombat("player") then
+        if inCombat then
             AuraUtil.ForEachAura(unit, buffFilterInCombat, nil, AddBuff, true)
         else
             AuraUtil.ForEachAura(unit, buffFilter, nil, AddBuff, true)
@@ -246,7 +245,7 @@ local function AddAllAuras(frame)
     end
 
     if dbEntry.Debuffs.Enabled then
-        if UnitAffectingCombat("player") then
+        if inCombat then
             AuraUtil.ForEachAura(unit, debuffFilterInCombat, nil, AddDebuff, true)
         else
             AuraUtil.ForEachAura(unit, debuffFilter, nil, AddDebuff, true)
@@ -275,6 +274,8 @@ local function UpdateAuras(frame, updateInfo)
         dispelChanged = true
     else
         if updateInfo.addedAuras then
+            local inCombat = UnitAffectingCombat("player")
+
             for i=1, #updateInfo.addedAuras do
                 local aura = updateInfo.addedAuras[i]
                 local done = false
@@ -284,21 +285,21 @@ local function UpdateAuras(frame, updateInfo)
                     dispelChanged = true
                 end
 
-                if defensivesEnabled and not C_UnitAuras.IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, defensiveFilter) then
+                if defensivesEnabled and not C_UnitAuras_IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, defensiveFilter) then
                     ProcessAura(unit, aura)
                     frame.defensives[aura.auraInstanceID] = aura
                     defensivesChanged = true
                     done = true
                 elseif not done and buffsEnabled then
-                    if UnitAffectingCombat("player") then
-                        if not C_UnitAuras.IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, buffFilterInCombat) then
+                    if inCombat then
+                        if not C_UnitAuras_IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, buffFilterInCombat) then
                             ProcessAura(unit, aura)
                             frame.buffs[aura.auraInstanceID] = aura
                             buffsChanged = true
                             done = true
                         end
                     else
-                        if not C_UnitAuras.IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, buffFilter) then
+                        if not C_UnitAuras_IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, buffFilter) then
                             ProcessAura(unit, aura)
                             frame.buffs[aura.auraInstanceID] = aura
                             buffsChanged = true
@@ -308,14 +309,14 @@ local function UpdateAuras(frame, updateInfo)
                 end
 
                 if not done and debuffsEnabled then
-                    if UnitAffectingCombat("player") then
-                        if not C_UnitAuras.IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, debuffFilterInCombat) then
+                    if inCombat then
+                        if not C_UnitAuras_IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, debuffFilterInCombat) then
                             ProcessAura(unit, aura)
                             frame.debuffs[aura.auraInstanceID] = aura
                             debuffsChanged = true
                         end
                     else
-                        if not C_UnitAuras.IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, debuffFilter) then
+                        if not C_UnitAuras_IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, debuffFilter) then
                             ProcessAura(unit, aura)
                             frame.debuffs[aura.auraInstanceID] = aura
                             debuffsChanged = true
@@ -534,9 +535,11 @@ local function UpdateHealthColor(frame)
     if frame.dead then
         local dc = dbEntry.HealthBar.DeadColor
         frame.HealthBar:SetStatusBarColor(dc.r, dc.g, dc.b, dc.a)
+        frame.Background:SetVertexColor(dc.r, dc.g, dc.b, dc.a)
     elseif frame.disconnected then
         local dc = dbEntry.HealthBar.DisconnectedColor
         frame.HealthBar:SetStatusBarColor(dc.r, dc.g, dc.b, dc.a)
+        frame.Background:SetVertexColor(dc.r, dc.g, dc.b, dc.a)
     else
         local r, g, b = Util.GetUnitColor(frame.unit, true)
 
