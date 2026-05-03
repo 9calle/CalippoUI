@@ -1026,6 +1026,13 @@ local defaults = {
 
             Font = defaultFont,
             Outline = "",
+
+            Buffs = {
+                Enabled = true,
+            },
+            Debuffs = {
+                Enabled = true,
+            },
         },
         Minimap = {
             Enabled = true,

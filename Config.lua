@@ -1989,6 +1989,18 @@ local function CreatePlayerAuraSettings(container)
     scrollFrame:SetLayout("List")
     container:AddChild(scrollFrame)
 
+    local toggleGroup = CreateInlineGroup(scrollFrame, "") 
+
+    CreateCheckBox(toggleGroup, "Enable buffs", dbEntry.Buffs.Enabled,
+        function(self, event, value)
+            dbEntry.Buffs.Enabled = value
+        end, 0.5)
+
+    CreateCheckBox(toggleGroup, "Enable debuffs", dbEntry.Debuffs.Enabled,
+        function(self, event, value)
+            dbEntry.Debuffs.Enabled = value
+        end, 0.5)
+
     local alphaGroup = CreateInlineGroup(scrollFrame, "Alpha") 
 
     CreateSlider(alphaGroup, "Alpha (Out of combat)", 0, 100, 1, dbEntry.Alpha*100, 
@@ -2126,7 +2138,7 @@ local function CreatePrivateAuraPage(container)
 
     local group = CreateInlineGroup(scrollFrame, "")
 
-    CreateCheckBox(group, "Toggle Private Auras", dbEntry.Enabled,
+    CreateCheckBox(group, "Enable Private Auras", dbEntry.Enabled,
         function(self, event, value)
             dbEntry.Enabled = value
         end, 1)

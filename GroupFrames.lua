@@ -219,11 +219,8 @@ local function AddAllAuras(frame)
 	end
 
     local function AddDefensive(aura)
-        -- TODO : Ta bort?
-        if not C_UnitAuras_IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, defensiveFilter) then
-            ProcessAura(unit, aura)
-            frame.defensives[aura.auraInstanceID] = aura
-        end
+        ProcessAura(unit, aura)
+        frame.defensives[aura.auraInstanceID] = aura
     end
 
     local function AddDispel(aura)
@@ -280,7 +277,8 @@ local function UpdateAuras(frame, updateInfo)
                 local aura = updateInfo.addedAuras[i]
                 local done = false
 
-                if not C_UnitAuras_IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, playerDispellableFilter) then
+                -- TODO : Temp lösning.
+                if aura.dispelName and not C_UnitAuras_IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, debuffFilter) then
                     frame.dispels[aura.auraInstanceID] = aura
                     dispelChanged = true
                 end
@@ -1218,6 +1216,7 @@ local function SetupGroupFrame(unit, groupType, frameName, parent, num)
     clickFrame:SetAttribute("ping-receiver", true)
     clickFrame:Show()
 
+    -- TDOD : Avregistrera event när frame inte är synlig?
     frame:RegisterUnitEvent("UNIT_AURA", unit)
     frame:RegisterUnitEvent("UNIT_HEALTH", unit)
     frame:RegisterUnitEvent("UNIT_MAXHEALTH", unit)
@@ -1227,6 +1226,7 @@ local function SetupGroupFrame(unit, groupType, frameName, parent, num)
     frame:RegisterUnitEvent("UNIT_PHASE", unit)
     frame:RegisterUnitEvent("UNIT_CONNECTION", unit)
     frame:RegisterUnitEvent("UNIT_IN_RANGE_UPDATE", unit)
+    frame:RegisterUnitEvent("UNIT_DISTANCE_CHECK_UPDATE", unit)
     frame:RegisterUnitEvent("UNIT_THREAT_SITUATION_UPDATE", unit)
     frame:RegisterUnitEvent("UNIT_THREAT_LIST_UPDATE", unit)
     frame:RegisterEvent("PLAYER_FLAGS_CHANGED")
@@ -1244,6 +1244,7 @@ local function SetupGroupFrame(unit, groupType, frameName, parent, num)
         if event == "GROUP_ROSTER_UPDATE" then
             if UnitExists(self.unit) then
                 UpdateAll(self)
+                UpdateAuras(self)
             end
         end
 
@@ -1285,6 +1286,8 @@ local function SetupGroupFrame(unit, groupType, frameName, parent, num)
         elseif event == "PLAYER_FLAGS_CHANGED" then
             UpdateAFK(self)
             UpdateCenterIcon(self)
+        elseif event == "UNIT_DISTANCE_CHECK_UPDATE" then
+            UpdateAuras(self)
         elseif event == "UNIT_PHASE" then
             UpdateInPhase(self)
             UpdateCenterIcon(self)

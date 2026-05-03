@@ -22,9 +22,9 @@ local function StyleChatBox(i)
     -- _G["ChatFrame"..i.."EditBoxHeader"]:SetFont(dbEntry.Font, dbEntry.Size, dbEntry.Outline)
 
     local chatTab = _G["ChatFrame"..i.."Tab"]
-    chatTab.HighlightLeft:SetTexture(nil)
-    chatTab.HighlightMiddle:SetTexture(nil)
-    chatTab.HighlightRight:SetTexture(nil)
+    -- chatTab.HighlightLeft:SetTexture(nil)
+    -- chatTab.HighlightMiddle:SetTexture(nil)
+    -- chatTab.HighlightRight:SetTexture(nil)
     chatTab.ActiveLeft:SetAlpha(0)
     chatTab.ActiveMiddle:SetAlpha(0)
     chatTab.ActiveRight:SetAlpha(0)

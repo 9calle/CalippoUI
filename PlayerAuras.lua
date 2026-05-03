@@ -59,12 +59,18 @@ local function AddCombatAlpha(frame)
 end
 
 function PA.StyleBuffsAndDebuffs()
-    for _, frame in pairs({BuffFrame.AuraContainer:GetChildren()}) do
-        StyleFrame(frame)
+    local dbEntry = CUI.DB.profile.PlayerAuras
+
+    if dbEntry.Buffs.Enabled then
+        for _, frame in pairs({BuffFrame.AuraContainer:GetChildren()}) do
+            StyleFrame(frame)
+        end
     end
 
-    for _, frame in pairs({DebuffFrame.AuraContainer:GetChildren()}) do
-        StyleFrame(frame)
+    if dbEntry.Debuffs.Enabled then
+        for _, frame in pairs({DebuffFrame.AuraContainer:GetChildren()}) do
+            StyleFrame(frame)
+        end
     end
 end
 
@@ -85,7 +91,9 @@ function PA.Load()
 
     PA.StyleBuffsAndDebuffs()
 
-    hooksecurefunc(DebuffFrame, "Update", function()
-        StyleDebuffs()
-    end)
+    if CUI.DB.profile.PlayerAuras.Debuffs.Enabled then
+        hooksecurefunc(DebuffFrame, "Update", function()
+            StyleDebuffs()
+        end)
+    end
 end

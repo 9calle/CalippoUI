@@ -250,6 +250,8 @@ local canCraft = {
     "Martyr's Waistwrap",
     "Adherent's Silken Shroud",
 
+    "Spellbreaker's Bracers",
+
     "Blood Knight's Warblade",
     "Blood Knight's Impetus",
     "Farstrider's Mercy",
@@ -385,6 +387,8 @@ local function UpdateGroupFinderScore(frame, profile, shouldOffset)
     end
 end
 
+local applicationText
+
 local function SetupGroupFinder()
     hooksecurefunc("LFGListApplicationViewer_UpdateApplicant", function(self, applicantID)
         if InCombatLockdown() then return end
@@ -421,6 +425,14 @@ local function SetupGroupFinder()
             UpdateGroupFinderScore(self, profile, true)
         end
     end)
+
+    -- LFGListApplicationDialog:HookScript("OnShow", function(self)
+    --     self.Description.EditBox:SetText(applicationText)
+    -- end)
+
+    -- LFGListApplicationDialog:HookScript("OnHide", function(self)
+    --     applicationText = self.Description.EditBox:GetText()
+    -- end)
 end
 
 ---------------------------------------------------------------------------------------------------------------------------------
