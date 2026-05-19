@@ -219,12 +219,16 @@ local function AddAllAuras(frame)
 	end
 
     local function AddDefensive(aura)
+        -- TODO : Temp lösning.
+        if aura.auraInstanceID > 10000 then return end
         ProcessAura(unit, aura)
         frame.defensives[aura.auraInstanceID] = aura
     end
 
     local function AddDispel(aura)
-        frame.dispels[aura.auraInstanceID] = aura
+        if aura.dispelName then
+            frame.dispels[aura.auraInstanceID] = aura
+        end
     end
 
     AuraUtil_ForEachAura(unit, playerDispellableFilter, nil, AddDispel, true)
@@ -276,6 +280,9 @@ local function UpdateAuras(frame, updateInfo)
             for i=1, #updateInfo.addedAuras do
                 local aura = updateInfo.addedAuras[i]
                 local done = false
+
+                -- TODO : Temp lösning.
+                if aura.auraInstanceID > 10000 then return end
 
                 -- TODO : Temp lösning.
                 if aura.dispelName and not C_UnitAuras_IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, debuffFilter) then

@@ -373,6 +373,8 @@ local function UpdateGroupFinderScore(frame, profile, shouldOffset)
         else
             frame.CUI_MainScore:SetText("")
         end
+    else
+        frame.CUI_MainScore:SetText("")
     end
 
     if profile and profile.raidProfile then
@@ -384,6 +386,8 @@ local function UpdateGroupFinderScore(frame, profile, shouldOffset)
                 frame.CUI_RaidProg:SetText("")
             end
         end
+    else
+        frame.CUI_RaidProg:SetText("")
     end
 end
 
@@ -427,12 +431,11 @@ local function SetupGroupFinder()
     end)
 
     -- LFGListApplicationDialog:HookScript("OnShow", function(self)
-    --     self.Description.EditBox:SetText(applicationText)
+    --     C_LFGList.ApplyToGroup(self.resultID, self.TankButton:IsShown() and self.TankButton.CheckButton:GetChecked(), self.HealerButton:IsShown() and self.HealerButton.CheckButton:GetChecked(), self.DamagerButton:IsShown() and self.DamagerButton.CheckButton:GetChecked())
+    --     StaticPopupSpecial_Hide(self)
     -- end)
 
-    -- LFGListApplicationDialog:HookScript("OnHide", function(self)
-    --     applicationText = self.Description.EditBox:GetText()
-    -- end)
+    -- LFGListFrame_SetActivePanel(LFGListFrame, LFGListFrame.SearchPanel)
 end
 
 ---------------------------------------------------------------------------------------------------------------------------------

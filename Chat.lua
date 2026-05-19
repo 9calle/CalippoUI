@@ -8,29 +8,31 @@ local Chat = CUI.Chat
 local function StyleChatBox(i)
     local dbEntry = CUI.DB.profile.Chat
 
-    _G["ChatFrame"..i.."EditBoxLeft"]:Hide()
-    _G["ChatFrame"..i.."EditBoxRight"]:Hide()
-    _G["ChatFrame"..i.."EditBoxMid"]:Hide()
+    _G["ChatFrame"..i.."EditBoxLeft"]:SetAlpha(0)
+    _G["ChatFrame"..i.."EditBoxRight"]:SetAlpha(0)
+    _G["ChatFrame"..i.."EditBoxMid"]:SetAlpha(0)
 
-    _G["ChatFrame"..i.."EditBoxFocusLeft"]:SetTexture(nil)
-    _G["ChatFrame"..i.."EditBoxFocusRight"]:SetTexture(nil)
-    _G["ChatFrame"..i.."EditBoxFocusMid"]:SetTexture(nil)
+    _G["ChatFrame"..i.."EditBoxFocusLeft"]:SetAlpha(0)
+    _G["ChatFrame"..i.."EditBoxFocusRight"]:SetAlpha(0)
+    _G["ChatFrame"..i.."EditBoxFocusMid"]:SetAlpha(0)
 
-    _G["ChatFrame"..i.."ButtonFrame"]:Hide()
+    _G["ChatFrame"..i.."ButtonFrame"]:SetAlpha(0)
     -- _G["ChatFrame"..i]:SetFont(dbEntry.Font, dbEntry.Size, dbEntry.Outline)
     -- _G["ChatFrame"..i.."EditBox"]:SetFont(dbEntry.Font, dbEntry.Size, dbEntry.Outline)
     -- _G["ChatFrame"..i.."EditBoxHeader"]:SetFont(dbEntry.Font, dbEntry.Size, dbEntry.Outline)
 
     local chatTab = _G["ChatFrame"..i.."Tab"]
+
     -- chatTab.HighlightLeft:SetTexture(nil)
     -- chatTab.HighlightMiddle:SetTexture(nil)
     -- chatTab.HighlightRight:SetTexture(nil)
     chatTab.ActiveLeft:SetAlpha(0)
     chatTab.ActiveMiddle:SetAlpha(0)
     chatTab.ActiveRight:SetAlpha(0)
-    chatTab.Left:Hide()
-    chatTab.Middle:Hide()
-    chatTab.Right:Hide()
+    
+    chatTab.Left:SetAlpha(0)
+    chatTab.Middle:SetAlpha(0)
+    chatTab.Right:SetAlpha(0)
     -- chatTab.noMouseAlpha = 0
 end
 
