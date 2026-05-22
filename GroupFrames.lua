@@ -1164,7 +1164,7 @@ local function SetupGroupFrame(unit, groupType, frameName, parent, num)
     local overlayFrame = CreateFrame("Frame", nil, frame)
     overlayFrame:SetParentKey("Overlay")
     overlayFrame:SetAllPoints(frame)
-    overlayFrame:SetFrameLevel(damageAbsorbBar:GetFrameLevel()+1)
+    overlayFrame:SetFrameLevel(healAbsorbBar:GetFrameLevel()+1)
 
     frame.buffPool = CreateFramePool("Frame", overlayFrame, "CUI_AuraFrameTemplate")
     frame.debuffPool = CreateFramePool("Frame", overlayFrame, "CUI_AuraFrameTemplate")
