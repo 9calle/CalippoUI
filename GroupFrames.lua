@@ -1286,10 +1286,12 @@ local function SetupGroupFrame(unit, groupType, frameName, parent, num)
             UpdateAuras(self)
             UpdateAFK(self)
             UpdateCenterIcon(self)
+            clickFrame:SetAttribute("*type2", "togglemenu")
         elseif event == "PLAYER_REGEN_DISABLED" then
             UpdateAuras(self)
             UpdateAFK(self)
             UpdateCenterIcon(self)
+            clickFrame:SetAttribute("*type2", nil)
         elseif event == "PLAYER_FLAGS_CHANGED" then
             UpdateAFK(self)
             UpdateCenterIcon(self)
