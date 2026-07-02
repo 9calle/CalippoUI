@@ -265,21 +265,20 @@ for i, c in pairs(DEBUFF_DISPLAY_COLOR_INFO) do
     dispelColorCurve:AddPoint(i, c)
 end
 
-local buffFilter = "HELPFUL"
-local debuffFilter = "HARMFUL"
-local debuffFilterPlayerOnly = "PLAYER|HARMFUL"
-
 local function UpdateAuraFilters(frame)
+    local maxShownBuffs = CUI.DB.profile.UnitFrames[frame.name]["Buffs"].MaxShown
+    local maxShownDebuffs = CUI.DB.profile.UnitFrames[frame.name]["Debuffs"].MaxShown
+
     frame.BuffsContainer:ClearAuraFilters()
     frame.DebuffsContainer:ClearAuraFilters()
 
-    if UnitIsFriend("player", frame.unit) then
-        frame.BuffsContainer:AddAuraFilter("HELPFUL", { maxFrameCount = 20 })
-    else
-        frame.BuffsContainer:AddAuraFilter("PLAYER|HARMFUL", { maxFrameCount = 20 })
-    end
+    frame.BuffsContainer:AddAuraFilter("HELPFUL", { maxFrameCount = maxShownBuffs })
 
-    frame.DebuffsContainer:AddAuraFilter("HARMFUL", { maxFrameCount = 20 })
+    if UnitIsFriend("player", frame.unit) then
+        frame.DebuffsContainer:AddAuraFilter("HARMFUL", { maxFrameCount = maxShownDebuffs })
+    else
+        frame.DebuffsContainer:AddAuraFilter("PLAYER|HARMFUL", { maxFrameCount = maxShownDebuffs })
+    end
 end
 
 local function SetupAuras(frame)
@@ -317,26 +316,35 @@ local function SetupAuras(frame)
             auraButton:SetSize(size, size)
             Util_PositionFromIndex(i-1, auraButton, container, anchorPoint, anchorRelativePoint, dirH, dirV, size, size, padding, posX, posY, rowLength)
 
-            auraButton.Icon = auraButton:CreateTexture(nil, "OVERLAY")
+            auraButton.Icon = auraButton:CreateTexture(nil, "ARTWORK")
             auraButton.Icon:SetAllPoints(auraButton)
             auraButton:SetIcon(auraButton.Icon)
 
-            auraButton.ApplicationText = auraButton:CreateFontString(nil, "OVERLAY")
-            auraButton.ApplicationText:SetFont(stacksFont, stacksSize, stacksOutline)
-            auraButton.ApplicationText:SetPoint(stacksAP, auraButton, stacksARP, stacksPX, stacksPY)
-            auraButton:SetApplicationCount(auraButton.ApplicationText, {})
-
-            -- auraButton.Border = auraButton:CreateTexture(nil, "ARTWORK")
-            -- auraButton.Border:SetAllPoints(auraButton)
-            -- auraButton.Border:SetTexture("Interface/AddOns/CalippoUI/Media/DropShadowBorder.blp")
-            -- auraButton:SetAuraBorder(auraButton.Border)WWWWWz§
-            Util.AddBorder(auraButton)
-
             auraButton.Cooldown = CreateFrame("Cooldown", nil, auraButton, "CooldownFrameTemplate")
+            auraButton.Cooldown:SetFrameLevel(auraButton:GetFrameLevel()+1)
             auraButton.Cooldown:SetDrawEdge(true)
             auraButton.Cooldown:SetReverse(true)
             auraButton.Cooldown:SetHideCountdownNumbers(true)
             auraButton:SetDurationCooldown(auraButton.Cooldown)
+
+            auraButton.Overlay = CreateFrame("Frame", nil, auraButton)
+            auraButton.Overlay:SetFrameLevel(auraButton:GetFrameLevel()+2)
+
+            auraButton.ApplicationText = auraButton.Overlay:CreateFontString(nil, "OVERLAY")
+            auraButton.ApplicationText:SetFont(stacksFont, stacksSize, stacksOutline)
+            auraButton.ApplicationText:SetPoint(stacksAP, auraButton, stacksARP, stacksPX, stacksPY)
+            auraButton:SetApplicationCount(auraButton.ApplicationText, {})
+
+            auraButton.Border = auraButton.Overlay:CreateTexture(nil, "OVERLAY")
+            auraButton.Border:SetPoint("TOPLEFT", auraButton, "TOPLEFT", -3, 3)
+            auraButton.Border:SetPoint("BOTTOMRIGHT", auraButton, "BOTTOMRIGHT", 3, -3)
+            local AuraBorderOptions = {
+                showIcon = true,
+                showWhenHarmful = true,
+                showWhenHelpful = true,
+            }
+            auraButton:SetAuraBorder(auraButton.Border, AuraBorderOptions)
+            --Util.AddBorder(auraButton)
 
             container:AddAuraFrame(auraButton)
         end
@@ -345,6 +353,10 @@ local function SetupAuras(frame)
     SetupAuraType("Buffs")
     SetupAuraType("Debuffs")
     UpdateAuraFilters(frame)
+end
+
+function UF.UpdateAuras(frame)
+
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -928,7 +940,6 @@ function SetupUnitFrame(frameName, unit, number)
     local raidMarker = overlayFrame:CreateTexture(nil, "OVERLAY")
     raidMarker:SetParentKey("RaidMarker")
 
-    frame:RegisterUnitEvent("UNIT_AURA", unit)
     frame:RegisterUnitEvent("UNIT_HEALTH", unit)
     frame:RegisterUnitEvent("UNIT_MAXHEALTH", unit)
     frame:RegisterUnitEvent("UNIT_ABSORB_AMOUNT_CHANGED", unit)

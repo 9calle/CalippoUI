@@ -93,309 +93,97 @@ local debuffFilterInCombat = "HARMFUL" -- "HARMFUL|RAID_IN_COMBAT"
 local defensiveFilter = "HELPFUL|BIG_DEFENSIVE"
 local playerDispellableFilter = "HARMFUL" -- "HARMFUL|RAID_PLAYER_DISPELLABLE"
 
-local function UpdateDispel(frame)
-    for id, aura in pairs(frame.dispels) do
-        local dispelColor = C_UnitAuras_GetAuraDispelTypeColor(frame.unit, aura.auraInstanceID, dispelColorCurveGradient)
-        if dispelColor then
-            frame.Overlay.DispelGradient:SetColorTexture(dispelColor.r, dispelColor.g, dispelColor.b, dispelColor.a)
-            frame.Overlay.DispelGradient:Show()
-            return
-        end
-    end
+local function UpdateAuraFilters(frame)
+    local maxShownBuffs = CUI.DB.profile.GroupFrames[frame.name]["Buffs"].MaxShown
+    local maxShownDebuffs = CUI.DB.profile.GroupFrames[frame.name]["Debuffs"].MaxShown
+    local maxShownDefensives = CUI.DB.profile.GroupFrames[frame.name]["Defensives"].MaxShown
 
-    frame.Overlay.DispelGradient:Hide()
+    frame.BuffsContainer:ClearAuraFilters()
+    frame.DebuffsContainer:ClearAuraFilters()
+    frame.DefensivesContainer:ClearAuraFilters()
+
+    if UnitAffectingCombat("player") then
+        frame.BuffsContainer:AddAuraFilter("PLAYER|HELPFUL|RAID_IN_COMBAT", { maxFrameCount = maxShownBuffs })
+    else
+        frame.BuffsContainer:AddAuraFilter("PLAYER|HELPFUL|RAID", { maxFrameCount = maxShownBuffs })
+    end
+    frame.DebuffsContainer:AddAuraFilter("HARMFUL", { maxFrameCount = maxShownDebuffs })
+    frame.DefensivesContainer:AddAuraFilter("HELPFUL|BIG_DEFENSIVE", { maxFrameCount = maxShownDefensives })
 end
 
-local function IterateAuras(frame, auraTable, pool, type)
-    local dbEntry = CUI.DB.profile.GroupFrames[frame.name][type]
-    local anchorPoint = dbEntry.AnchorPoint
-    local anchorRelativePoint = dbEntry.AnchorRelativePoint
-    local dirH = dbEntry.DirH
-    local dirV = dbEntry.DirV
-    local size = dbEntry.Size
-    local padding = dbEntry.Padding
-    local posX = dbEntry.PosX
-    local posY = dbEntry.PosY
-    local rowLength = dbEntry.RowLength
-    local maxShown = dbEntry.MaxShown
+local function SetupAuras(frame)
+    local function SetupAuraType(type)
+        local dbEntry = CUI.DB.profile.GroupFrames[frame.name][type]
+        local anchorPoint = dbEntry.AnchorPoint
+        local anchorRelativePoint = dbEntry.AnchorRelativePoint
+        local dirH = dbEntry.DirH
+        local dirV = dbEntry.DirV
+        local size = dbEntry.Size
+        local padding = dbEntry.Padding
+        local posX = dbEntry.PosX
+        local posY = dbEntry.PosY
+        local rowLength = dbEntry.RowLength
 
-    local stacksEnabled = dbEntry.Stacks.Enabled
-    local stacksAP = dbEntry.Stacks.AnchorPoint
-    local stacksARP = dbEntry.Stacks.AnchorRelativePoint
-    local stacksPX = dbEntry.Stacks.PosX
-    local stacksPY = dbEntry.Stacks.PosY
-    local stacksFont = dbEntry.Stacks.Font
-    local stacksOutline = dbEntry.Stacks.Outline
-    local stacksSize = dbEntry.Stacks.Size
+        local stacksEnabled = dbEntry.Stacks.Enabled
+        local stacksAP = dbEntry.Stacks.AnchorPoint
+        local stacksARP = dbEntry.Stacks.AnchorRelativePoint
+        local stacksPX = dbEntry.Stacks.PosX
+        local stacksPY = dbEntry.Stacks.PosY
+        local stacksFont = dbEntry.Stacks.Font
+        local stacksOutline = dbEntry.Stacks.Outline
+        local stacksSize = dbEntry.Stacks.Size
 
-    local zoomIcons = CUI.DB.global.ZoomIcons
+        local zoomIcons = CUI.DB.global.ZoomIcons
 
-    pool:ReleaseAll()
-
-    index = 0
-    for id, aura in pairs(auraTable) do
-        if index > maxShown then return end
+        local container = CreateFrame("AuraContainer", nil, frame, "CustomAuraContainerTemplate")
+        container:SetFrameLevel(frame.Overlay:GetFrameLevel())
+        container:SetParentKey(type.."Container")
+        container:SetAllPoints(frame)
+        container:SetUnit(frame.unit)
         
-        local auraFrame = pool:Acquire()
-        auraFrame:Show()
+        for i=1, 20 do
+            local auraButton = CreateFrame("AuraButton", nil, container, "CustomAuraButtonTemplate")
+            auraButton:SetSize(size, size)
+            Util_PositionFromIndex(i-1, auraButton, container, anchorPoint, anchorRelativePoint, dirH, dirV, size, size, padding, posX, posY, rowLength)
 
-        auraFrame.unit = frame.unit
-        auraFrame.type = type
-        auraFrame.showTooltip = true
-        auraFrame.auraInstanceID = id
+            auraButton.Icon = auraButton:CreateTexture(nil, "ARTWORK")
+            auraButton.Icon:SetAllPoints(auraButton)
+            auraButton:SetIcon(auraButton.Icon)
 
-        auraFrame:SetSize(size, size)
+            auraButton.Cooldown = CreateFrame("Cooldown", nil, auraButton, "CooldownFrameTemplate")
+            auraButton.Cooldown:SetFrameLevel(auraButton:GetFrameLevel()+1)
+            auraButton.Cooldown:SetDrawEdge(true)
+            auraButton.Cooldown:SetReverse(true)
+            auraButton.Cooldown:SetHideCountdownNumbers(true)
+            auraButton:SetDurationCooldown(auraButton.Cooldown)
 
-        if type == "Debuffs" then
-            -- local c = aura.borderColor
-            local color = C_UnitAuras_GetAuraDispelTypeColor(frame.unit, id, dispelColorCurve)
-            if color then
-                auraFrame.Overlay.Backdrop:SetBackdropBorderColor(color.r, color.g, color.b, color.a)
-            else
-                auraFrame.Overlay.Backdrop:SetBackdropBorderColor(0, 0, 0, 1)
-            end
-        else
-            auraFrame.Overlay.Backdrop:SetBackdropBorderColor(0, 0, 0, 1)
-        end
+            auraButton.Overlay = CreateFrame("Frame", nil, auraButton)
+            auraButton.Overlay:SetFrameLevel(auraButton:GetFrameLevel()+2)
 
-        auraFrame.Icon:SetTexture(aura.icon)
+            auraButton.ApplicationText = auraButton.Overlay:CreateFontString(nil, "OVERLAY")
+            auraButton.ApplicationText:SetFont(stacksFont, stacksSize, stacksOutline)
+            auraButton.ApplicationText:SetPoint(stacksAP, auraButton, stacksARP, stacksPX, stacksPY)
+            auraButton:SetApplicationCount(auraButton.ApplicationText, {})
 
-        if zoomIcons then
-            auraFrame.Icon:SetTexCoord(.08, .92, .08, .92)
-        else
-            auraFrame.Icon:SetTexCoord(.01, .99, .01, .99)
-        end
+            auraButton.Border = auraButton.Overlay:CreateTexture(nil, "OVERLAY")
+            auraButton.Border:SetPoint("TOPLEFT", auraButton, "TOPLEFT", -3, 3)
+            auraButton.Border:SetPoint("BOTTOMRIGHT", auraButton, "BOTTOMRIGHT", 3, -3)
+            local AuraBorderOptions = {
+                showIcon = true,
+                showWhenHarmful = true,
+                showWhenHelpful = true,
+            }
+            auraButton:SetAuraBorder(auraButton.Border, AuraBorderOptions)
+            --Util.AddBorder(auraButton)
 
-        local stacksFrame = auraFrame.Overlay.Count
-        if stacksEnabled then
-            stacksFrame:Show()
-            stacksFrame:ClearAllPoints()
-            stacksFrame:SetPoint(stacksAP, auraFrame.Overlay, stacksARP, stacksPX, stacksPY)
-            stacksFrame:SetFont(stacksFont, stacksSize, stacksOutline)
-            stacksFrame:SetText(C_StringUtil_TruncateWhenZero(aura.applications))
-        else
-            stacksFrame:Hide()
-        end
-
-        local durationObject = C_UnitAuras.GetAuraDuration(frame.unit, id)
-        if not durationObject then return end
-        auraFrame.Cooldown:SetCooldownFromDurationObject(durationObject)
-
-        Util_PositionFromIndex(index, auraFrame, frame, anchorPoint, anchorRelativePoint, dirH, dirV, size, size, padding, posX, posY, rowLength)
-
-        index = index + 1
-	end
-end
-
-local function ProcessAura(unit, aura)
-    if not aura then return end
-
-    local color = C_UnitAuras_GetAuraDispelTypeColor(unit, aura.auraInstanceID, dispelColorCurve)
-
-    if color then
-        aura.borderColor = color
-    else
-        aura.borderColor = CreateColor(0, 0, 0, 1)
-    end
-end
-
-local function AddAllAuras(frame)
-    local dbEntry = CUI.DB.profile.GroupFrames[frame.name]
-    local inCombat = UnitAffectingCombat("player")
-    local unit = frame.unit
-    table_wipe(frame.buffs)
-    table_wipe(frame.debuffs)
-    table_wipe(frame.defensives)
-    table_wipe(frame.dispels)
-
-    local function AddBuff(aura)
-        ProcessAura(unit, aura)
-        frame.buffs[aura.auraInstanceID] = aura
-	end
-
-    local function AddDebuff(aura)
-        ProcessAura(unit, aura)
-        frame.debuffs[aura.auraInstanceID] = aura
-	end
-
-    local function AddDefensive(aura)
-        -- TODO : Temp lösning.
-        if aura.auraInstanceID > 10000 then return end
-        ProcessAura(unit, aura)
-        frame.defensives[aura.auraInstanceID] = aura
-    end
-
-    local function AddDispel(aura)
-        if aura.dispelName then
-            frame.dispels[aura.auraInstanceID] = aura
+            container:AddAuraFrame(auraButton)
         end
     end
-
-    AuraUtil_ForEachAura(unit, playerDispellableFilter, nil, AddDispel, true)
-
-    if dbEntry.Buffs.Enabled then
-        if inCombat then
-            AuraUtil.ForEachAura(unit, buffFilterInCombat, nil, AddBuff, true)
-        else
-            AuraUtil.ForEachAura(unit, buffFilter, nil, AddBuff, true)
-        end
-    end
-
-    if dbEntry.Defensives.Enabled then
-        AuraUtil.ForEachAura(unit, defensiveFilter, nil, AddDefensive, true)
-    end
-
-    if dbEntry.Debuffs.Enabled then
-        if inCombat then
-            AuraUtil.ForEachAura(unit, debuffFilterInCombat, nil, AddDebuff, true)
-        else
-            AuraUtil.ForEachAura(unit, debuffFilter, nil, AddDebuff, true)
-        end
-    end
-end
-
-local function UpdateAuras(frame, updateInfo)
-    local dbEntry = CUI.DB.profile.GroupFrames[frame.name]
-    local buffsEnabled = dbEntry.Buffs.Enabled
-    local debuffsEnabled = dbEntry.Debuffs.Enabled
-    local defensivesEnabled = dbEntry.Defensives.Enabled
-    local unit = frame.unit
-	local buffsChanged = false
-    local debuffsChanged = false
-    local defensivesChanged = false
-    local dispelsChanged = false
-
-    if not buffsEnabled and not debuffsEnabled then return end
-
-    if not updateInfo or updateInfo.isFullUpdate then
-        AddAllAuras(frame)
-        buffsChanged = true
-        debuffsChanged = true
-        defensivesChanged = true
-        dispelChanged = true
-    else
-        if updateInfo.addedAuras then
-            local inCombat = UnitAffectingCombat("player")
-
-            for i=1, #updateInfo.addedAuras do
-                local aura = updateInfo.addedAuras[i]
-                local done = false
-
-                -- TODO : Temp lösning.
-                if aura.auraInstanceID > 10000 then return end
-
-                -- TODO : Temp lösning.
-                if aura.dispelName and not C_UnitAuras_IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, debuffFilter) then
-                    frame.dispels[aura.auraInstanceID] = aura
-                    dispelChanged = true
-                end
-
-                if defensivesEnabled and not C_UnitAuras_IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, defensiveFilter) then
-                    ProcessAura(unit, aura)
-                    frame.defensives[aura.auraInstanceID] = aura
-                    defensivesChanged = true
-                    done = true
-                elseif not done and buffsEnabled then
-                    if inCombat then
-                        if not C_UnitAuras_IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, buffFilterInCombat) then
-                            ProcessAura(unit, aura)
-                            frame.buffs[aura.auraInstanceID] = aura
-                            buffsChanged = true
-                            done = true
-                        end
-                    else
-                        if not C_UnitAuras_IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, buffFilter) then
-                            ProcessAura(unit, aura)
-                            frame.buffs[aura.auraInstanceID] = aura
-                            buffsChanged = true
-                            done = true
-                        end
-                    end
-                end
-
-                if not done and debuffsEnabled then
-                    if inCombat then
-                        if not C_UnitAuras_IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, debuffFilterInCombat) then
-                            ProcessAura(unit, aura)
-                            frame.debuffs[aura.auraInstanceID] = aura
-                            debuffsChanged = true
-                        end
-                    else
-                        if not C_UnitAuras_IsAuraFilteredOutByInstanceID(unit, aura.auraInstanceID, debuffFilter) then
-                            ProcessAura(unit, aura)
-                            frame.debuffs[aura.auraInstanceID] = aura
-                            debuffsChanged = true
-                        end
-                    end
-                end
-            end
-        end
-
-        if updateInfo.updatedAuraInstanceIDs then
-            for i=1, #updateInfo.updatedAuraInstanceIDs do
-                local id = updateInfo.updatedAuraInstanceIDs[i]
-
-				if frame.buffs[id] then
-					local newAura = C_UnitAuras.GetAuraDataByAuraInstanceID(unit, id)
-                    ProcessAura(unit, newAura)
-                    frame.buffs[id] = newAura
-                    buffsChanged = true
-                elseif frame.debuffs[id] then
-                    local newAura = C_UnitAuras.GetAuraDataByAuraInstanceID(unit, id)
-                    ProcessAura(unit, newAura)
-                    frame.debuffs[id] = newAura
-                    debuffsChanged = true
-                end
-
-                if frame.defensives[id] then
-                    local newAura = C_UnitAuras.GetAuraDataByAuraInstanceID(unit, id)
-                    ProcessAura(unit, newAura)
-                    frame.defensives[id] = newAura
-                    defensivesChanged = true
-				end 
-            end
-        end
-
-        if updateInfo.removedAuraInstanceIDs then
-            for i=1, #updateInfo.removedAuraInstanceIDs do
-                local id = updateInfo.removedAuraInstanceIDs[i]
-
-                if frame.buffs[id] then
-                    frame.buffs[id] = nil
-                    buffsChanged = true
-                elseif frame.debuffs[id] then
-                    frame.debuffs[id] = nil
-                    debuffsChanged = true
-                end
-
-                if frame.dispels[id] then
-                    frame.dispels[id] = nil
-                    dispelChanged = true
-                end
-                
-                if frame.defensives[id] then
-                    frame.defensives[id] = nil
-                    defensivesChanged = true
-                end
-            end
-        end
-    end
-
-    if buffsChanged then
-        IterateAuras(frame, frame.buffs, frame.buffPool, "Buffs")
-    end
-
-    if defensivesChanged then
-        IterateAuras(frame, frame.defensives, frame.defensivePool, "Defensives")
-    end
-
-    if debuffsChanged then
-        IterateAuras(frame, frame.debuffs, frame.debuffPool, "Debuffs")
-    end
-
-    if dispelChanged then
-        UpdateDispel(frame)
-    end
+    
+    SetupAuraType("Buffs")
+    SetupAuraType("Debuffs")
+    SetupAuraType("Defensives")
+    UpdateAuraFilters(frame)
 end
 
 local function UpdatePrivateAuraAnchors(frame, showTest)
@@ -425,10 +213,7 @@ local function UpdatePrivateAuraAnchors(frame, showTest)
 end
 
 function GF.UpdateAuras(groupFrame, privateAuraTest)
-    for _, frame in ipairs(groupFrame.frames) do
-        UpdateAuras(frame)
-        UpdatePrivateAuraAnchors(frame, privateAuraTest)
-    end
+
 end
 
 local function SetupPrivateAnchors(frame)
@@ -886,7 +671,6 @@ function GF.ToggleGroupTestFrames(type, state)
                 frame.unit = unit
                 frame:SetAttribute("unit", unit)
                 UpdateAll(frame)
-                UpdateAuras(frame)
                 RegisterAttributeDriver(frame, "state-visibility", "[group:raid]hide;[group:party, @"..unit..", exists]show;hide")
             end
         end
@@ -899,7 +683,6 @@ function GF.ToggleGroupTestFrames(type, state)
                 frame.unit = "player"
                 frame:SetAttribute("unit", "player")
                 UpdateAll(frame)
-                UpdateAuras(frame)
                 RegisterAttributeDriver(frame, "state-visibility", "show")
             else
                 local unit = "raid"..i
@@ -1098,10 +881,6 @@ local function SetupGroupFrame(unit, groupType, frameName, parent, num)
     frame.groupType = groupType
     frame.name = frameName
     frame.num = num
-    frame.buffs = {}
-    frame.debuffs = {}
-    frame.defensives = {}
-    frame.dispels = {}
     frame.calc = CreateUnitHealPredictionCalculator()
     frame.calc:SetHealAbsorbClampMode(Enum.UnitHealAbsorbClampMode.CurrentHealth)
     frame.calc:SetIncomingHealClampMode(Enum.UnitIncomingHealClampMode.MissingHealth)
@@ -1166,9 +945,7 @@ local function SetupGroupFrame(unit, groupType, frameName, parent, num)
     overlayFrame:SetAllPoints(frame)
     overlayFrame:SetFrameLevel(healAbsorbBar:GetFrameLevel()+1)
 
-    frame.buffPool = CreateFramePool("Frame", overlayFrame, "CUI_AuraFrameTemplate")
-    frame.debuffPool = CreateFramePool("Frame", overlayFrame, "CUI_AuraFrameTemplate")
-    frame.defensivePool = CreateFramePool("Frame", overlayFrame, "CUI_AuraFrameTemplate")
+    SetupAuras(frame)
 
     local border = CreateFrame("Frame", nil, overlayFrame, "BackdropTemplate")
     border:SetParentKey("Border")
@@ -1224,7 +1001,6 @@ local function SetupGroupFrame(unit, groupType, frameName, parent, num)
     clickFrame:Show()
 
     -- TDOD : Avregistrera event när frame inte är synlig?
-    frame:RegisterUnitEvent("UNIT_AURA", unit)
     frame:RegisterUnitEvent("UNIT_HEALTH", unit)
     frame:RegisterUnitEvent("UNIT_MAXHEALTH", unit)
     frame:RegisterUnitEvent("UNIT_ABSORB_AMOUNT_CHANGED", unit)
@@ -1251,16 +1027,12 @@ local function SetupGroupFrame(unit, groupType, frameName, parent, num)
         if event == "GROUP_ROSTER_UPDATE" then
             if UnitExists(self.unit) then
                 UpdateAll(self)
-                UpdateAuras(self)
             end
         end
 
         if not self:IsShown() then return end
 
-        if event == "UNIT_AURA" then
-            local _, updateInfo = ...
-            UpdateAuras(self, updateInfo)
-        elseif event == "UNIT_HEALTH" then
+        if event == "UNIT_HEALTH" then
             UpdateHealth(self)
             UpdateHealPrediction(self)
             UpdateIsDead(self)
@@ -1283,20 +1055,20 @@ local function SetupGroupFrame(unit, groupType, frameName, parent, num)
         elseif event  == "PLAYER_TARGET_CHANGED" then
             UpdateBorderColor(self)
         elseif event == "PLAYER_REGEN_ENABLED" then
-            UpdateAuras(self)
             UpdateAFK(self)
             UpdateCenterIcon(self)
+            UpdateAuraFilters(self)
             clickFrame:SetAttribute("*type2", "togglemenu")
         elseif event == "PLAYER_REGEN_DISABLED" then
-            UpdateAuras(self)
             UpdateAFK(self)
             UpdateCenterIcon(self)
+            UpdateAuraFilters(self)
             clickFrame:SetAttribute("*type2", nil)
         elseif event == "PLAYER_FLAGS_CHANGED" then
             UpdateAFK(self)
             UpdateCenterIcon(self)
         elseif event == "UNIT_DISTANCE_CHECK_UPDATE" then
-            UpdateAuras(self)
+            -- TODO : Ta bort?
         elseif event == "UNIT_PHASE" then
             UpdateInPhase(self)
             UpdateCenterIcon(self)
@@ -1320,7 +1092,6 @@ local function SetupGroupFrame(unit, groupType, frameName, parent, num)
     end)
 
     UpdateAll(frame)
-    UpdateAuras(frame)
 
     if groupType == "party" then
         RegisterAttributeDriver(frame, "state-visibility", "[group:raid]hide;[group:party, @"..unit..", exists]show;hide")
