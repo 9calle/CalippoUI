@@ -1544,19 +1544,11 @@ local function CreateGroupFrameAuraPage(container, groupFrame)
 
         local group = CreateInlineGroup(scrollFrame, type)
 
-        if type ~= "PrivateAuras" then
-            CreateCheckBox(group, "Show "..type, dbEntry.Enabled,
-                function(self, event, value)
-                    dbEntry.Enabled = value
-                    GF.UpdateAuras(frame)
-                end, 1)
-        else
-            CreateCheckBox(group, "Show test frames (reload needed to apply settings)", privateAuraTestFrame,
-                function(self, event, value)
-                    privateAuraTestFrame = value
-                    GF.UpdateAuras(frame, privateAuraTestFrame)
-                end, 1)
-        end
+        CreateCheckBox(group, "Show "..type, dbEntry.Enabled,
+            function(self, event, value)
+                dbEntry.Enabled = value
+                GF.UpdateAuras(frame)
+            end, 1)
 
         CreateSlider(group, "Size", 1, 50, 1, dbEntry.Size,
             function(self, event, value)
@@ -1618,9 +1610,7 @@ local function CreateGroupFrameAuraPage(container, groupFrame)
                 GF.UpdateAuras(frame)
             end, 0.5)
 
-        if type ~= "PrivateAuras" then
-            CreateTextGroup(scrollFrame, dbEntry.Stacks, GF.UpdateAuras, frame, "Stacks")
-        end
+        CreateTextGroup(scrollFrame, dbEntry.Stacks, GF.UpdateAuras, frame, "Stacks")
 
         scrollFrame:DoLayout()
     end
@@ -1634,8 +1624,7 @@ local function CreateGroupFrameAuraPage(container, groupFrame)
     tabGroup:SetLayout("Fill")
     tabGroup:SetTabs({{text="Buffs", value="Buffs"},
                     {text="Debuffs", value="Debuffs"},
-                    {text="Defensives", value="Defensives"},
-                    {text="Private Auras", value="PrivateAuras"},})
+                    {text="Defensives", value="Defensives"},})
     tabGroup:SetCallback("OnGroupSelected", SelectGroup)
     tabGroup:SelectTab("Buffs")
 

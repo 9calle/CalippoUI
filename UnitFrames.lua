@@ -248,36 +248,17 @@ end
 
 ---------------------------------------------------------------------------------------------------
 
-local DEBUFF_DISPLAY_COLOR_INFO = {
-    [0] = CreateColor(0, 0, 0, 1),
-    [1] = DEBUFF_TYPE_MAGIC_COLOR,
-    [2] = DEBUFF_TYPE_CURSE_COLOR,
-    [3] = DEBUFF_TYPE_DISEASE_COLOR,
-    [4] = DEBUFF_TYPE_POISON_COLOR,
-    [9] = DEBUFF_TYPE_BLEED_COLOR,
-    [11] = DEBUFF_TYPE_BLEED_COLOR,
-}
-
-local dispelColorCurve = C_CurveUtil.CreateColorCurve()
-dispelColorCurve:SetType(Enum.LuaCurveType.Step)
-
-for i, c in pairs(DEBUFF_DISPLAY_COLOR_INFO) do
-    dispelColorCurve:AddPoint(i, c)
-end
-
 local function UpdateAuraFilters(frame)
-    local maxShownBuffs = CUI.DB.profile.UnitFrames[frame.name]["Buffs"].MaxShown
-    local maxShownDebuffs = CUI.DB.profile.UnitFrames[frame.name]["Debuffs"].MaxShown
+    -- TODO : Hitta mer korrekt sätt att lösa uppdatering?
+    frame.BuffsContainer:SetAuraGroupFilterString("AuraGroup", "")
+    frame.DebuffsContainer:SetAuraGroupFilterString("AuraGroup", "")
 
-    frame.BuffsContainer:ClearAuraFilters()
-    frame.DebuffsContainer:ClearAuraFilters()
-
-    frame.BuffsContainer:AddAuraFilter("HELPFUL", { maxFrameCount = maxShownBuffs })
+    frame.BuffsContainer:SetAuraGroupFilterString("AuraGroup", "HELPFUL")
 
     if UnitIsFriend("player", frame.unit) then
-        frame.DebuffsContainer:AddAuraFilter("HARMFUL", { maxFrameCount = maxShownDebuffs })
+        frame.DebuffsContainer:SetAuraGroupFilterString("AuraGroup", "HARMFUL")
     else
-        frame.DebuffsContainer:AddAuraFilter("PLAYER|HARMFUL", { maxFrameCount = maxShownDebuffs })
+        frame.DebuffsContainer:SetAuraGroupFilterString("AuraGroup", "PLAYER|HARMFUL")
     end
 end
 
@@ -304,17 +285,17 @@ local function SetupAuras(frame)
         local stacksOutline = dbEntry.Stacks.Outline
         local stacksSize = dbEntry.Stacks.Size
 
-        local zoomIcons = CUI.DB.global.ZoomIcons
-
-        local container = CreateFrame("AuraContainer", nil, frame, "CustomAuraContainerTemplate");
+        local container = CreateFrame("AuraContainer", nil, frame, "CustomAuraContainerTemplate")
         container:SetParentKey(type.."Container")
-        container:SetAllPoints(frame)
+        container:SetPoint(anchorPoint, frame, anchorRelativePoint, posX, posY)
         container:SetUnit(frame.unit)
-        
-        for i=1, 20 do
-            local auraButton = CreateFrame("AuraButton", nil, container, "CustomAuraButtonTemplate")
+        container:SetFlowLayoutMaximumLineSize(rowLength*(size+padding))
+        container:SetFlowLayoutAxis(AnchorUtil.FlowLayoutAxis.Horizontal)
+        container:SetFlowLayoutAnchorPoint(anchorPoint)
+        container:SetFlowLayoutGrowthDirection(AnchorUtil.FlowDirection[Util.Directions[dirH]], AnchorUtil.FlowDirection[Util.Directions[dirV]])
+
+        local function InitializeAuraButton(auraButton)
             auraButton:SetSize(size, size)
-            Util_PositionFromIndex(i-1, auraButton, container, anchorPoint, anchorRelativePoint, dirH, dirV, size, size, padding, posX, posY, rowLength)
 
             auraButton.Icon = auraButton:CreateTexture(nil, "ARTWORK")
             auraButton.Icon:SetAllPoints(auraButton)
@@ -344,9 +325,28 @@ local function SetupAuras(frame)
                 showWhenHelpful = true,
             }
             auraButton:SetAuraBorder(auraButton.Border, AuraBorderOptions)
-            --Util.AddBorder(auraButton)
+        end
 
-            container:AddAuraFrame(auraButton)
+        local options = {
+            maxFrameCount = maxShown,
+            sortMethod = AuraContainerSortMethod.Default,
+            sortDirection = AuraContainerSortDirection.Normal,
+            initializeFrame = InitializeAuraButton,
+            templateNames = { "CustomAuraButtonTemplate" },
+        }
+        container:AddAuraGroup("AuraGroup", "", options)
+
+        local layoutOptions = {
+            elementSpacing = padding,
+            lineSpacing = padding,
+            forceNewLine = true,
+            elementWidth = size,
+            elementHeight = size,
+        }
+        container:SetAuraGroupLayout("AuraGroup", layoutOptions)
+
+        if not dbEntry.Enabled then
+            container:Hide()
         end
     end
     
@@ -356,7 +356,7 @@ local function SetupAuras(frame)
 end
 
 function UF.UpdateAuras(frame)
-
+    -- TODO
 end
 
 ---------------------------------------------------------------------------------------------------
@@ -523,10 +523,10 @@ local function UpdateLeaderAssist(frame)
     local leaderFrame = frame.Overlay.LeaderIcon
     local unit = frame.unit
 
-    if UnitIsGroupLeader(unit) then
+    if not issecretvalue(UnitIsGroupLeader(unit)) and UnitIsGroupLeader(unit) then
         leaderFrame:SetAtlas("UI-HUD-UnitFrame-Player-Group-LeaderIcon")
         leaderFrame:Show()
-    elseif UnitIsGroupAssistant(unit) then
+    elseif not issecretvalue(UnitIsGroupAssistant(unit)) and UnitIsGroupAssistant(unit) then
         leaderFrame:SetAtlas("UI-HUD-UnitFrame-Player-Group-GuideIcon")
         leaderFrame:Show()
     else

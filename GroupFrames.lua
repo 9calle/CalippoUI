@@ -52,63 +52,20 @@ end
 
 ---------------------------------------------------------------------------------------------------------------------------------
 
-local DEBUFF_DISPLAY_COLOR_INFO = {
-    [0] = CreateColor(0, 0, 0, 1),
-    [1] = DEBUFF_TYPE_MAGIC_COLOR,
-    [2] = DEBUFF_TYPE_CURSE_COLOR,
-    [3] = DEBUFF_TYPE_DISEASE_COLOR,
-    [4] = DEBUFF_TYPE_POISON_COLOR,
-    [9] = DEBUFF_TYPE_BLEED_COLOR,
-    [11] = DEBUFF_TYPE_BLEED_COLOR,
-}
-
-local DEBUFF_DISPLAY_COLOR_INFO_GRADIENT = {
-    [0] = CreateColor(0, 0, 0, 0),
-    [1] = DEBUFF_TYPE_MAGIC_COLOR,
-    [2] = DEBUFF_TYPE_CURSE_COLOR,
-    [3] = DEBUFF_TYPE_DISEASE_COLOR,
-    [4] = DEBUFF_TYPE_POISON_COLOR,
-    [9] = DEBUFF_TYPE_BLEED_COLOR,
-    [11] = DEBUFF_TYPE_BLEED_COLOR,
-}
-
-local dispelColorCurve = C_CurveUtil.CreateColorCurve()
-dispelColorCurve:SetType(Enum.LuaCurveType.Step)
-for i, c in pairs(DEBUFF_DISPLAY_COLOR_INFO) do
-    dispelColorCurve:AddPoint(i, c)
-end
-
-
-local dispelColorCurveGradient = C_CurveUtil.CreateColorCurve()
-dispelColorCurveGradient:SetType(Enum.LuaCurveType.Step)
-for i, c in pairs(DEBUFF_DISPLAY_COLOR_INFO_GRADIENT) do
-    dispelColorCurveGradient:AddPoint(i, c)
-end
-
-local buffFilter = "PLAYER|HELPFUL|RAID"
-local buffFilterInCombat = "PLAYER|HELPFUL|RAID_IN_COMBAT"
--- TODO : Temp lösning
-local debuffFilter = "HARMFUL" -- "HARMFUL|RAID"
-local debuffFilterInCombat = "HARMFUL" -- "HARMFUL|RAID_IN_COMBAT"
-local defensiveFilter = "HELPFUL|BIG_DEFENSIVE"
-local playerDispellableFilter = "HARMFUL" -- "HARMFUL|RAID_PLAYER_DISPELLABLE"
-
 local function UpdateAuraFilters(frame)
-    local maxShownBuffs = CUI.DB.profile.GroupFrames[frame.name]["Buffs"].MaxShown
-    local maxShownDebuffs = CUI.DB.profile.GroupFrames[frame.name]["Debuffs"].MaxShown
-    local maxShownDefensives = CUI.DB.profile.GroupFrames[frame.name]["Defensives"].MaxShown
+    -- TODO : Hitta mer korrekt sätt att lösa uppdatering?
+    frame.BuffsContainer:SetAuraGroupFilterString("AuraGroup", "")
+    frame.DebuffsContainer:SetAuraGroupFilterString("AuraGroup", "")
+    frame.DefensivesContainer:SetAuraGroupFilterString("AuraGroup", "")
 
-    frame.BuffsContainer:ClearAuraFilters()
-    frame.DebuffsContainer:ClearAuraFilters()
-    frame.DefensivesContainer:ClearAuraFilters()
+    frame.DebuffsContainer:SetAuraGroupFilterString("AuraGroup", "HARMFUL")
+    frame.DefensivesContainer:SetAuraGroupFilterString("AuraGroup", "HELPFUL|BIG_DEFENSIVE")
 
     if UnitAffectingCombat("player") then
-        frame.BuffsContainer:AddAuraFilter("PLAYER|HELPFUL|RAID_IN_COMBAT", { maxFrameCount = maxShownBuffs })
+        frame.BuffsContainer:SetAuraGroupFilterString("AuraGroup", "PLAYER|HELPFUL|RAID_IN_COMBAT")
     else
-        frame.BuffsContainer:AddAuraFilter("PLAYER|HELPFUL|RAID", { maxFrameCount = maxShownBuffs })
+        frame.BuffsContainer:SetAuraGroupFilterString("AuraGroup", "PLAYER|HELPFUL|RAID")
     end
-    frame.DebuffsContainer:AddAuraFilter("HARMFUL", { maxFrameCount = maxShownDebuffs })
-    frame.DefensivesContainer:AddAuraFilter("HELPFUL|BIG_DEFENSIVE", { maxFrameCount = maxShownDefensives })
 end
 
 local function SetupAuras(frame)
@@ -133,18 +90,18 @@ local function SetupAuras(frame)
         local stacksOutline = dbEntry.Stacks.Outline
         local stacksSize = dbEntry.Stacks.Size
 
-        local zoomIcons = CUI.DB.global.ZoomIcons
-
         local container = CreateFrame("AuraContainer", nil, frame, "CustomAuraContainerTemplate")
         container:SetFrameLevel(frame.Overlay:GetFrameLevel())
         container:SetParentKey(type.."Container")
-        container:SetAllPoints(frame)
+        container:SetPoint(anchorPoint, frame, anchorRelativePoint, posX, posY)
         container:SetUnit(frame.unit)
-        
-        for i=1, 20 do
-            local auraButton = CreateFrame("AuraButton", nil, container, "CustomAuraButtonTemplate")
+        container:SetFlowLayoutMaximumLineSize(rowLength*(size+padding))
+        container:SetFlowLayoutAxis(AnchorUtil.FlowLayoutAxis.Horizontal)
+        container:SetFlowLayoutAnchorPoint(anchorPoint)
+        container:SetFlowLayoutGrowthDirection(AnchorUtil.FlowDirection[Util.Directions[dirH]], AnchorUtil.FlowDirection[Util.Directions[dirV]])
+
+        local function InitializeAuraButton(auraButton)
             auraButton:SetSize(size, size)
-            Util_PositionFromIndex(i-1, auraButton, container, anchorPoint, anchorRelativePoint, dirH, dirV, size, size, padding, posX, posY, rowLength)
 
             auraButton.Icon = auraButton:CreateTexture(nil, "ARTWORK")
             auraButton.Icon:SetAllPoints(auraButton)
@@ -171,12 +128,31 @@ local function SetupAuras(frame)
             local AuraBorderOptions = {
                 showIcon = true,
                 showWhenHarmful = true,
-                showWhenHelpful = true,
+                showWhenHelpful = false,
             }
             auraButton:SetAuraBorder(auraButton.Border, AuraBorderOptions)
-            --Util.AddBorder(auraButton)
+        end
 
-            container:AddAuraFrame(auraButton)
+        local options = {
+            maxFrameCount = maxShown,
+            sortMethod = AuraContainerSortMethod.Default,
+            sortDirection = AuraContainerSortDirection.Normal,
+            initializeFrame = InitializeAuraButton,
+            templateNames = { "CustomAuraButtonTemplate" },
+        }
+        container:AddAuraGroup("AuraGroup", "", options)
+
+        local layoutOptions = {
+            elementSpacing = padding,
+            lineSpacing = padding,
+            forceNewLine = true,
+            elementWidth = size,
+            elementHeight = size,
+        }
+        container:SetAuraGroupLayout("AuraGroup", layoutOptions)
+
+        if not dbEntry.Enabled then
+            container:Hide()
         end
     end
     
@@ -186,83 +162,8 @@ local function SetupAuras(frame)
     UpdateAuraFilters(frame)
 end
 
-local function UpdatePrivateAuraAnchors(frame, showTest)
-    local dbEntry = CUI.DB.profile.GroupFrames[frame.name].PrivateAuras
-    local anchorPoint = dbEntry.AnchorPoint
-    local anchorRelativePoint = dbEntry.AnchorRelativePoint
-    local dirH = dbEntry.DirH
-    local dirV = dbEntry.DirV
-    local size = dbEntry.Size
-    local padding = dbEntry.Padding
-    local posX = dbEntry.PosX
-    local posY = dbEntry.PosY
-    local rowLength = dbEntry.RowLength
-    local maxShown = dbEntry.MaxShown
-
-    for i=1, 6 do
-        local container = frame.Overlay["PrivateAuraContainer"..i]
-        container:SetSize(size, size)
-        Util_PositionFromIndex(i-1, container, frame.Overlay, anchorPoint, anchorRelativePoint, dirH, dirV, size, size, padding, posX, posY, rowLength)
-
-        if showTest == true then
-            container.TestTexture:Show()
-        elseif showTest == false then
-            container.TestTexture:Hide()
-        end
-    end
-end
-
-function GF.UpdateAuras(groupFrame, privateAuraTest)
-
-end
-
-local function SetupPrivateAnchors(frame)
-    local dbEntry = CUI.DB.profile.GroupFrames[frame.name].PrivateAuras
-    local anchorPoint = dbEntry.AnchorPoint
-    local anchorRelativePoint = dbEntry.AnchorRelativePoint
-    local dirH = dbEntry.DirH
-    local dirV = dbEntry.DirV
-    local size = dbEntry.Size
-    local padding = dbEntry.Padding
-    local posX = dbEntry.PosX
-    local posY = dbEntry.PosY
-    local rowLength = dbEntry.RowLength
-    local maxShown = dbEntry.MaxShown
-
-    for i=1, 6 do
-        local container = CreateFrame("Frame", nil, frame.Overlay)
-        container:SetParentKey("PrivateAuraContainer"..i)
-        container:SetSize(size, size)
-        Util_PositionFromIndex(i-1, container, frame.Overlay, anchorPoint, anchorRelativePoint, dirH, dirV, size, size, padding, posX, posY, rowLength)
-
-        local texture = container:CreateTexture(nil, "OVERLAY")
-        texture:SetParentKey("TestTexture")
-        texture:SetAllPoints(container)
-        texture:SetColorTexture(0, 0, 0, 1)
-        texture:Hide()
-
-        local anchor = C_UnitAuras.AddPrivateAuraAnchor({
-            unitToken = frame.unit,
-            auraIndex = i,
-            parent = container,
-            showCountdownFrame = true,
-            showCountdownNumbers = false,
-            isContainer = false,
-            iconInfo = {
-                iconWidth = size,
-                iconHeight = size,
-                borderScale = size/20,
-                iconAnchor = {
-                    point = "CENTER",
-                    relativeTo = container,
-                    relativePoint = "CENTER",
-                    offsetX = 0,
-                    offsetY = 0,
-                },
-            },
-        })
-        table.insert(frame.privateAnchors, anchor)
-    end
+function GF.UpdateAuras(groupFrame)
+    -- TODO
 end
 
 ---------------------------------------------------------------------------------------------------------------------------------
@@ -884,7 +785,6 @@ local function SetupGroupFrame(unit, groupType, frameName, parent, num)
     frame.calc = CreateUnitHealPredictionCalculator()
     frame.calc:SetHealAbsorbClampMode(Enum.UnitHealAbsorbClampMode.CurrentHealth)
     frame.calc:SetIncomingHealClampMode(Enum.UnitIncomingHealClampMode.MissingHealth)
-    frame.privateAnchors = {}
 
     frame.disconnected = nil
     frame.summon = nil
@@ -985,8 +885,6 @@ local function SetupGroupFrame(unit, groupType, frameName, parent, num)
 
     local raidMarker = overlayFrame:CreateTexture(nil, "OVERLAY")
     raidMarker:SetParentKey("RaidMarker")
-
-    SetupPrivateAnchors(frame)
 
     local clickFrame = CreateFrame("Button", nil, overlayFrame, "CUI_UnitFrameTemplate")
     clickFrame:SetParentKey("ClickFrame")
