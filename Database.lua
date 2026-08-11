@@ -3,6 +3,12 @@ local addonName, CUI = ...
 CUI.Database = {}
 local Database = CUI.Database
 
+CUI.SharedMedia = LibStub("LibSharedMedia-3.0")
+CUI.SharedMedia:Register("font", "Fira Sans Medium", "Interface/AddOns/CalippoUI/Fonts/FiraSans-Medium.ttf")
+CUI.SharedMedia:Register("font", "Fira Sans Black", "Interface/AddOns/CalippoUI/Fonts/FiraSans-Black.ttf")
+CUI.SharedMedia:Register("statusbar", "CUI Default", "Interface/AddOns/CalippoUI/Media/Statusbar.tga")
+CUI.SharedMedia:Register("statusbar", "CUI Striped", "Interface/AddOns/CalippoUI/Media/Striped.tga")
+
 CUI_BACKDROP_DS = {
     edgeFile = "Interface/AddOns/CalippoUI/Media/DropShadowBorder.blp",
     edgeSize = PixelUtil.GetNearestPixelSize(1, UIParent:GetEffectiveScale(), 1) * 3,
@@ -1264,11 +1270,5 @@ local defaults = {
 }
 
 function Database.Load()
-    CUI.SharedMedia = LibStub("LibSharedMedia-3.0")
-    CUI.SharedMedia:Register("font", "Fira Sans Medium", "Interface/AddOns/CalippoUI/Fonts/FiraSans-Medium.ttf")
-    CUI.SharedMedia:Register("font", "Fira Sans Black", "Interface/AddOns/CalippoUI/Fonts/FiraSans-Black.ttf")
-    CUI.SharedMedia:Register("statusbar", "CUI Default", "Interface/AddOns/CalippoUI/Media/Statusbar.tga")
-    CUI.SharedMedia:Register("statusbar", "CUI Striped", "Interface/AddOns/CalippoUI/Media/Striped.tga")
-
     CUI.DB = LibStub("AceDB-3.0"):New("CalippoDB", defaults, "Default")
 end

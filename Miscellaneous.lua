@@ -435,7 +435,12 @@ local function SetupGroupFinder()
     --     StaticPopupSpecial_Hide(self)
     -- end)
 
-    -- LFGListFrame_SetActivePanel(LFGListFrame, LFGListFrame.SearchPanel)
+    local button = CreateFrame("Button", nil, LFGListFrame, "UIPanelButtonTemplate")
+    button:SetSize(22, 22)
+    button:SetPoint("TOPRIGHT", LFGListFrame, "TOPRIGHT", -40, -30)
+    button:SetScript("OnClick", function()
+        LFGListFrame_SetActivePanel(LFGListFrame, LFGListFrame.SearchPanel)
+    end)
 end
 
 ---------------------------------------------------------------------------------------------------------------------------------

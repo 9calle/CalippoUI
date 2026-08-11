@@ -507,6 +507,12 @@ local function CreateGeneralSettings(container)
             CUI.DB.profile.Miscellaneous.TradeAutoWhisper.Enabled = value
         end, 1)
 
+    local expansionButton = AceGUI:Create("Button")
+    expansionButton:SetText("Expansion Feature")
+    expansionButton:SetCallback("OnClick", function() ExpansionLandingPageMinimapButton:Click() end)
+    expansionButton:SetRelativeWidth(1)
+    scrollFrame:AddChild(expansionButton)
+
     scrollFrame:DoLayout()
 end
 
