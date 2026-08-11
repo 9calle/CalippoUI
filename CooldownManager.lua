@@ -246,6 +246,9 @@ function CDM.Load()
 
     for _, viewer in pairs(cooldownViewers) do
         CDM.UpdateAlpha(viewer)
+        CDM.UpdateStyle(viewer)
+        UpdatePositions(viewer)
         HookScripts(viewer)
+
     end
 end

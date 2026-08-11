@@ -123,14 +123,27 @@ local function SetupAuras(frame)
             auraButton:SetApplicationCount(auraButton.ApplicationText, {})
 
             auraButton.Border = auraButton.Overlay:CreateTexture(nil, "OVERLAY")
-            auraButton.Border:SetPoint("TOPLEFT", auraButton, "TOPLEFT", -3, 3)
-            auraButton.Border:SetPoint("BOTTOMRIGHT", auraButton, "BOTTOMRIGHT", 3, -3)
-            local AuraBorderOptions = {
+            auraButton.Border:SetTexture("Interface/AddOns/CalippoUI/Media/CUI_Border.tga")
+            auraButton.Border:SetPoint("TOPLEFT", auraButton, "TOPLEFT", -1, 1)
+            auraButton.Border:SetPoint("BOTTOMRIGHT", auraButton, "BOTTOMRIGHT", 1, -1)
+            local auraBorderOptions = {
                 showIcon = true,
                 showWhenHarmful = true,
                 showWhenHelpful = false,
+                showWithoutDispelType = true,
+
+                style = Enum.CustomAuraButtonDispelTypeTextureStyle.PreserveAsset,
+
+                customDispelColorMap = {
+                    None = CreateColor(0, 0, 0, 1), -- DEBUFF_TYPE_NONE_COLOR
+                    Magic = DEBUFF_TYPE_MAGIC_COLOR,
+                    Curse = DEBUFF_TYPE_CURSE_COLOR,
+                    Disease = DEBUFF_TYPE_DISEASE_COLOR,
+                    Poison = DEBUFF_TYPE_POISON_COLOR,
+                    Bleed = DEBUFF_TYPE_BLEED_COLOR,
+                },
             }
-            auraButton:SetAuraBorder(auraButton.Border, AuraBorderOptions)
+            auraButton:SetAuraBorder(auraButton.Border, auraBorderOptions)
         end
 
         local options = {
