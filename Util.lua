@@ -19,6 +19,13 @@ local securecallfunction = securecallfunction
 
 ---------------------------------------------------------------------------------------------------
 
+Util.Directions = {
+    LEFT = "Left",
+    RIGHT = "Right",
+    UP = "Up",
+    DOWN = "Down",
+}
+
 function Util.AddBorder(frame, useLines)
     if useLines then
         frame.Borders = {}
