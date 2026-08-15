@@ -251,6 +251,7 @@ local canCraft = {
     "Adherent's Silken Shroud",
 
     "Spellbreaker's Bracers",
+    "Spellbreaker's Rebuke",
 
     "Blood Knight's Warblade",
     "Blood Knight's Impetus",

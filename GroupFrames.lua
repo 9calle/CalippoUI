@@ -100,7 +100,7 @@ local function SetupAuras(frame)
         container:SetFlowLayoutAnchorPoint(anchorPoint)
         container:SetFlowLayoutGrowthDirection(AnchorUtil.FlowDirection[Util.Directions[dirH]], AnchorUtil.FlowDirection[Util.Directions[dirV]])
 
-        local function InitializeAuraButton(auraButton)
+        local function InitializeDebuffAuraButton(auraButton)
             auraButton:SetSize(size, size)
 
             auraButton.Icon = auraButton:CreateTexture(nil, "ARTWORK")
@@ -146,11 +146,47 @@ local function SetupAuras(frame)
             auraButton:SetAuraBorder(auraButton.Border, auraBorderOptions)
         end
 
+        local function InitializeBuffAuraButton(auraButton)
+            auraButton:SetSize(size, size)
+
+            auraButton.Icon = auraButton:CreateTexture(nil, "ARTWORK")
+            auraButton.Icon:SetAllPoints(auraButton)
+            auraButton:SetIcon(auraButton.Icon)
+
+            auraButton.Cooldown = CreateFrame("Cooldown", nil, auraButton, "CooldownFrameTemplate")
+            auraButton.Cooldown:SetFrameLevel(auraButton:GetFrameLevel()+1)
+            auraButton.Cooldown:SetDrawEdge(true)
+            auraButton.Cooldown:SetReverse(true)
+            auraButton.Cooldown:SetHideCountdownNumbers(true)
+            auraButton:SetDurationCooldown(auraButton.Cooldown)
+
+            auraButton.Overlay = CreateFrame("Frame", nil, auraButton)
+            auraButton.Overlay:SetFrameLevel(auraButton:GetFrameLevel()+2)
+
+            auraButton.ApplicationText = auraButton.Overlay:CreateFontString(nil, "OVERLAY")
+            auraButton.ApplicationText:SetFont(stacksFont, stacksSize, stacksOutline)
+            auraButton.ApplicationText:SetPoint(stacksAP, auraButton, stacksARP, stacksPX, stacksPY)
+            auraButton:SetApplicationCount(auraButton.ApplicationText, {})
+
+            auraButton.Border = auraButton.Overlay:CreateTexture(nil, "OVERLAY")
+            auraButton.Border:SetTexture("Interface/AddOns/CalippoUI/Media/CUI_Border.tga")
+            auraButton.Border:SetPoint("TOPLEFT", auraButton, "TOPLEFT", -1, 1)
+            auraButton.Border:SetPoint("BOTTOMRIGHT", auraButton, "BOTTOMRIGHT", 1, -1)
+            auraButton.Border:SetVertexColor(0, 0, 0, 1)
+        end
+
+        local initFunction
+        if type == "Buffs" or type == "Defensives" then
+            initFunction = InitializeBuffAuraButton
+        else
+            initFunction = InitializeDebuffAuraButton
+        end
+
         local options = {
             maxFrameCount = maxShown,
             sortMethod = AuraContainerSortMethod.Default,
             sortDirection = AuraContainerSortDirection.Normal,
-            initializeFrame = InitializeAuraButton,
+            initializeFrame = initFunction,
             templateNames = { "CustomAuraButtonTemplate" },
         }
         container:AddAuraGroup("AuraGroup", "", options)
