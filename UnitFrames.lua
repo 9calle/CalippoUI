@@ -337,7 +337,7 @@ local function SetupAuras(frame)
                     Bleed = DEBUFF_TYPE_BLEED_COLOR,
                 },
             }
-            auraButton:SetAuraBorder(auraButton.Border, auraBorderOptions)
+            auraButton:AddDispelTypeTexture(auraButton.Border, auraBorderOptions)
         end
 
         local options = {

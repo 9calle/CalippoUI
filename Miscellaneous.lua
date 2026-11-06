@@ -48,6 +48,14 @@ local function SetupFastLoot()
     f:RegisterEvent("LOOT_READY")
 
     f:SetScript("OnEvent", function()
+        if GetCVar("autoLootDefault") ~= "1" then
+            return
+        end
+
+        if IsShiftKeyDown() then
+            return
+        end
+
         for i=1, GetNumLootItems() do
             LootSlot(i)
         end
@@ -174,83 +182,13 @@ end
 
 ---------------------------------------------------------------------------------------------------------------------------------
 
-function Misc.UpdatePrivateAuraAnchors(show)
-    local dbEntry = CUI.DB.profile.Miscellaneous.PrivateAuras
-    local anchorPoint = dbEntry.AnchorPoint
-    local anchorRelativePoint = dbEntry.AnchorRelativePoint
-    local dirH = dbEntry.DirH
-    local dirV = dbEntry.DirV
-    local size = dbEntry.Size
-    local padding = dbEntry.Padding
-    local posX = dbEntry.PosX
-    local posY = dbEntry.PosY
-    local rowLength = dbEntry.RowLength
-
-    for i=1, 6 do
-        local container = _G["CUI_PrivateAura"..i]
-        container:SetSize(size, size)
-        CUI.Util.PositionFromIndex(i-1, container, UIParent, anchorPoint, anchorRelativePoint, dirH, dirV, size, size, padding, posX, posY, rowLength)
-
-        container.TestTexture:SetShown(show)
-    end
-end
-
-local function SetupPrivateAuras()
-    local dbEntry = CUI.DB.profile.Miscellaneous.PrivateAuras
-    if not dbEntry.Enabled then return end
-
-    local anchorPoint = dbEntry.AnchorPoint
-    local anchorRelativePoint = dbEntry.AnchorRelativePoint
-    local dirH = dbEntry.DirH
-    local dirV = dbEntry.DirV
-    local size = dbEntry.Size
-    local padding = dbEntry.Padding
-    local posX = dbEntry.PosX
-    local posY = dbEntry.PosY
-    local rowLength = dbEntry.RowLength
-    
-    for i=1, 6 do
-        local container = CreateFrame("Frame", "CUI_PrivateAura"..i, UIParent)
-        container:SetSize(size, size)
-        CUI.Util.PositionFromIndex(i-1, container, UIParent, anchorPoint, anchorRelativePoint, dirH, dirV, size, size, padding, posX, posY, rowLength)
-
-        local texture = container:CreateTexture(nil, "OVERLAY")
-        texture:SetParentKey("TestTexture")
-        texture:SetAllPoints(container)
-        texture:SetColorTexture(0, 0, 0, 1)
-        texture:Hide()
-
-        C_UnitAuras.AddPrivateAuraAnchor({
-            unitToken = "player",
-            auraIndex = i,
-            parent = container,
-            showCountdownFrame = true,
-            showCountdownNumbers = true,
-            isContainer = false,
-            iconInfo = {
-                iconWidth = size,
-                iconHeight = size,
-                borderScale = size/20,
-                iconAnchor = {
-                    point = "CENTER",
-                    relativeTo = container,
-                    relativePoint = "CENTER",
-                    offsetX = 0,
-                    offsetY = 0,
-                },
-            },
-        })
-    end
-end
-
----------------------------------------------------------------------------------------------------------------------------------
-
 local canCraft = {
     "Martyr's Bindings",
     "Martyr's Waistwrap",
     "Adherent's Silken Shroud",
 
     "Spellbreaker's Bracers",
+    "Spellbreaker's Girdle",
     "Spellbreaker's Rebuke",
 
     "Blood Knight's Warblade",
@@ -330,128 +268,10 @@ end
 
 ---------------------------------------------------------------------------------------------------------------------------------
 
-local function UpdateGroupFinderScore(frame, profile, shouldOffset)
-    if not frame.CUI_Score then
-        local scoreFrame = frame:CreateFontString(nil, "OVERLAY")
-        if shouldOffset then
-            scoreFrame:SetPoint("CENTER", 0, -18)
-        else
-            scoreFrame:SetPoint("CENTER", 50, 0)
-        end
-        scoreFrame:SetFont("Interface/AddOns/CalippoUI/Fonts/FiraSans-Medium.ttf", 11, "")
-        frame.CUI_Score = scoreFrame
-
-        local mainScoreFrame = frame:CreateFontString(nil, "OVERLAY")
-        mainScoreFrame:SetPoint("LEFT", scoreFrame, "RIGHT", 3, 0)
-        mainScoreFrame:SetFont("Interface/AddOns/CalippoUI/Fonts/FiraSans-Medium.ttf", 11, "")
-        frame.CUI_MainScore = mainScoreFrame
-
-        local raidProgress = frame:CreateFontString(nil, "OVERLAY")
-        raidProgress:SetPoint("LEFT", mainScoreFrame, "RIGHT", 0, 0)
-        raidProgress:SetFont("Interface/AddOns/CalippoUI/Fonts/FiraSans-Medium.ttf", 11, "")
-        raidProgress:SetTextColor(0.64, 0.21, 0.93)
-        frame.CUI_RaidProg = raidProgress
-
-        local mainRaidProgress = frame:CreateFontString(nil, "OVERLAY")
-        mainRaidProgress:SetPoint("LEFT", raidProgress, "RIGHT", 3, 0)
-        mainRaidProgress:SetFont("Interface/AddOns/CalippoUI/Fonts/FiraSans-Medium.ttf", 11, "")
-        mainRaidProgress:SetTextColor(0.64, 0.21, 0.93)
-        frame.CUI_MainRaidProg = mainRaidProgress
-    end
-    
-    if profile and profile.mythicKeystoneProfile then
-        local score = profile.mythicKeystoneProfile.currentScore
-        local r, g, b = RaiderIO.GetScoreColor(score)
-        frame.CUI_Score:SetText(score)
-        frame.CUI_Score:SetTextColor(r, g, b)
-
-        if profile.mythicKeystoneProfile.mainCurrentScore and profile.mythicKeystoneProfile.mainCurrentScore ~= 0 then
-            local mainScore = profile.mythicKeystoneProfile.mainCurrentScore
-            r, g, b = RaiderIO.GetScoreColor(mainScore)
-
-            frame.CUI_MainScore:SetText("("..mainScore..") ")
-            frame.CUI_MainScore:SetTextColor(r, g, b)
-        else
-            frame.CUI_MainScore:SetText("")
-        end
-    else
-        frame.CUI_MainScore:SetText("")
-    end
-
-    if profile and profile.raidProfile then
-        for i, raid in ipairs(profile.raidProfile.progress) do
-            if raid.difficulty == 3 then
-                frame.CUI_RaidProg:SetText("| "..raid.progressCount)
-                break
-            else
-                frame.CUI_RaidProg:SetText("")
-            end
-        end
-    else
-        frame.CUI_RaidProg:SetText("")
-    end
-end
-
-local applicationText
-
-local function SetupGroupFinder()
-    hooksecurefunc("LFGListApplicationViewer_UpdateApplicant", function(self, applicantID)
-        if InCombatLockdown() then return end
-
-        local applicantInfo = C_LFGList.GetApplicantInfo(applicantID)
-        local name = C_LFGList.GetApplicantMemberInfo(applicantID, applicantInfo.numMembers)
-
-        if self.Member1 and self.Member1.Rating then
-            self.Member1.Rating:Hide()
-        end
-
-        if self.InviteButton then
-            self.InviteButton:SetWidth(20)
-            self.InviteButton.Text:SetText("Inv")
-        end
-
-        if not RaiderIO then return end
-        local profile = RaiderIO.GetProfile(name)
-
-        if profile then
-            UpdateGroupFinderScore(self, profile)
-        end
-    end)
-
-    hooksecurefunc("LFGListSearchEntry_Update", function(self)
-        if InCombatLockdown() then return end
-
-        local searchResultData = C_LFGList.GetSearchResultInfo(self.resultID)
-
-        if not RaiderIO then return end
-        local profile = RaiderIO.GetProfile(searchResultData.leaderName)
-        
-        if profile then
-            UpdateGroupFinderScore(self, profile, true)
-        end
-    end)
-
-    -- LFGListApplicationDialog:HookScript("OnShow", function(self)
-    --     C_LFGList.ApplyToGroup(self.resultID, self.TankButton:IsShown() and self.TankButton.CheckButton:GetChecked(), self.HealerButton:IsShown() and self.HealerButton.CheckButton:GetChecked(), self.DamagerButton:IsShown() and self.DamagerButton.CheckButton:GetChecked())
-    --     StaticPopupSpecial_Hide(self)
-    -- end)
-
-    local button = CreateFrame("Button", nil, LFGListFrame, "UIPanelButtonTemplate")
-    button:SetSize(22, 22)
-    button:SetPoint("TOPRIGHT", LFGListFrame, "TOPRIGHT", -40, -30)
-    button:SetScript("OnClick", function()
-        LFGListFrame_SetActivePanel(LFGListFrame, LFGListFrame.SearchPanel)
-    end)
-end
-
----------------------------------------------------------------------------------------------------------------------------------
-
 function Misc.Load()
     SetupCursorRing()
     SetupFastLoot()
     SetupAutoQuestGossip()
     SetupAutoRepairSell()
-    SetupPrivateAuras()
     SetupTradeAutoWhisper()
-    SetupGroupFinder()
 end

@@ -27,8 +27,7 @@ function MM.UpdateTexts()
     FramerateFrame.Label:SetFont(dbEntry.Font, 12, dbEntry.Outline)
     FramerateFrame.FramerateText:SetFont(dbEntry.Font, 12, dbEntry.Outline)
 
-    local zoneText = MinimapCluster.ZoneTextButton:GetRegions()
-    zoneText:SetFont(dbEntry.Font, 12, dbEntry.Outline)
+    MinimapZoneText:SetFont(dbEntry.Font, 12, dbEntry.Outline)
 end
 
 local function SetupMinimap()
@@ -37,7 +36,15 @@ local function SetupMinimap()
 
     MinimapCluster.MinimapContainer:SetAllPoints(MinimapCluster)
 
-    MinimapCluster.BorderTop:Hide()
+    MinimapCluster.ZoneTextButton.AddTexture:Hide()
+    MinimapCluster.ZoneTextButton.StateTexture:Hide()
+
+    --MinimapCluster.BorderTop:Hide()
+    for i, child in ipairs({MinimapCluster.MinimapContainer:GetChildren()}) do
+        if (i == 3) then
+            child:Hide()
+        end
+    end
 
     MinimapCluster.Tracking.Button:ClearAllPoints()
     MinimapCluster.Tracking.Button:SetPoint("BOTTOM", Minimap, "BOTTOM", -10, 3)
@@ -48,13 +55,12 @@ local function SetupMinimap()
     MinimapCluster.ZoneTextButton:ClearAllPoints()
     MinimapCluster.ZoneTextButton:SetFrameLevel(10)
     MinimapCluster.ZoneTextButton:SetPoint("TOP", Minimap, "TOP", 0, -5)
-    local zoneText = MinimapCluster.ZoneTextButton:GetRegions()
-    zoneText:SetJustifyH("CENTER")
+    MinimapZoneText:SetJustifyH("CENTER")
 
     MinimapCluster.MinimapContainer:SetAllPoints(MinimapCluster)
 
-    MinimapCluster.InstanceDifficulty:ClearAllPoints()
-    MinimapCluster.InstanceDifficulty:SetPoint("TOPRIGHT", Minimap, "TOPRIGHT", 1, 1)
+    --MinimapCluster.InstanceDifficulty:ClearAllPoints()
+    --MinimapCluster.InstanceDifficulty:SetPoint("TOPRIGHT", Minimap, "TOPRIGHT", 1, 1)
 
     MinimapCluster.IndicatorFrame:ClearAllPoints()
     MinimapCluster.IndicatorFrame:SetPoint("TOPLEFT", Minimap, "TOPLEFT", 2, -2)
@@ -62,7 +68,8 @@ local function SetupMinimap()
     TimeManagerClockButton:ClearAllPoints()
     TimeManagerClockButton:SetPoint("BOTTOMLEFT", Minimap, "BOTTOMLEFT", -3, 13)
 
-    AddonCompartmentFrame:Hide()
+    AddonCompartmentFrame:ClearAllPoints()
+    AddonCompartmentFrame:SetPoint("TOPRIGHT", Minimap, "TOPRIGHT", 0, 0)
 
     GameTimeFrame:ClearAllPoints()
     GameTimeFrame:SetPoint("BOTTOM", Minimap, "BOTTOM", 10, 0)
@@ -110,12 +117,12 @@ local function SetupMinimap()
         self:SetPoint("BOTTOMLEFT", Minimap, "BOTTOMLEFT", 5, 3)
     end)
 
-    QueueStatusButton:ClearAllPoints()
-    QueueStatusButton:SetPoint("CENTER", Minimap, "BOTTOMLEFT")
-    hooksecurefunc(QueueStatusButton, "UpdatePosition", function(self)
-        self:ClearAllPoints()
-        self:SetPoint("CENTER", Minimap, "BOTTOMLEFT")
-    end)
+    -- QueueStatusButton:ClearAllPoints()
+    -- QueueStatusButton:SetPoint("CENTER", Minimap, "BOTTOMLEFT")
+    -- hooksecurefunc(QueueStatusButton, "UpdatePosition", function(self)
+    --     self:ClearAllPoints()
+    --     self:SetPoint("CENTER", Minimap, "BOTTOMLEFT")
+    -- end)
 
     local configButton = CreateFrame("Button", nil, Minimap)
     configButton:SetSize(40, 20)

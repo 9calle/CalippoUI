@@ -35,7 +35,7 @@ local UnitName = UnitName
 local function HideBlizzard()
     Hide.HideBlizzardParty()
     Hide.HideBlizzardRaid()
-    Hide.HideBlizzardRaidManager()
+    --Hide.HideBlizzardRaidManager()
 end
 
 ---------------------------------------------------------------------------------------------------------------------------------
@@ -53,13 +53,12 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------
 
 local function UpdateAuraFilters(frame)
-    -- TODO : Hitta mer korrekt sätt att lösa uppdatering?
     frame.BuffsContainer:SetAuraGroupFilterString("AuraGroup", "")
     frame.DebuffsContainer:SetAuraGroupFilterString("AuraGroup", "")
     frame.DefensivesContainer:SetAuraGroupFilterString("AuraGroup", "")
-
+    
     frame.DebuffsContainer:SetAuraGroupFilterString("AuraGroup", "HARMFUL")
-    frame.DefensivesContainer:SetAuraGroupFilterString("AuraGroup", "HELPFUL|BIG_DEFENSIVE")
+    frame.DefensivesContainer:SetAuraGroupFilterString("AuraGroup", "HELPFUL")
 
     if UnitAffectingCombat("player") then
         frame.BuffsContainer:SetAuraGroupFilterString("AuraGroup", "PLAYER|HELPFUL|RAID_IN_COMBAT")
@@ -143,7 +142,7 @@ local function SetupAuras(frame)
                     Bleed = DEBUFF_TYPE_BLEED_COLOR,
                 },
             }
-            auraButton:SetAuraBorder(auraButton.Border, auraBorderOptions)
+            auraButton:AddDispelTypeTexture(auraButton.Border, auraBorderOptions)
         end
 
         local function InitializeBuffAuraButton(auraButton)
@@ -189,7 +188,81 @@ local function SetupAuras(frame)
             initializeFrame = initFunction,
             templateNames = { "CustomAuraButtonTemplate" },
         }
-        container:AddAuraGroup("AuraGroup", "", options)
+
+        if type == "Defensives" then
+            options.candidateFilters = {
+                includeSpellIDs = {
+                    -- Warrior
+                    [871] = true, -- Shield Wall
+                    [118038] = true, -- Die by the Sword
+                    [184364] = true, -- Enraged Regeneration
+
+                    -- Paladin
+                    [498] = true, -- Divine Protection
+                    [642] = true, -- Divine Shield
+                    [1022] = true, -- Blessing of Protection
+                    [6940] = true, -- Blessing of Sacrifice
+                    [31850] = true, -- Ardent Defender
+                    [86659] = true, -- Guardian of Ancient Kings
+                    [184662] = true, -- Shield of Vengeance
+                    [199448] = true, -- Blessing of Sacrifice
+                    [204018] = true, -- Blessing of Spellwarding
+                    [212641] = true, -- Guardian of Ancient Kings
+
+                    -- Hunter
+                    [53480] = true, -- Roar of Sacrifice
+                    [186265] = true, -- Aspect of the Turtle
+                    [264735] = true, -- Survival of the Fittest
+
+                    -- Rogue
+                    [1966] = true, -- Feint
+                    [31224] = true, -- Cloak of Shadows
+                    [81549] = true, -- Cloak of Shadows
+
+                    [19236] = true, -- Desperate Prayer
+                    [33206] = true, -- Pain Suppression
+                    [47585] = true, -- Dispersion
+                    [47788] = true, -- Guardian Spirit
+
+                    [48707] = true, -- Anti-Magic Shell
+                    [48792] = true, -- Icebound Fortitude
+                    [55233] = true, -- Vampiric Blood
+                    [444741] = true, -- Anti-Magic Shell proc
+
+                    [108271] = true, -- Astral Shift
+
+                    [45438] = true, -- Ice Block
+                    [342246] = true, -- Alter Time
+                    [414658] = true, -- Ice Cold
+
+		            [104773] = true, -- Unending Resolve
+
+                    [115203] = true, -- Fortifying Brew
+                    [116849] = true, -- Life Cocoon
+                    [120954] = true, -- Fortifying Brew
+                    [125174] = true, -- Touch of Karma
+                    [243435] = true, -- Fortifying Brew
+
+                    [22812] = true, -- Barkskin
+                    [50322] = true, -- Survival Instincts
+                    [61336] = true, -- Survival Instincts
+                    [102342] = true, -- Ironbark
+
+                    [207771] = true, -- Fiery Brand
+                    [212800] = true, -- Blur
+
+                    [357170] = true, -- Time Dilation
+                    [363916] = true, -- Obsidian Scales
+                    [374227] = true, -- Zephyr
+                }
+            }
+            container:AddAuraGroup("AuraGroup", "HELPFUL", options)
+        elseif type == "Debuffs" then
+            container:AddAuraGroup("AuraGroup", "HARMFUL", options)
+        else
+            container:AddAuraGroup("AuraGroup", "", options)
+        end
+
 
         local layoutOptions = {
             elementSpacing = padding,
@@ -956,7 +1029,7 @@ local function SetupGroupFrame(unit, groupType, frameName, parent, num)
     frame:RegisterUnitEvent("UNIT_PHASE", unit)
     frame:RegisterUnitEvent("UNIT_CONNECTION", unit)
     frame:RegisterUnitEvent("UNIT_IN_RANGE_UPDATE", unit)
-    frame:RegisterUnitEvent("UNIT_DISTANCE_CHECK_UPDATE", unit)
+    -- frame:RegisterUnitEvent("UNIT_DISTANCE_CHECK_UPDATE", unit)
     frame:RegisterUnitEvent("UNIT_THREAT_SITUATION_UPDATE", unit)
     frame:RegisterUnitEvent("UNIT_THREAT_LIST_UPDATE", unit)
     frame:RegisterEvent("PLAYER_FLAGS_CHANGED")
@@ -974,6 +1047,7 @@ local function SetupGroupFrame(unit, groupType, frameName, parent, num)
         if event == "GROUP_ROSTER_UPDATE" then
             if UnitExists(self.unit) then
                 UpdateAll(self)
+                UpdateAuraFilters(self)
             end
         end
 

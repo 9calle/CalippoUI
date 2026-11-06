@@ -223,14 +223,28 @@ local function HookScripts(viewer)
     end)
 
     if viewer:GetName() == "BuffIconCooldownViewer" then
+        for _, frame in ipairs({viewer:GetChildren()}) do
+            frame:HookScript("OnShow", function()
+                if dbEntry.CenterIcons then
+                    UpdatePositions(viewer)
+                end
+            end)
+
+            frame:HookScript("OnHide", function()
+                if dbEntry.CenterIcons then
+                    UpdatePositions(viewer)
+                end
+            end)
+        end
+
         hooksecurefunc(viewer, "OnAcquireItemFrame", function(self, itemFrame)
-            itemFrame:SetScript("OnShow", function()
+            itemFrame:HookScript("OnShow", function()
                 if dbEntry.CenterIcons then
                     UpdatePositions(self)
                 end
             end)
 
-            itemFrame:SetScript("OnHide", function()
+            itemFrame:HookScript("OnHide", function()
                 if dbEntry.CenterIcons then
                     UpdatePositions(self)
                 end
@@ -249,6 +263,5 @@ function CDM.Load()
         CDM.UpdateStyle(viewer)
         UpdatePositions(viewer)
         HookScripts(viewer)
-
     end
 end

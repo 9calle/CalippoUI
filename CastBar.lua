@@ -58,26 +58,45 @@ end
 
 ---------------------------------------------------------------------------------------------------
 
-local function UpdateCastBar(castBar, isChannel, isEmpower)
+local function UpdatePushBack(castBar)
     local duration
 
-    if isChannel or isEmpower then
+    if castBar.Type == "Channel" then
         duration = UnitChannelDuration("player")
     else
         duration = UnitCastingDuration("player")
     end
 
     local direction
-    if isChannel then
-        direction = 1
+    if castBar.Type == "Channel" then
+        castBar.Direction = 1
     else
-        direction = 0
+        castBar.Direction = 0
     end
 
-    castBar:SetTimerDuration(duration, 0, direction)
+    castBar:SetTimerDuration(duration, 0, castBar.Direction)
+    castBar:Show()
+end
 
-    castBar.startTime = startTime
-    castBar.endTime = endTime
+local function UpdateCastBar(castBar, isChannel, isEmpower)
+    local duration
+
+    if isChannel or isEmpower then
+        duration = UnitChannelDuration("player")
+        castBar.Type = "Channel"
+    else
+        duration = UnitCastingDuration("player")
+        castBar.Type = "Cast"
+    end
+
+    local direction
+    if isChannel then
+        castBar.Direction = 1
+    else
+        castBar.Direction = 0
+    end
+
+    castBar:SetTimerDuration(duration, 0, castBar.Direction)
     castBar:Show()
 end
 
@@ -96,6 +115,7 @@ local function SetupCastBar()
 
     castBar:RegisterUnitEvent("UNIT_SPELLCAST_START", "player")
     castBar:RegisterUnitEvent("UNIT_SPELLCAST_STOP", "player")
+    castBar:RegisterUnitEvent("UNIT_SPELLCAST_DELAYED", "player")
     castBar:RegisterUnitEvent("UNIT_SPELLCAST_INTERRUPTED", "player")
     castBar:RegisterUnitEvent("UNIT_SPELLCAST_CHANNEL_START", "player")
     castBar:RegisterUnitEvent("UNIT_SPELLCAST_CHANNEL_STOP", "player")
@@ -104,7 +124,9 @@ local function SetupCastBar()
     castBar:RegisterUnitEvent("UNIT_SPELLCAST_EMPOWER_UPDATE", "player")
     castBar:RegisterUnitEvent("UNIT_SPELLCAST_EMPOWER_STOP", "player")
     castBar:SetScript("OnEvent", function(self, event, ...)
-        if event == "UNIT_SPELLCAST_START" then
+        if event == "UNIT_SPELLCAST_DELAYED" then
+            UpdatePushBack(self)
+        elseif event == "UNIT_SPELLCAST_START" then
             UpdateCastBar(self, false)
         elseif event == "UNIT_SPELLCAST_EMPOWER_START" then
             UpdateCastBar(self, false, true)

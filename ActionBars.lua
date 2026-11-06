@@ -287,6 +287,7 @@ end
 function AB.Load()
     HideBlizzard()
 
+    MainActionBar.BorderArt:Hide()
     MainMenuBarVehicleLeaveButton:SetParent(UIParent)
 
     AddHooks()
