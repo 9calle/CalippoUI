@@ -414,11 +414,11 @@ local defaults = {
                 Width = 174,
                 Height = 52,
 
-                AnchorFrame = "EssentialCooldownViewer",
-                AnchorPoint = "TOPRIGHT",
-                AnchorRelativePoint = "TOPLEFT",
-                PosX = -2,
-                PosY = 17,
+                AnchorFrame = "UIParent",
+                AnchorPoint = "Center",
+                AnchorRelativePoint = "Center",
+                PosX = -150,
+                PosY = -450,
 
                 Name = {
                     PosX = 5,
@@ -459,11 +459,11 @@ local defaults = {
                 Width = 174,
                 Height = 52,
 
-                AnchorFrame = "EssentialCooldownViewer",
-                AnchorPoint = "TOPLEFT",
-                AnchorRelativePoint = "TOPRIGHT",
-                PosX = 2,
-                PosY = 17,
+                AnchorFrame = "UIParent",
+                AnchorPoint = "Center",
+                AnchorRelativePoint = "Center",
+                PosX = 150,
+                PosY = -450,
 
                 LeaderIcon = {
                     Enabled = true,
@@ -1057,7 +1057,7 @@ local defaults = {
             Size = 12,
         },
         ResourceBars = {
-            Enabled = true,
+            Enabled = false,
 
             PrimaryResourceBar = {
                 Enabled = true,
@@ -1144,7 +1144,7 @@ local defaults = {
             },
         },
         CooldownManager = {
-            Enabled = true,
+            Enabled = false,
 
             ["**"] = {
                 Alpha = 1,
